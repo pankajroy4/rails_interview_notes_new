@@ -272,3 +272,97 @@ Answer ->  They decouple deployment from release. We can ship code safely and to
 Question 55: How do you ensure quality gates in CI?
 
 Answer ->  Use failing pipeline checks: tests must pass, RuboCop must pass, security scans must pass, minimum coverage threshold must be met. 
+
+------------------------------------------------------------------------------------------------------
+Question 56: Your CI pipeline sometimes fails but passes locally. Why?
+
+Answer -> If the CI pipeline fails but tests pass locally, I first assume the issue is non-deterministic behavior or environment mismatch.
+
+  One common reason is race conditions in tests. For example, background jobs, threads, or async operations may behave differently in CI due to CPU speed or parallel execution.
+
+  Another common issue is database cleanup problems. If tests are not properly isolated, leftover data from previous tests may cause failures in CI where test execution order differs.
+
+  Order-dependent tests are also a big cause. Locally, tests might run in a predictable order, but in CI they may run in random or parallel order. If one test depends on data created by another, it will fail intermittently.
+
+  Missing test seeds or factories can also cause this. Sometimes local machines have extra seed data or cached state that CI does not.
+
+  Environment mismatch is another reason — different Ruby versions, different gem versions, missing system libraries, or differences in timezone settings.
+
+  How I Fix It:
+  First, I ensure proper test isolation by using transactional fixtures or DatabaseCleaner so each test runs in a clean state.
+  Second, I enable randomized test order. In RSpec, I run tests with random seed and fix order-dependent failures immediately.
+  Third, I avoid global shared state and ensure factories create all required data explicitly.
+
+  I also make sure the CI environment mirrors production and local as closely as possible — same Ruby version, same DB engine, same environment variables.
+  If needed, I reproduce CI locally using Docker to ensure parity.
+
+------------------------------------------------------------------------------------------------------
+Question 57: Sidekiq Jobs Stuck in Queue, messages are delayed. Queue backlog increasing. What will you check?
+
+Answer -> “If messages are getting delayed and the queue backlog is increasing, I first treat it as a throughput bottleneck problem.
+The first thing I check is Redis health and memory usage. If Redis is close to memory limits, it can slow down job fetching or start evicting keys, which affects queue performance.
+
+Next, I check worker concurrency settings. If Sidekiq concurrency is set too low relative to incoming job volume, jobs will naturally pile up. I compare job arrival rate versus processing rate.
+
+Then I inspect queue prioritization. If all jobs share the same queue, long-running jobs can block time-sensitive ones. For example, message delivery should not wait behind heavy PDF generation jobs.
+
+I also check for dead jobs or retry storms. If many jobs are failing and retrying aggressively, the retry queue itself can create backlog.
+
+Another important factor is long-running jobs. If a single job takes 30 seconds and concurrency is low, workers stay blocked. I check job execution time using Sidekiq dashboard or logs.
+
+How I Fix It:
+  First, I separate queues based on priority — for example:
+    critical for message sending
+    default for normal jobs
+    low for non-urgent processing
+
+  Second, I increase concurrency carefully, ensuring CPU and memory capacity can handle it.
+
+  If workload still exceeds capacity, I scale horizontally by adding more Sidekiq processes or EC2 instances.
+
+  If specific jobs are slow, I optimize them or break them into smaller batch jobs to reduce blocking time.
+
+  I also tune retry intervals to prevent retry storms.
+
+------------------------------------------------------------------------------------------------------
+Question 58: How do you safely stop and restart a Rails app with Sidekiq?
+Answer -> In production, I always perform graceful shutdown.
+For Puma, I use phased restart (pumactl phased-restart) so existing requests finish before workers are replaced.
+If we are using systemd then we can run: sudo systemctl restart puma
+So, when we run: umactl phased-restart
+  New workers boot
+  Old workers finish current requests
+  No downtime
+  No dropped connections
+
+For Sidekiq, Sidekiq has built-in graceful shutdown behavior. I use systemctl stop which puts it into quiet mode — it stops fetching new jobs and completes running jobs before shutting down. it also gives 25 seconds default timeout.
+Example: sudo systemctl stop sidekiq
+      OR bundle exec sidekiqctl stop tmp/pids/sidekiq.pid
+
+If jobs exceed timeout, they are re-queued in Redis automatically. So no job lost.
+I ensure Sidekiq is stopped before running migrations to avoid schema mismatch issues.
+Then I start services again after deployment.
+
+------------------------------------------------------------------------------------------------------
+Question 59: A Sidekiq job is processing payment. During deployment, Sidekiq is stopped.
+The job was halfway through updating DB and calling external API.
+How do you design your job to avoid inconsistent state?
+
+Answer -> If a Sidekiq job is processing a payment and deployment happens in the middle, I design the job to be idempotent and transaction-safe.
+First, I never assume the job will run only once. Sidekiq can retry jobs if the process stops or crashes. So the job logic must safely handle retries.
+For example, I maintain a clear payment state machine in the database — something like pending, processing, paid, failed.
+
+When the job starts, I lock the payment record using database-level locking — like SELECT FOR UPDATE or with_lock in Rails — to prevent concurrent updates.
+Then I wrap all database changes inside a transaction. That way, either everything commits or nothing does. If the job is killed before commit, the transaction rolls back automatically.
+
+For the external API call — like calling Razorpay capture API — I store a unique gateway transaction ID and add a unique index on that field. Before crediting a wallet or marking payment as paid, I check if that transaction ID already exists. That prevents double crediting if the job retries.
+
+So the design principles I follow are:
+  Idempotent job logic
+  Database transactions
+  Record locking
+  Unique constraints at database level
+  Proper payment status tracking
+
+This way, even if Sidekiq shuts down mid-processing, when the job retries, it safely resumes or exits without corrupting state.
+In short, I assume failure is normal and design the job to be retry-safe and consistency-safe.

@@ -324,3 +324,44 @@ Better to use:
   - Declarative and discoverable: Scopes are listed when introspecting a model.
   - More semantic: with_name_like reads better and clearly describes its intent.
   - Performance: Scopes are optimized by Rails for chaining and merging.
+
+---------------------------------------------------------------------------------------------------------------
+Question: What is closure in Rails?
+Answer: In Ruby, a closure is a block, proc, or lambda that captures and retains access to variables from the lexical scope in which it was defined, even after that scope has exited. 
+Rails uses closures heavily in scopes, callbacks, routes, and controller filters.
+
+Example 1: Closure in methods.
+  def outer_method
+    message = "Hello"
+
+    return Proc.new { puts message }
+  end
+
+  my_proc = outer_method # Method call finished
+  my_proc.call #Output: "Hello"
+
+  Here:
+    message is a local variable inside outer_method
+    Normally, it should disappear after the method finishes
+    But the Proc remembers it
+    That is a closure
+    The Proc closes over (captures) the variable message.
+
+Example 2: Closure via block.
+  my_proc = Proc.new do 
+              3.times do |i|
+                puts i
+              end
+            end
+
+  my_proc.call
+  
+Note: Closures capture Local variables by reference (not by value).
+    Example:
+      x = 10
+      my_proc = Proc.new { puts x }
+      x = 20
+      my_proc.call
+
+    Output: 20
+    Because it captured reference, not value.

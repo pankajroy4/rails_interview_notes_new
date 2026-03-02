@@ -370,3 +370,142 @@ Answer: LRU stands for Least Recently Used.
       When you need to evict, remove the tail node (least recently used).
 
   This is how LRU achieves fast reads, writes, and evictions, all in constant time.
+
+==============================================================================================================
+🔸HTTP Caching (Using ETag or Last-Modified):
+  HTTP caching using ETag or Last-Modified is browser-level or proxy-level caching. It is different from Redis or Memcached.
+
+  Instead of storing rendered HTML in server memory (generally redis), we let the browser ask the server — "Has this resource changed?"
+  If it has not changed, the server returns 304 Not Modified without sending the response body.
+  This saves bandwidth, reduces CPU usage, and improves response time.
+
+🔸ETag (Entity Tag):
+  ETag is basically a fingerprint of the response.
+  It can be generated based on:
+    Record updated_at
+    Record cache key (model_name/id)
+    Or full response body digest
+
+  The server sends an ETag in HTTP response header like ETag: "abc123xyz"
+  The browser stores it.
+  Next time, browser sends that ETag in HTTP request header:
+    If-None-Match: "abc123xyz"
+  If the resource has not changed, server automatically responds: 304 Not Modified. So No response body is sent.
+
+  Example: In Rails, this is extremely simple using fresh_when or stale?.
+      class ProductsController < ApplicationController
+        def show
+          @product = Product.find(params[:id])
+          fresh_when(@product)
+          # If stale, Rails will render normally.
+        end
+      end
+
+      We use stale?() method when we want manual checks, like:
+        def show
+          @product = Product.find(params[:id])
+
+          if stale?(etag: @product)
+            render
+          end
+        end
+        
+  ➤What Rails Does Internally to generate ETag?
+    When you call fresh_when(@product) then rails automatically generates ETag and sets caching headers based on the model record using: 
+      @product.cache_key_with_version
+
+    Which looks like: products/5-20260228103000
+  
+    If updated_at changes → cache key changes → ETag changes → browser gets new response.
+    If nothing changed → Rails returns 304 Not Modified.
+
+    cache_key_with_version is a method provided by ActiveRecord.
+    Every ActiveRecord model automatically gets it.
+
+🔸Last-Modified:
+  Last-Modified is simpler.
+  Rails sends the last updated timestamp of the resource in the HTTP response header.
+
+  Example header:
+    Last-Modified: Wed, 28 Feb 2026 10:30:00 GMT
+  The browser stores it.
+  In next request browser sends it back in HTTP request header:
+    If-Modified-Since: Wed, 28 Feb 2026 10:30:00 GMT
+
+  If the resource was not updated after that time → return 304. So No response body is sent.
+
+  Example using Last Modified:
+    class ProductsController < ApplicationController
+      def show
+        @product = Product.find(params[:id])
+
+        fresh_when last_modified: @product.updated_at
+      end
+    end
+
+    Or manually:
+
+    def show
+      @product = Product.find(params[:id])
+
+      if stale?(last_modified: @product.updated_at)
+        render
+      end
+    end
+    
+    +---------------------------------------------------+
+    |         ETag           |      Last-Modified       |
+    |------------------------|--------------------------|
+    | Based on fingerprint   | Based on timestamp       |
+    | More accurate          | Less precise             |
+    | Detects content change | Detects only time change |
+    | Slightly heavier       | Very lightweight         |
+    +---------------------------------------------------+
+
+==============================================================================================================
+🔸Cache Invalidation Strategies:
+  There are few Strategies which we should use for Cache Invalidation.
+
+  🔹Strategy 1: Time-Based Expiration (TTL)
+    This is the simplest. example: Rails.cache.fetch("products", expires_in: 10.minutes)
+    After 10 min → automatically expires.
+    But, there are some pros and cons.
+    Pros is that is the very easy to implement but cons is that it may serve stale data.
+
+  🔹Strategy 2: Version-Based (Rails Default)
+    Rails uses cache_key_with_version. Key includes: products/5-20260228130000
+    When updated_at changes → new key → old key ignored.
+    Automatic invalidation.
+    Best for ActiveRecord models.
+
+  🔹Strategy 3: Manual Invalidation
+    example: Rails.cache.delete("products")
+    Used when:
+      Bulk updates
+      Background job updates
+      Complex dependencies
+
+  🔹Strategy 4: Event-Based Invalidation
+    We use events like callbacks for invalidation. Example:
+
+      after_commit :expire_cache
+
+      def expire_cache
+        Rails.cache.delete("top_products")
+      end
+
+  🔹Strategy 5: Write-Through Caching
+    When writing to DB, Also update cache. Example:
+      product.update!(name: "New")
+      Rails.cache.write("product_#{product.id}", product)
+
+    This keeps cache always fresh.
+
+  🔹Strategy 6: Cache-Aside Pattern (Most Common)
+    General flow is:
+      Check cache
+      If miss → fetch DB
+      Store in cache
+      Return
+
+    Rails fetch implements this.

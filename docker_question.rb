@@ -246,3 +246,32 @@ Answer -> Health checks define how Docker verifies container health. For Rails, 
 Question 47: When would you use Nginx with Rails containers?
 
 Answer -> In production, Nginx can be used as a reverse proxy to handle SSL termination, static assets, caching, and forwarding requests to Puma.
+
+------------------------------------------------------------------------------------------------------
+Question 48: Your Dockerized Rails app works locally but fails on EC2. Why?
+
+Answer -> If a Dockerized Rails app works locally but fails on EC2, I immediately suspect environment or configuration differences between local and production.
+The most common cause is missing environment variables. Locally, we often rely on .env files, but on EC2 those variables may not be injected into the container. So I verify all required variables like SECRET_KEY_BASE, DATABASE_URL, Redis URL, API keys, etc.
+Another common issue is a DATABASE_URL mismatch. Locally we may be using SQLite or a local Postgres instance, but on EC2 it should connect to RDS or a production database. If the connection string is incorrect, the app will boot but fail during DB initialization.
+
+Production credentials are another frequent cause. Rails encrypted credentials must be properly mounted, and RAILS_MASTER_KEY must be available inside the container. If not, Rails will crash on boot.
+
+Assets are also a big issue. In production, Rails expects precompiled assets. If assets:precompile is not executed during the Docker build stage, the app may fail when serving static files.
+
+Sometimes the problem is a wrong ENTRYPOINT or CMD in the Dockerfile — for example, forgetting to run bundle exec puma -C config/puma.rb or not running migrations before starting the server.
+
+How I Fix It:
+  First, I ensure the Dockerfile uses a multi-stage build:
+    One stage for installing gems and compiling assets
+    A final lightweight runtime image
+
+  Second, I verify that RAILS_ENV=production is set inside the container and not defaulting to development.
+
+  Third, I double-check environment variables using:
+    docker exec -it container_name env
+
+  Finally, I inspect logs using:
+    docker logs container_name
+    and verify database connectivity from inside the container.
+
+    
