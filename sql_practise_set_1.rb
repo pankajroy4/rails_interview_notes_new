@@ -73,7 +73,7 @@
   ('Mobile', 30000, 20, 1),
   ('Novel', 500, 100, 2),
   ('T-Shirt', 800, 50, 3),
-  ('Jeans', 2000, 12, NULL)
+  ('Jeans', 75000, 12, NULL)
   ('Headphones', 2000, 15, 1);
 
 
@@ -158,8 +158,8 @@ Aggregation & Business Logic:
 23.Find the city generating the highest revenue.
 24.Find top 3 highest spending users.
 25.Find top-selling product by quantity.
-26.Find top-selling product by revenue.
-27.Find monthly revenue (group by month).
+26.Find top-selling product by revenue. **
+27.Find monthly revenue (group by month). **
 28.Find average product price per category.
 29.Find users whose total spending is greater than 50,000.
 30.Find percentage contribution of each category to total revenue.

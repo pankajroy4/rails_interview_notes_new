@@ -196,23 +196,17 @@ WHERE id IN (
 --------------------------------------------------------------------------------------------------------------
 -- 20.Find the most recently placed order for each user.
 
-SELECT u.id, u.name, u.email, COUNT(o.id) as no FROM users u
-INNER JOIN orders o
-ON u.id = o.user_id
-
--- Best & Cleanest (Window Function — Recommended)
-
--- SELECT *
--- FROM (
---     SELECT 
---         o.*,
---         ROW_NUMBER() OVER (
---             PARTITION BY user_id 
---             ORDER BY created_at DESC
---         ) AS rn
---     FROM orders o
--- ) sub
--- WHERE rn = 1;
+SELECT *
+FROM (
+        SELECT 
+            o.*,
+            ROW_NUMBER() OVER (
+                PARTITION BY user_id 
+                ORDER BY created_at DESC
+            ) AS rn
+        FROM orders o
+    ) sub
+WHERE rn = 1;
 
 --------------------------------------------------------------------------------------------------------------
 -- 21.Find total revenue generated from completed orders only.
@@ -352,4 +346,79 @@ ON oi.product_id = p.id
 GROUP BY p.id, p.name
 ORDER BY sold_qty DESC
 
----------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
+-- 26.Find top-selling product by revenue.
+
+SELECT p.id, p.name, SUM(oi.quantity * oi.price) AS total_revenue
+FROM order_items oi
+JOIN products p 
+ON p.id = oi.product_id
+GROUP BY p.id, p.name
+ORDER BY total_revenue DESC
+LIMIT 1;
+
+--------------------------------------------------------------------------------------------------------------
+-- 27.Find monthly revenue (group by month).
+
+SELECT DATE_TRUNC('month', o.created_at) AS month, SUM(oi.quantity * oi.price) AS monthly_revenue
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.id
+GROUP BY month
+ORDER BY month;
+
+--------------------------------------------------------------------------------------------------------------
+-- 28.Find average product price per category.
+
+SELECT c.name, AVG(p.price) as avg_price FROM products p
+INNER JOIN categories c
+ON c.id = p.category_id
+GROUP BY c.id, c.name
+
+-- OR
+
+SELECT 
+    COALESCE(c.name, 'Uncategorized') AS category_name,
+    AVG(p.price) AS avg_price
+FROM products p
+LEFT JOIN categories c
+    ON c.id = p.category_id
+GROUP BY c.name;
+
+--------------------------------------------------------------------------------------------------------------
+-- 29.Find users whose total spending is greater than 50,000.
+
+SELECT u.*, o.spending FROM users u
+INNER JOIN ( 
+		SELECT user_id, SUM(total_amount) AS spending  from orders
+		GROUP BY user_id
+	) o
+ON o.user_id = u.id
+WHERE o.spending > 50000
+
+
+-- OR
+
+SELECT 
+    u.id,
+    u.name,
+    u.email,
+    SUM(o.total_amount) AS spending
+FROM users u
+JOIN orders o ON o.user_id = u.id
+GROUP BY u.id, u.name, u.email
+HAVING SUM(o.total_amount) > 50000;
+
+-- OR
+
+WITH user_spending AS (
+    SELECT user_id, SUM(total_amount) AS spending
+    FROM orders
+    GROUP BY user_id
+)
+SELECT u.*, us.spending
+FROM users u
+JOIN user_spending us ON us.user_id = u.id
+WHERE us.spending > 50000;
+
+--------------------------------------------------------------------------------------------------------------
+-- 30.Find percentage contribution of each category to total revenue.
