@@ -1,0 +1,51 @@
+name: "Ruby on Rails CD"
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build test image
+        run: docker build --build-arg RAILS_MASTER_KEY=${{ secrets.RAILS_MASTER_KEY }} -t portfolio_rails_backend:latest .
+
+  push_image:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: pankajporwal75/portfolio_rails_backend:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: push_image
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd apps/pankaj_portfolio
+            export MASTER_KEY=${{ secrets.RAILS_MASTER_KEY }}
+            docker compose -f production.yml down && \
+            docker compose -f production.yml pull && \
+            docker compose -f production.yml up -d

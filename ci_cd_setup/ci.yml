@@ -1,0 +1,25 @@
+name: "Ruby on Rails CI"
+
+on:
+  pull_request:
+    branches: [ "integration" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker compose -f development.yml build
+
+      - name: Start DB Container
+        run: docker compose -f development.yml up -d db
+
+      - name: Prepare Database
+        run: docker compose -f development.yml run --rm --entrypoint="" web bundle exec rails db:prepare
+
+      - name: Run tests
+        run: docker compose -f development.yml run --rm --entrypoint="" web bundle exec rspec

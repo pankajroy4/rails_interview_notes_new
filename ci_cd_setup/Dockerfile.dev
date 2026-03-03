@@ -1,0 +1,26 @@
+FROM ruby:3.2.1
+
+# Install dependencies
+RUN apt-get update -qq && apt-get install -y \
+  postgresql-client \
+  nodejs \
+  libpoppler-dev \
+  libimage-exiftool-perl \
+  imagemagick \
+  libvips42 \
+  libvips-dev \
+  poppler-utils
+
+# Install bundler
+RUN gem install bundler
+
+# Create app directory
+WORKDIR /backend
+
+# Copy Gemfiles first to leverage Docker cache
+COPY Gemfile Gemfile.lock ./
+
+# Install gems
+RUN bundle install
+
+ENTRYPOINT [ "./script/start_dev.sh" ]

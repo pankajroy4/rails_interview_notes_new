@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:11
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pankaj_portfolio_prod
+
+  web:
+    image: pankajporwal75/portfolio_rails_backend:latest
+    working_dir: /backend
+    volumes:
+      - storage:/backend/storage
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=production
+      - DATABASE_URL=postgres://postgres:postgres@db/pankaj_portfolio_prod
+      - RAILS_MASTER_KEY=${MASTER_KEY}
+
+volumes:
+  db-data:
+    driver: local
+  storage:
+    driver: local
