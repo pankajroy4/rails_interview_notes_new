@@ -1,0 +1,22 @@
+# config/database.yml
+
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  host: <%= ENV['POSTGRES_HOST'] || 'db' %>
+  username: <%= ENV['POSTGRES_USERNAME'] || 'postgres' %>
+  password: <%= ENV['POSTGRES_PASSWORD'] || 'postgres' %>
+  port: <%= ENV['POSTGRES_PORT'] || 5432 %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: <%= ENV['POSTGRES_DB'] || 'pankaj_portfolio_dev' %>
+
+test:
+  <<: *default
+  database: <%= ENV['POSTGRES_DB'] || 'pankaj_portfolio_test' %>
+
+production:
+  <<: *default
+  database: <%= ENV['POSTGRES_DB'] || 'pankaj_portfolio_prod' %>
