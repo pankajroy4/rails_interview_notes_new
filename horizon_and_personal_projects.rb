@@ -1,3 +1,12 @@
+Question: What is an EDI file?
+
+Answer -> EDI stands for Electronic Data Interchange. It is a standardized format used for exchanging structured business documents between computer systems without human intervention.
+Industries like automotive and retail use it heavily for things like purchase orders, invoices, and product catalogs.
+
+In our case, we processed a large EDI Parts Master file from Volkswagen, which contained millions of fixed-width records representing spare parts and pricing information.
+
+----------------------------------------------------------------------------------------------------------------
+
 Question: You mentioned you optimized a job from 24 hours to 6 minutes. Can you explain exactly what you did?
 
 Answer -> This optimization was part of a Parts Master import pipeline in a large-scale automotive claims system used by Volkswagen Group.
