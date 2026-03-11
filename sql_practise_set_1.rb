@@ -52,6 +52,11 @@
       manager_id INT REFERENCES employees(id)
   );
 
+  CREATE TABLE jorders (
+    id SERIAL,
+    metadata JSONB
+  );
+
 5:insert Data into tables:
 
   INSERT INTO users (name, email, age, city) VALUES
@@ -67,6 +72,13 @@
   ('Books'),
   ('Footwear'),
   ('Clothing');
+
+   INSERT INTO jorders (metadata) VALUES
+   ('{
+     "payment_method": "credit card",
+     "country": {"code": "+91", "name": "India"},
+     "device": "web browser"
+   }');
 
   INSERT INTO products (name, price, stock, category_id) VALUES
   ('Laptop', 75000, 10, 1),
@@ -196,3 +208,13 @@ Advanced / Real Backend Scenarios
 49.Simulate stock deduction:
     Write a query that shows remaining stock after all completed orders.
 50.Identify users whose total spending increased month-over-month (growth analysis).
+
+
+-----------------------------------------------------------------------
+1.what enviction policy you used in redis?
+2.What is triggers in database? Why we use constraints over triggers?
+3.Which index is used by JASONB column in postgres? -> gin index 
+
+4.Can we use gin index on string? Why or why not?
+5.how do you decide the no. of threads of sidekiq for you rails application?
+6.Can we use include and extends both for a same module in a class?
