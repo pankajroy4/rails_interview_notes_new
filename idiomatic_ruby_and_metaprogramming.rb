@@ -1,3 +1,127 @@
+➤What is Metaprogramming?
+===========================
+  Metaprogramming in the context of Ruby on Rails refers to writing code that can dynamically generate, modify, or interact with other code at runtime. It is a core part of Rails “magic” — the reason you can write less code and still get powerful behavior.
+
+  Instead of manually defining everything, your program can:
+    Create methods on the fly
+    Modify classes while the app is running
+    Infer behavior from naming conventions
+
+➤Why Rails uses metaprogramming?
+=============================
+  Rails is built on Ruby, which is highly dynamic. Rails leverages this to:
+    Reduce boilerplate code
+    Provide “convention over configuration”
+    Make APIs feel natural and readable
+
+➤Common examples of Metaprogramming in Rails
+=============================================
+  1.Dynamic finder methods (Active Record)
+    In Rails models, you can write: User.find_by_email("test@example.com")
+    Even if find_by_email is not explicitly defined, Rails creates it dynamically based on the database column (email).
+
+  2.Associations
+    class Post < ApplicationRecord
+      belongs_to :user
+    end
+
+    Rails automatically generates methods like:
+      post.user
+      post.user=
+      post.build_user
+
+    No need to define them manually.
+
+  3.method_missing
+    Rails sometimes uses Ruby’s method_missing to catch undefined methods and handle them dynamically.
+
+  4.define_method
+    Rails internally uses things like:
+      define_method(:my_method) do
+        # dynamic behavior
+      end
+    to create methods at runtime.
+
+
+➤Pros and Cons of Metaprogramming?
+=============================================
+  Pros:
+    Cleaner code (less repetition)
+    Flexible APIs
+    Rapid development
+
+  Cons:
+    Harder to debug
+    Can feel “magical” or confusing
+    Errors may only appear at runtime
+
+
+➤What is monkey patching?
+=============================================
+  Monkey patching means modifying or extending existing classes or methods at runtime, even if you did not write them originally.
+
+  You “patch” a class by:
+    Adding new methods
+    Changing existing behavior
+  without editing the original source code.
+
+  Example 1: Modified Rubys built-in String class.
+    class String
+      def shout
+        upcase + "!!!"
+      end
+    end
+
+    "hello".shout # => "HELLO!!!"
+
+    Here, we just modified Rubys built-in String class.
+
+  Example 2: Overriding an existing method.
+    class String
+      def upcase
+        "OVERRIDDEN"
+      end
+    end
+
+    "hello".upcase
+    # => "OVERRIDDEN"
+
+    Here, We have changed how upcase works everywhere.
+
+  NOTE:
+    Rails itself uses monkey patching in places, but developers also use it to:
+      Fix bugs in gems temporarily
+      Extend framework behavior
+      Customize third-party libraries
+
+      Example:
+        class ActiveRecord::Base
+          def my_custom_method
+            "Hello from all models!"
+          end
+        end
+
+        Now every model in Rails has this method.
+
+➤Pros and Cons of monkey patching
+==================================
+  Pros:
+    Quick fixes without changing external libraries
+    Powerful customization
+    Can extend behavior globally
+
+  Cons:
+    Can break existing functionality unexpectedly
+    Hard to track where behavior changed
+    Conflicts with other code/gems
+    Makes debugging harder
+
+  NOTE:
+   🔸Metaprogramming → Writing code that generates/modifies code dynamically
+   🔸Monkey patching → A specific use of metaprogramming where you modify existing classes.
+
+   🔸Monkey patching is a type of metaprogramming, but not all metaprogramming is monkey patching.
+
 ➤Idiomatic Ruby patterns & handy methods
 ==========================================
 🔸tap
