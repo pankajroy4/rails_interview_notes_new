@@ -10,7 +10,7 @@
 
 ---------------------------------------------------------------------------------------------------------------------
 2. What is Sprockets in rails?
-    Answer: Sprockets is the classic Rails asset pipeline, introduced in Rails 3 and used as the default up to Rails. Its main responsibility is to manage frontend assets like JavaScript, CSS, and images, and optimize them for production.
+    Answer: Sprockets is the classic Rails asset pipeline, introduced in Rails 3 and used as the default up to Rails 6. Its main responsibility is to manage frontend assets like JavaScript, CSS, and images, and optimize them for production.
 
     Internally, Sprockets works in a pipeline-based architecture.
 
