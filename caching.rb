@@ -202,10 +202,10 @@ This is why manual expiration is usually unnecessary.
 ---------------------------------------------------------------------------------------------
 Question: When NOT to Use Russian Doll?
 Answer: When we have:
-Very simple pages
-Small datasets
-Highly dynamic real-time dashboards
-When invalidation logic is complex
+  Very simple pages
+  Small datasets
+  Highly dynamic real-time dashboards
+  When invalidation logic is complex
 then we should not use Russian Doll caching because overusing nested caching can increase cache memory usage.
 
 ---------------------------------------------------------------------------------------------
@@ -299,7 +299,7 @@ Question: How Memcached Works (Internally)?
 Answer: Memcached is a distributed in-memory key-value store used purely for caching. It stores data in RAM and uses LRU(Least Recently Used) eviction. It is ideal for reducing database load by caching frequently accessed or expensive queries. Unlike Redis, it does not support persistence or complex data structures. 
 I would use Memcached when I only need fast ephemeral caching in high-traffic applications.
 
-Memcached is an in-memory caching system, so all the data is stored directly in RAM. Because it operates entirely in memory and does nott touch disk, it is extremely fast — typically sub-millisecond latency.
+Memcached is an in-memory caching system, so all the data is stored directly in RAM. Because it operates entirely in memory and does not touch disk, it is extremely fast — typically sub-millisecond latency.
 
 Internally, it uses an LRU eviction policy, which stands for Least Recently Used. That means when the allocated memory is full and new data needs to be added, Memcached automatically removes the least recently accessed keys to make space.
 
