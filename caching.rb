@@ -356,13 +356,14 @@ Answer: LRU stands for Least Recently Used.
  🔸Data Structures Behind LRU:
     To implement LRU efficiently, most caching systems (like Memcached or Redis) use a combination of Hash Map (Dictionary) and Doubly Linked List.
 
-    ➤Doubly Linked List:
-      Stores key → value mapping
+    ➤Hash Map(Dictionary):
+      Stores key → node reference (not the value directly)
       Allows O(1) access to any key
 
     ➤Doubly Linked List:
+      Stores the actual key → value pairs (in nodes)
       Keeps track of usage order (most recently used → least recently used)
-      Allows O(1) insertion, removal, and moving keys to the front.
+      Allows O(1) insertion, removal, and moving nodes to the front.
 
     ➤Combined approach:
       Hash map points to nodes in the doubly linked list.
