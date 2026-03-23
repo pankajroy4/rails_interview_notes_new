@@ -93,13 +93,13 @@
 
       Without ESCAPE, % acts as wildcard'.
 
-    NOTE: Index can only work when prefix is fixed.
-          'abc%'  -> Here Index will be used.
-          '_bc%'	-> Here Index will not be used.
-          '%abc'	-> Here Index will not be used.
+    NOTE: Indexing can only work when prefix is fixed.
+          'abc%'  -> Here Indexing will be used.
+          '_bc%'	-> Here Indexing will not be used.
+          '%abc'	-> Here Indexing will not be used.
 
 🔸Regex Pattern Symbols:
-  NOTE: Index do not works in regex. Regex normally causes full table scan unless combined with trigram index.
+  NOTE: Indexing do not works in regex. Regex normally causes full table scan unless combined with trigram index.
 
   Regex is used with:
     column ~ 'pattern'
@@ -545,7 +545,7 @@ Answer: A window function performs a calculation across a set of rows that are r
             Next rank is 2 (no skipping)
 
     🔸LAG() and LEAD()
-      LAG() and LEAD() are window functions used to access data from previous or next rows — without using self joins. It is used access or compare rows.
+      LAG() and LEAD() are window functions used to access data from previous or next rows — without using self joins. It is used to access or compare rows.
 
     🔸LAG()
       LAG() gives you data from a previous row.
