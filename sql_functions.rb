@@ -64,7 +64,7 @@
     _ (underscore) Matches exactly one character.
     It will match strings of length 3, starts with P and ends with n.
     It will match something like: Pan,Pin,Pun
-    It will not match: Pan,Pin,Pun, Pansa
+    It will not match: Paan,Piin,Puan, Pansa
 
     SELECT * FROM users
     WHERE name LIKE 'P__'
