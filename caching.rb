@@ -376,7 +376,7 @@ Answer: LRU stands for Least Recently Used.
 🔸HTTP Caching (Using ETag or Last-Modified):
   HTTP caching using ETag or Last-Modified is browser-level or proxy-level caching. It is different from Redis or Memcached.
 
-  Instead of storing rendered HTML in server memory (generally redis), we let the browser ask the server — "Has this resource changed?"
+  Instead of storing rendered HTML/data in server memory (generally redis), we let the browser ask the server — "Has this resource changed?"
   If it has not changed, the server returns 304 Not Modified without sending the response body.
   This saves bandwidth, reduces CPU usage, and improves response time.
 

@@ -566,8 +566,11 @@ This structure works well for most cases, but it does require multiple tables an
 
     # Creating categories and subcategories
     electronics = Category.create(name: 'Electronics')
+    
     device = electronics.subcategories.create(name: 'Device')
+
     mobile = device.subcategories.create(name: 'Mobile')
+
     iot = device.subcategories.create(name: 'Iot')
     smart = mobile.subcategories.create(name: 'Smart')
     feature = mobile.subcategories.create(name: 'Feature')
