@@ -47,7 +47,7 @@ Answer -> Microservices increase system complexity. Debugging becomes harder, ne
 ------------------------------------------------------------------------------------------------------
 Question 6: How do microservices communicate with each other?
 
-Answer: -> Microservices communicate either synchronously using REST or gRPC APIs, or asynchronously using message queues or event systems like Kafka or RabbitMQ. The choice depends on whether an immediate response is required
+Answer: -> Microservices communicate either synchronously using REST or gRPC(Google Remote Procedure Call) APIs, or asynchronously using message queues or event systems like Kafka or RabbitMQ. The choice depends on whether an immediate response is required
 For example, an Order Service may call a Payment Service via HTTP or publish an event like order_created.
 
 ------------------------------------------------------------------------------------------------------
