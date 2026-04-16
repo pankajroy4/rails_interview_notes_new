@@ -1,5 +1,5 @@
 What is React?
-  Answer -> React is a declarative, component-based UI library that builds user interfaces by efficiently updating the DOM using a virtual representation.
+  Answer -> React is a declarative, component-based JavaScript UI library that builds user interfaces by efficiently updating the DOM using a virtual representation.
 
 ---------------------------------------------------------------------------------------------------
 Why React exists?
