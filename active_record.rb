@@ -470,3 +470,172 @@ ActiveRecord Models - Validations, Callbacks, Scopes, Enums, Attribute API, Conc
 
     Attribute values are stored in @attributes Which is an instance of ActiveModel::AttributeSet
     So when you do user.name, it actually calls read_attribute(:name) which fetches from internal attribute hash.
+
+==========================================================================================
+🔸Difference between before_save and after_save?
+
+  Both before_save and after_save are ActiveRecord callbacks that run during the save lifecycle, but the key difference is when they execute relative to persistence.
+
+  before_save runs before the record is written to the database, while after_save runs after the record has been successfully persisted.
+
+  In terms of use cases:
+
+    I use before_save when I want to modify or normalize data before it gets stored, like formatting fields or setting derived attributes.
+    I use after_save when I want to trigger side effects after persistence, like logging, sending notifications, or updating related records.
+
+  One important thing is:
+    Even though after_save runs after the save call, it still runs inside the database transaction. So if something fails later in the transaction, changes can still be rolled back.
+
+  Example:
+      before_save :normalize_email
+      after_save :log_activity
+
+      def normalize_email
+        self.email = email.downcase.strip
+      end
+
+      def log_activity
+        Rails.logger.info("User saved with id #{id}")
+      end
+
+🔸Difference between before_save and before_create?
+
+  The main difference is about scope of execution.
+
+  before_save runs on both create and update, while before_create runs only when a new record is being created.
+
+  So if I want logic to run every time the record is saved — whether it is a new record or an update — I use before_save.
+
+  But if the logic should run only once at creation time, I use before_create.
+
+  Practical scenario:
+    before_create: generate a unique token or set default values only once
+    before_save: normalize or validate fields every time
+
+  Example:
+    before_create :generate_token
+    before_save :normalize_name
+
+    def generate_token
+      self.token = SecureRandom.hex(10)
+    end
+
+    def normalize_name
+      self.name = name.capitalize
+    end
+
+
+🔸Difference between after_save and after_commit?
+  after_save runs immediately after the save operation, but still inside the transaction.
+  after_commit, on the other hand, runs only after the database transaction has been successfully committed.
+
+  So the key difference is:
+    after_save: may run even if the transaction later rolls back
+    after_commit: runs only when data is permanently persisted
+
+  Why this matters:
+
+  If you are triggering external side effects, like:
+    sending emails
+    calling APIs
+    pushing jobs to background workers
+  You should always use after_commit, because you do not want those actions to happen if the transaction fails.
+
+  Example:
+
+    after_commit :send_welcome_email
+
+    def send_welcome_email
+      UserMailer.welcome_email(self).deliver_later
+    end
+
+  If we used after_save here and the transaction rolled back, the email could still be sent, which is inconsistent.
+
+
+NOTE:
+    In Rails, there is no before_commit callback.
+    In Rails ActiveRecord, we do not really have a standard before_commit callback like we have before_save or before_create.
+
+    In Rails, instead of before_commit, we generally rely on callbacks like before_save or after_save for logic that should run before the transaction is committed.
+
+    Rails does not provide a standard before_commit, so we treat callbacks like before_save and after_save as pre-commit logic, and after_commit as post-commit logic. For anything external or irreversible, I always prefer after_commit.
+
+
+🔸Callback Order in rails ActiveRecord:
+    For a create operation, the order is roughly:
+      before_validation
+      after_validation
+      before_save
+      before_create
+      -- DB INSERT happens here --
+      after_create
+      after_save
+      after_commit
+
+    For an update operation, it becomes:
+      before_validation
+      after_validation
+      before_save
+      before_update
+      -- DB UPDATE happens --
+      after_update
+      after_save
+      after_commit
+
+    Key observations:
+      before_save runs before both create and update
+      before_create / before_update are more specific
+      after_save runs after create/update but before commit
+      after_commit runs only after transaction is complete
+
+NOTE:
+    The difference between after_create and after_save is mainly about scope and timing within the save lifecycle.
+
+    after_create runs only once, when a record is first created (INSERT)
+    after_save runs every time the record is saved, so on both create and update
+
+    after_create runs first
+    then after_save runs
+
+    Both after_create and after_save run inside the transaction.
+    So if the transaction fails later, both can still be rolled back.
+    That is why for external side effects, we prefer: after_commit
+
+🔸Available around callbacks in rails:
+  “around_* callbacks wrap the operation and give full control over execution flow, but I use them carefully because they can make the code harder to understand compared to before/after callbacks.”
+
+  Rails supports:
+    around_save
+    around_create
+    around_update
+    around_destroy
+
+    For create, it looks like:
+      around_save (before part)
+        around_create (before part)
+          -- INSERT happens --
+        around_create (after part)
+      around_save (after part)
+
+
+🔸When do we actually use around callbacks?
+  In real projects, around_* is rarely used, but useful in cases like:
+    1.Performance measurement
+        around_save :measure_time
+    2. Wrapping logic (transactions, logging, instrumentation)
+    3. Temporary state changes
+
+  NOTE: If we forget to call yield, the actual operation never happens.
+
+        “around_* callbacks wrap the entire operation. Their 'before' part runs before before_* callbacks, and their 'after' part runs after after_* callbacks.
+
+        around_save (before part)
+          before_save
+          around_create (before part)
+            before_create
+            -- INSERT happens --
+            after_create
+          around_create (after part)
+          after_save
+        around_save (after part)
+        after_commit
