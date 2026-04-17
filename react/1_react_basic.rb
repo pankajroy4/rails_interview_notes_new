@@ -302,9 +302,4 @@ In React, keys are used to uniquely identify elements in a list during reconcili
 
 React.memo is a higher-order component that prevents unnecessary re-renders by doing a shallow comparison of props. If props do not change, the component will not re-render.
 
-
-useMemo is used to memoize expensive computations so they are only recalculated when dependencies change. It helps in performance optimization by avoiding unnecessary recalculations.
-
-useCallback is used to memoize function references so that they are not recreated on every render. This is especially useful when passing functions to memoized child components.
-
 API calls in React are typically handled inside useEffect. It is important to handle cleanup to avoid memory leaks, especially if the component unmounts before the API call completes. We also need to manage loading and error states properly
