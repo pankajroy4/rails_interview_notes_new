@@ -78,7 +78,7 @@ Explain React internal working step by step?
   Now, when there is a state change, React does not directly update the Real DOM. Instead, it follows a smart process:
     First, it creates a new Virtual DOM based on the updated state.
     
-    Then comes diffing, also known as reconciliation, where React compares the new Virtual DOM with the previous one to identify what has changed.
+    Then comes diffing, where React compares the new Virtual DOM with the previous one to identify what has changed.
 
     After identifying the differences, React performs a patch update, meaning it updates only the specific parts of the Real DOM that actually changed, instead of re-rendering everything.
 
