@@ -249,7 +249,7 @@ Question 9: What are fragments?
 
 Answer -> Fragments are used to group multiple elements without adding extra nodes to the DOM.
 
-Instead of wrapping everything in a <div>, we can use <></>.
+Instead of wrapping everything in a <div>, we can use fragments i.e <></>.
 This helps keep the DOM clean and avoids unnecessary nesting.
 
 For example, if a component needs to return multiple <td> elements inside a table row, fragments are very useful.
@@ -1146,9 +1146,9 @@ MORE CONCEPTS: Lazy loading + Suspense (Better UX for routing)
       import React, { Suspense } from "react";
       import { Routes, Route } from "react-router-dom";
 
-      const Home = React.lazy(() => import("./Home"));  // this is oute-based code splitting
-      const Dashboard = React.lazy(() => import("./Dashboard")); // this is oute-based code splitting
-      const NotFound = React.lazy(() => import("./NotFound"));  // this is oute-based code splitting
+      const Home = React.lazy(() => import("./Home"));  // this is route-based code splitting
+      const Dashboard = React.lazy(() => import("./Dashboard")); // this is route-based code splitting
+      const NotFound = React.lazy(() => import("./NotFound"));  // this is route-based code splitting
 
       function App() {
         return (
