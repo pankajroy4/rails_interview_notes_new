@@ -315,6 +315,28 @@ Variation of useEffect:
   No dependencies, not even empty array → run on every render
   cleanup → for unsubscribing, prevents memory leaks
 
+NOTE: API calls are not always inside useEffect. 
+For API call, useEffect is used when the API call depends on component lifecycle, like fetching data on mount. 
+But for user-triggered actions like delete or submit, the API call should be inside event handlers.
+
+  Example:
+      import Button from "./components/Button";
+      const Login = () => {
+        const handleLogin = async () => {
+          console.log("Login clicked");
+          //call backend api here
+        };
+
+        return (
+          <Button onClick={handleLogin} variant="primary">
+            Login
+          </Button>
+        );
+      };
+
+NOTE:
+  Anything that belongs to outside the Reacts world, should go inside useEffect.
+  Anything that is Tied to rendering / state change, should go inside useEffect - because rending phase must be pure.
 --------------------------------------------------------------------------------------------------------
 Question 14: Explain useContext.
 
@@ -1450,8 +1472,63 @@ Question 64: Reusable components design
 
 Answer -> Reusable components should be generic, configurable, and decoupled from business logic.
 For example, instead of creating a button specifically for login, I create a generic Button component that accepts props like onClick, variant, and children.
-
 Also, I avoid tightly coupling components with specific data structures.
+
+Example:
+    import React from "react";
+
+    const Button = ({ onClick, variant = "primary", children, disabled = false }) => {
+      const baseStyle = "px-4 py-2 rounded font-medium";
+
+      const variants = {
+        primary: "bg-blue-500 text-white",
+        secondary: "bg-gray-500 text-white",
+        danger: "bg-red-500 text-white",
+      };
+
+      return (
+        <button
+          onClick={onClick}
+          disabled={disabled}
+          className={`${baseStyle} ${variants[variant]} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          {children}
+        </button>
+      );
+    };
+    export default Button;
+
+  Now we can use it in various cases:
+  case 1:
+    import Button from "./components/Button";
+    const Login = () => {
+      const handleLogin = async () => {
+        console.log("Login clicked");
+        //call backend api here
+      };
+
+      return (
+        <Button onClick={handleLogin} variant="primary">
+          Login
+        </Button>
+      );
+    };
+
+  case 2: 
+    import Button from "./components/Button";
+    const DeleteUser = () => {
+      const handleDelete =  async () => {
+        console.log("Delete clicked");
+        //call backend api here
+      };
+
+      return (
+        <Button onClick={handleDelete} variant="danger">
+          Delete User
+        </Button>
+      );
+    };
+
 Another important aspect is composition over inheritance. Instead of creating multiple similar components, I prefer composing them using props and children.
 
 Example:
