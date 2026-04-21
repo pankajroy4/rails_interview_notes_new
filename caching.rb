@@ -202,10 +202,10 @@ This is why manual expiration is usually unnecessary.
 ---------------------------------------------------------------------------------------------
 Question: When NOT to Use Russian Doll?
 Answer: When we have:
-Very simple pages
-Small datasets
-Highly dynamic real-time dashboards
-When invalidation logic is complex
+  Very simple pages
+  Small datasets
+  Highly dynamic real-time dashboards
+  When invalidation logic is complex
 then we should not use Russian Doll caching because overusing nested caching can increase cache memory usage.
 
 ---------------------------------------------------------------------------------------------
@@ -299,7 +299,7 @@ Question: How Memcached Works (Internally)?
 Answer: Memcached is a distributed in-memory key-value store used purely for caching. It stores data in RAM and uses LRU(Least Recently Used) eviction. It is ideal for reducing database load by caching frequently accessed or expensive queries. Unlike Redis, it does not support persistence or complex data structures. 
 I would use Memcached when I only need fast ephemeral caching in high-traffic applications.
 
-Memcached is an in-memory caching system, so all the data is stored directly in RAM. Because it operates entirely in memory and does nott touch disk, it is extremely fast — typically sub-millisecond latency.
+Memcached is an in-memory caching system, so all the data is stored directly in RAM. Because it operates entirely in memory and does not touch disk, it is extremely fast — typically sub-millisecond latency.
 
 Internally, it uses an LRU eviction policy, which stands for Least Recently Used. That means when the allocated memory is full and new data needs to be added, Memcached automatically removes the least recently accessed keys to make space.
 
@@ -356,13 +356,14 @@ Answer: LRU stands for Least Recently Used.
  🔸Data Structures Behind LRU:
     To implement LRU efficiently, most caching systems (like Memcached or Redis) use a combination of Hash Map (Dictionary) and Doubly Linked List.
 
-    ➤Doubly Linked List:
-      Stores key → value mapping
+    ➤Hash Map(Dictionary):
+      Stores key → node reference (not the value directly)
       Allows O(1) access to any key
 
     ➤Doubly Linked List:
+      Stores the actual key → value pairs (in nodes)
       Keeps track of usage order (most recently used → least recently used)
-      Allows O(1) insertion, removal, and moving keys to the front.
+      Allows O(1) insertion, removal, and moving nodes to the front.
 
     ➤Combined approach:
       Hash map points to nodes in the doubly linked list.
@@ -375,7 +376,7 @@ Answer: LRU stands for Least Recently Used.
 🔸HTTP Caching (Using ETag or Last-Modified):
   HTTP caching using ETag or Last-Modified is browser-level or proxy-level caching. It is different from Redis or Memcached.
 
-  Instead of storing rendered HTML in server memory (generally redis), we let the browser ask the server — "Has this resource changed?"
+  Instead of storing rendered HTML/data in server memory (generally redis), we let the browser ask the server — "Has this resource changed?"
   If it has not changed, the server returns 304 Not Modified without sending the response body.
   This saves bandwidth, reduces CPU usage, and improves response time.
 

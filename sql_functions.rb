@@ -64,7 +64,7 @@
     _ (underscore) Matches exactly one character.
     It will match strings of length 3, starts with P and ends with n.
     It will match something like: Pan,Pin,Pun
-    It will not match: Pan,Pin,Pun, Pansa
+    It will not match: Paan,Piin,Puan, Pansa
 
     SELECT * FROM users
     WHERE name LIKE 'P__'
@@ -93,13 +93,13 @@
 
       Without ESCAPE, % acts as wildcard'.
 
-    NOTE: Index can only work when prefix is fixed.
-          'abc%'  -> Here Index will be used.
-          '_bc%'	-> Here Index will not be used.
-          '%abc'	-> Here Index will not be used.
+    NOTE: Indexing can only work when prefix is fixed.
+          'abc%'  -> Here Indexing will be used.
+          '_bc%'	-> Here Indexing will not be used.
+          '%abc'	-> Here Indexing will not be used.
 
 🔸Regex Pattern Symbols:
-  NOTE: Index do not works in regex. Regex normally causes full table scan unless combined with trigram index.
+  NOTE: Indexing do not works in regex. Regex normally causes full table scan unless combined with trigram index.
 
   Regex is used with:
     column ~ 'pattern'
@@ -400,15 +400,15 @@ Answer: A window function performs a calculation across a set of rows that are r
 
           This will be the result:
 
-            +--------------------------------------+
-            | id |  user_id | total |  user_total  |
-            |--------------------------------------|
-            | 1  |   1      | 100   |     300      |
-            | 2  |   1      | 200   |     300      |
-            | 3  |   2      | 300   |     500      |
-            | 4  |   2      | 150   |     500      |
-            | 5  |   2      | 50    |     500      |
-            +--------------------------------------+
+            +--------------------------------------------+
+            | id |  user_id | total_amount | user_total  |
+            |--------------------------------------------|
+            | 1  |   1      |      100     |     300     |
+            | 2  |   1      |      200     |     300     |
+            | 3  |   2      |      300     |     500     |
+            | 4  |   2      |      150     |     500     |
+            | 5  |   2      |      50      |     500     |
+            +--------------------------------------------+
 
           Here, Rows are NOT collapsed. Calculation happens “over a window”.
 
@@ -545,7 +545,7 @@ Answer: A window function performs a calculation across a set of rows that are r
             Next rank is 2 (no skipping)
 
     🔸LAG() and LEAD()
-      LAG() and LEAD() are window functions used to access data from previous or next rows — without using self joins. It is used access or compare rows.
+      LAG() and LEAD() are window functions used to access data from previous or next rows — without using self joins. It is used to access or compare rows.
 
     🔸LAG()
       LAG() gives you data from a previous row.

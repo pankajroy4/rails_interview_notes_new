@@ -1,6 +1,6 @@
 Controllers
 ===========
-➤In MVC, Controller is the middleman between Model (data) and View (UI). It receives requests, interacts with the model, and renders a response.
+➤In , Controller is the middleman between Model (data) and View (UI). It receives requests, interacts with the model, and renders a response.
 
 ➤Controller Filters (before_action, after_action, around_action)
   🔸around_action:

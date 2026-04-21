@@ -64,7 +64,7 @@ Like Sidekiq, it also:
   Processes queued tasks
   But its architecture is different from sidekiq.
 
-Example: Example 3: Resque worker(without ActiveJob). This code will completely skip Active job.
+Example: Resque worker(without ActiveJob). This code will completely skip Active job.
   # app/workers/send_email_worker.rb
   class SendEmailWorker
     @queue = :default

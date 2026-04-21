@@ -462,3 +462,32 @@ Union-Find
 Bipartite Graph
 
 Graph representation
+
+===================
+# Find maximum sum of subarry of size k= 3
+# arr = [1,34,6,9,0,12,4,6]. 
+# output = 49
+
+def get_max_subarry_sum(arr, k)
+  window_sum = 0
+
+  #first window
+  (0...k).each do |i| # will run for 0,1,2
+    window_sum += arr[i]
+  end
+
+  max_sum = window_sum
+  (k...arr.length).each do |j| # will run for 3 to 7 (arr length is 8 )
+
+    window_sum += arr[j]   # slide window by one
+    window_sum -= arr[j-k] # substract 1 item from left side. # 1st loop: (j = 3, k = 3) 3-3 = 0 => windowSum - arr[0]
+                                                              # 2nd loop: (j = 4, k = 3) 4-3 = 1 => windowSum - arr[1]
+    max_sum = [window_sum, max_sum].max
+  end
+
+  max_sum
+end
+
+arr = [1,34,6,9,0,12,4,6]
+k = 3
+get_max_subarry_sum(arr, k)

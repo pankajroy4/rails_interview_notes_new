@@ -47,3 +47,35 @@ int main(){
   printf("\n");
   return 0;
 }
+
+
+// ==============================================================================================================
+
+// Given an array of integers nums and an integer k, return the total number of subarrays whose sum equals to k.
+// A subarray is a contiguous non-empty sequence of elements within an array.
+// Constraints:
+//    1 <= nums.length <= 2 * 104
+//   -1000 <= nums[i] <= 1000
+//   -107 <= k <= 107
+
+class Solution {
+public:
+    int subarraySum(vector<int>& nums, int k) {
+        unordered_map<int, int> hash;
+        hash[0] = 1; // hash.insert({0,1});
+
+        int prefix_sum = 0;
+        int count = 0;
+
+        for(int i=0;i<nums.size(); i++){
+            prefix_sum += nums[i];
+
+            if(hash.find(prefix_sum-k) != hash.end()){
+               count += hash[prefix_sum - k];
+            }
+            hash[prefix_sum]++;
+        }
+        
+        return count;
+    }
+};
