@@ -329,3 +329,86 @@ Answer: A process is just an OS-level program instance. You simply start Sidekiq
         docker-compose up --scale worker=3
 
       Each container = one Sidekiq process.
+------------------------------------------------------------------------------------------------
+
+Question 14: How queues work in Sidekiq? What is the lifecycle of a job in Sidekiq?
+=> When you enqueue a job in Sidekiq using MyWorker.perform_async(args)
+
+Sidekiq serializes job JSON and pushes it to a Redis list corresponding to the queue (e.g., queue:default).
+Redis key: queue:default
+Redis Command: LPUSH queue:default <job_json>
+
+Queue structure in Redis: 
+  queue:default → [job1_json, job2_json, job3_json]
+  queue:critical → [job1_json, job2_json, job3_json]
+Each queue is a Redis List.
+
+In case of Scheduled/Delayed Job enqueued with: MyWorker.perform_in(5.minutes, args)
+  Sidekiq uses a Redis Sorted Set to manage scheduled jobs.
+  Redis Key: schedule
+  Each entry in the sorted set is a job JSON with a score representing the scheduled execution time (timestamp).
+  Redis Command: ZADD schedule <timestamp> <job_json>
+
+How workers fetch jobs?
+Sidekiq server threads continuously poll Redis using: BRPOP queue:critical queue:default queue:low timeout
+This command blocks until a job is available in any of the specified queues. When a job is found, Redis returns the queue name and the job JSON.
+Sidekiq thread then deserializes the job JSON to get the class name and arguments.
+It instantiates the worker class and calls perform with those arguments.
+
+Job lifecycle in Sidekiq:
+1. Enqueue: MyWorker.perform_async(args) → Job JSON pushed to Redis list (queue).
+2. Fetch: Sidekiq thread blocks on BRPOP until a job is available.
+3. Deserialize: Sidekiq thread gets job JSON, deserializes it to get class and args.
+4. Execute: Sidekiq thread calls perform on the worker instance with the args.
+5. Complete: If perform succeeds, job is removed from Redis. If it raises an exception, Sidekiq handles retries based on configuration.
+------------------------------------------------------------------------------------------------
+
+Question 15: What happens when a job fails?
+=> Job is not lost. Goes to retry set (sorted set), Redis Key: retry
+Sidekiq will retry the job after a delay (exponential backoff).
+If it exceeds max retries, it goes to the Dead Job Queue (Redis List: dead).
+
+Note: If worker crash after Pop, job is lost. To prevent this, we can use reliable fetch (Sidekiq Pro feature) which moves the job to a processing set before execution, allowing recovery if the worker crashes.
+
+Flow:
+  Move job → "in-progress" list
+  Process job
+  Delete from in-progress after success
+-------------------------------------------------------------------------------------------------
+
+Question 16: When raw data is passed instead of object in sidekiq and why?
+Case 1: When using Sidekiq Directly (without ActiveJob):
+  Sidekiq needs to serialize the job data to store it in Redis. It cannot store Ruby objects directly because Redis is a key-value store that only understands strings. So Sidekiq converts Ruby objects into JSON format (or another serialization format) before pushing them to Redis. When the worker fetches the job, it deserializes the JSON back into Ruby objects to execute the perform method.
+
+  This serialization process allows Sidekiq to store complex data structures in Redis while still being able to reconstruct them when needed.
+
+Example:
+  MyWorker.perform_async(user.id)
+  Here, we are passing user.id (a simple integer) instead of the entire user object. This is because:
+    1: It is more efficient to serialize simple data types like integers or strings than complex objects.
+    2: It avoids issues with object serialization, such as circular references or non-serializable attributes.
+    3: It reduces the amount of data stored in Redis, which can improve performance and reduce memory usage.
+    4: It allows for better decoupling between the job and the data layer. The worker can fetch the necessary data from the database using the ID when it executes, rather than relying on a potentially stale or large object being passed through Redis.
+
+  But, if object is passed like,
+    MyWorker.perform_async(user)
+  Then Sidekiq will attempt to serialize the entire user object, which can lead to:
+    Serialization errors if the object contains non-serializable attributes.
+    Increased memory usage in Redis due to storing large objects.
+    Potential issues with stale data if the object changes between enqueueing and execution.
+
+Therefore, it is a best practice to pass only simple data types (like IDs) to Sidekiq jobs and let the worker fetch the necessary data from the database when it runs.
+
+Case 2: When using ActiveJob as an abstraction layer:
+  ActiveJob provides a layer of abstraction that allows you to pass Ruby objects directly to your jobs.
+  It uses GlobalID to serialize and deserialize objects automatically. When you pass an ActiveRecord object (like a User instance) to an ActiveJob, it serializes it using GlobalID, which encodes the class name and the record ID. When the job is executed, ActiveJob uses GlobalID to find the record in the database and reconstruct the object.
+
+  Example:
+    SendEmailJob.perform_later(user)
+  Here, we are passing the entire user object to the job.
+
+  Under the hood, ActiveJob will serialize the user object using GlobalID, which creates a string like "gid://app/User/1" and stored in Redis(Job JSON).
+
+  When the job runs, ActiveJob will use this GlobalID to fetch the User record with ID 1 from the database and pass it to the perform method.
+
+  However, it is important to note that this convenience comes with some overhead due to the serialization process. If performance is a concern, especially for high-throughput jobs, it may still be better to pass simple data types (like IDs) and fetch the necessary records within the worker.
