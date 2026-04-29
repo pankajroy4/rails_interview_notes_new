@@ -74,7 +74,7 @@ Differecne betwwen lambda and Proc:
   🔸lambda's return just returns from the lambda.
 
 ➤How proc and lambda handle arguments:
-  Proc: arguments are flexible — it will not raise an error if you pass the wrong number of arguments.
+  Proc: arguments are flexible — it will not raise an error if you pass the wrong number of arguments (missing ones become nil).
   lambda: arguments are strict — wrong arity raises an ArgumentError.
 
   Example:

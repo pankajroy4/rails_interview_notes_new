@@ -15,7 +15,7 @@ Ways to fix N+1 Query:
 ======================
   includes:	Avoid N+1 by eager loading associations
   preload:	Similar to includes; always 2 separate queries
-  eager_load:	Uses a JOIN to load everything in 1 query
+  eager_load:	Uses a LEFT OUTER JOIN to load everything in 1 query
 
   ➤ Use .includes 99% of the time — it is smart enough to switch to joins when needed.
 
@@ -87,7 +87,7 @@ NOTE:
       Because preload loads associations in a separate query, and your WHERE clause references a table that is not yet joined. 
       Rails does not know how to process posts.published in the main query without a join.
 
-NOTE: includes is a smart eager loader that may use separate queries or LEFT OUTER JOIN depending on usage. preload always loads associations using separate queries. joins performs SQL JOIN but does not eager load association data and may still cause N+1 when accessing associations.
+NOTE: includes is a smart eager loader that may use separate queries or LEFT OUTER JOIN depending on usage. preload always loads associations using separate queries. joins performs SQL INNER JOIN but does not eager load association data and may still cause N+1 when accessing associations.
 
 
 Eager loading Part - 2 (Advance)
