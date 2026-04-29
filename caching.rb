@@ -11,7 +11,7 @@ What is Caching?
 
 Low-Level Caching (Manual)
 ===========================
-  Low-Level Cching is used when caching computed data.
+  Low-Level Caching is used when caching computed data.
 
   Rails.cache.fetch("active_products", expires_in: 10.minutes) do
     Product.where(active: true).to_a
@@ -191,9 +191,9 @@ Question: How Rails Makes Russian Doll Work
 Answer: Rails uses cache_key_with_version
 Example: products/5-20260228123045
 When product updates:
-updated_at changes
-version changes
-cache key changes
+  updated_at changes
+  version changes
+  cache key changes
 
 only that fragment invalidates
 Outer fragment automatically references new inner keys.
