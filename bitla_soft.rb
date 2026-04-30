@@ -102,6 +102,11 @@ But important point: If any one ID is missing, it will raise an error.
   It is ideal for background jobs, data migrations, or scripts.
   Internally, it uses LIMIT and OFFSET (actually primary key batching).
 
+  Custom batch size example:
+    User.find_each(batch_size: 500) do |user|
+      puts user.email
+    end
+
 🔸where is used to filter records based on conditions and it returns an ActiveRecord::Relation.
   Example:
     User.where(active: true)
@@ -185,7 +190,7 @@ Example: [1, 2, 3].each { |n| puts n }
 🔸A Proc is an object version of a block, so we can store it and pass it around.
 In ruby, Both proc and lambda are instance i.e object of inbuilt Proc class.
 Proc is flexible for arguments — it will not raise an error if you pass the wrong number of arguments.
-In Proc, return exits from the enclosing method mean Proc's return acts like return from the method containing it.'
+In Proc, return exit from the enclosing method mean Proc's return acts like return from the method containing it.'
 
 Example: 
   p = Proc.new { |user| "Hello #{user}" }
@@ -487,3 +492,55 @@ Solution 3:
   arr = [12, 9,39, 23, 47, 19, 8]
   k = 3
   puts find_kth_largest(arr, k)
+
+------------------------------------------------------------------------------------
+Given a string, find the length of the longest substring without repeating characters.
+Answer: This is variable Sliding window pattern.
+
+  def longest_substring(s)
+    set = {}
+    left = 0
+    max_length = 0
+
+    (0...s.length).each do |right|
+      while set[s[right]]
+        set.delete(s[left])
+        left += 1
+      end
+
+      set[s[right]] = true
+      max_length = [max_length, right - left + 1].max
+    end
+
+    max_length
+  end
+
+  puts longest_substring("abcabcbb")
+
+-----------------------------------------------------------------------------------------
+Max sum of subarray of size k
+Answer -> This is fixed sliding window pattern.
+
+def max_subarray_sum(arr, k)
+  window_sum = 0
+
+  # Step 1: first window
+  (0...k).each do |i|
+    window_sum += arr[i]
+  end
+
+  max_sum = window_sum
+
+  # Step 2: slide window
+  (k...arr.length).each do |i|
+    window_sum += arr[i]       # add next element
+    window_sum -= arr[i - k]   # remove left element
+
+    max_sum = [max_sum, window_sum].max
+  end
+
+  max_sum
+end
+
+puts max_subarray_sum([2,1,5,1,3,2], 3)
+
