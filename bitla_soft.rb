@@ -330,7 +330,7 @@ One important difference is that earlier versions of form_with submitted forms u
 
 Also, form_for automatically generates element IDs and classes, while form_with is a bit more minimal and does not include them unless specified.
 
-So overall, in modern Rails applications, we prefer form_with because it’s more flexible and is the standard going forward.
+So overall, in modern Rails applications, we prefer form_with because it is more flexible and is the standard going forward.
 
 Examples:
   <%= form_for @user do |f| %>
@@ -572,3 +572,81 @@ end
 
 
 puts subarray_sum([1,2,3], 3)  # 2
+
+---------------------------------------------------------------------------------
+Flights are given, find the path. Print the desired output.
+flights = [["DEL", "KOL" ], ["KOL", "BOM"], ["HYD","DEL"] , ["BOM", "GOA"], ["HYD", "GOA"]]
+Output: 
+  ["DEL", "KOL" ]
+  ["KOL", "BOM"]
+  ["BOM", "GOA"]
+
+Here, we have given the flight between the city. City represents node and edge represent path i.e flight.
+We have to find the path from source "DEL" to destination "GOA".
+
+def find_path(flights, source, destination)
+  # First create the directed graph
+  graph = Hash.new { |h, k| h[k] = [] }  # {"DEL"=>["KOL"], "KOL"=>["BOM"], "HYD"=>["DEL", "GOA"], "BOM"=>["GOA"]} 
+
+  flights.each do |from, to|
+    graph[from] << to
+  end
+
+  visited = {}
+
+  # Recursive path finding
+  dfs(source, destination, graph, visited, [])
+end
+
+def dfs(node, destination, graph, visited, path)
+  return path if node == destination
+
+  visited[node] = true
+
+  graph[node].each do |neigh|
+    next if visited[neigh]
+
+    result = dfs(neigh, destination, graph, visited, path + [[node, neigh]])
+    return result if result
+  end
+
+  nil
+end
+
+flights = [["DEL", "KOL" ], ["KOL", "BOM"], ["HYD","DEL"] , ["BOM", "GOA"], ["HYD", "GOA"]]
+result = find_path(flights, "DEL", "GOA")
+puts result.inspect
+
+
+------------------------------------------------------------------
+def shortest_path(flights, source, destination)
+  graph = Hash.new { |h, k| h[k] = [] }
+
+  flights.each do |from, to|
+    graph[from] << to
+  end
+
+  visited = {}
+  queue = [[source, []]]   # [current_node, path_so_far]
+
+  while !queue.empty?
+    node, path = queue.shift
+
+    return path if node == destination
+
+    next if visited[node]
+    visited[node] = true
+
+    graph[node].each do |neigh|
+      next if visited[neigh]
+
+      queue << [neigh, path + [[node, neigh]]]
+    end
+  end
+
+  nil
+end
+
+flights = [["DEL", "KOL" ], ["KOL", "BOM"], ["HYD","DEL"] , ["BOM", "GOA"], ["HYD", "GOA"]]
+
+puts shortest_path(flights, "DEL", "GOA").inspect
