@@ -474,15 +474,18 @@ Solution 3:
       if top_k.size < k
         top_k << num 
       else
-        min_index = 0
 
+        # find minimum in top_k
+        min_index = 0
         (1...k).each do |i|
           min_index = i if top_k[i] < top_k[min_index]
         end
 
+        # replace minimum if larger number found
         if num > top_k[min_index]
           top_k[min_index] = num
         end
+        
       end
     end
 
@@ -544,3 +547,28 @@ end
 
 puts max_subarray_sum([2,1,5,1,3,2], 3)
 
+---------------------------------------------------------------------------------
+Given an array of integers nums and an integer k, return the total number of subarrays whose sum equals to k.
+Array may contain negative numbers.
+A subarray is a contiguous non-empty sequence of elements within an array.
+
+def subarray_sum(nums, k)
+  target = k
+  count = 0
+  sum = 0
+
+  map = Hash.new(0)
+  map[0] = 1   # very important
+
+  nums.each do |num|
+    sum += num
+
+    count += map[sum - target]
+
+    map[sum] += 1
+  end
+  count
+end
+
+
+puts subarray_sum([1,2,3], 3)  # 2
