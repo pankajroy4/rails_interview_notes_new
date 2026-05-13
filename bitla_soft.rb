@@ -453,6 +453,15 @@ Answer:
 
       puts hash
 
+    solution 3:
+      hash = Hash.new(0)
+
+      str.scan(/\w+/).each do |word|
+        hash[word.downcase] +=1  
+      end
+
+      puts hash
+
 
 -------------------------------------------------------------------------------------
 Given an array and a value k. Find kth largest element from the array.
