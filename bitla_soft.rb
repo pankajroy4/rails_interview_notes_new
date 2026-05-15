@@ -474,7 +474,7 @@ Solution 1:
 Solution 2:
   arr.sort.reverse[k-1]
 
-Solution 3:
+Solution 3(Maintain top k elements using linear minimum search):
 
   def find_kth_largest(arr, k)
     top_k =[]
@@ -504,6 +504,120 @@ Solution 3:
   arr = [12, 9,39, 23, 47, 19, 8]
   k = 3
   puts find_kth_largest(arr, k)
+
+Solution 4: (Using Heap and delete k times)
+
+  def heapify(arr, n, i)
+    parent = i
+
+    left = i * 2 + 1
+    right = i * 2 + 2
+
+    if left < n && arr[left] > arr[parent]
+      parent = left
+    end
+
+    if right < n && arr[right] > arr[parent]
+      parent = right
+    end
+
+    if parent != i
+      temp = arr[i]
+      arr[i] = arr[parent]
+      arr[parent] = temp
+
+      #short hand of above three line. Ruby first evaluates the right side completely. Then assigns to left side:
+      # arr[i], arr[parent] = arr[parent], arr[i]
+
+      heapify(arr, n, parent)
+    end
+  end
+
+  def build_heap(arr)
+    last_non_leaf = (arr.size / 2) - 1
+
+    last_non_leaf.downto(0).each do |i|
+      heapify(arr, arr.size, i)
+    end
+  end
+
+  def kth_largest(arr, k)
+    n = arr.size
+
+    build_heap(arr)
+
+    # remove max k-1 times
+    (n - 1).downto(n - k + 1) do |i|
+      arr[0], arr[i] = arr[i], arr[0]
+
+      heapify(arr, i, 0)
+    end
+
+    arr[0]
+  end
+
+  arr = [4, 10, 3, 5, 1]
+  puts kth_largest(arr, 2)
+
+
+Solution 5: (Using Heap of size k)
+
+  def heapify(heap, n, i)
+    smallest = i
+
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < n && heap[left] < heap[smallest]
+      smallest = left
+    end
+
+    if right < n && heap[right] < heap[smallest]
+      smallest = right
+    end
+
+    if smallest != i
+      heap[i], heap[smallest] = heap[smallest], heap[i]
+
+      heapify(heap, n, smallest)
+    end
+  end
+
+  def build_min_heap(heap)
+    last_non_leaf = (heap.size / 2) - 1
+
+    last_non_leaf.downto(0) do |i|
+      heapify(heap, heap.size, i)
+    end
+  end
+
+  def find_kth_largest(arr, k)
+    # first k elements
+    min_heap = arr[0...k]
+
+    build_min_heap(min_heap)
+
+    # process remaining elements
+    (k...arr.size).each do |i|
+
+      # only care if current number
+      # is larger than heap root
+      if arr[i] > min_heap[0]
+
+        # replace root
+        min_heap[0] = arr[i]
+
+        # restore min heap
+        heapify(min_heap, k, 0)
+      end
+    end
+
+    min_heap[0]
+  end
+
+  arr = [3, 2, 1, 5, 6, 4]
+
+  puts find_kth_largest(arr, 2)
 
 ------------------------------------------------------------------------------------
 Given a string, find the length of the longest substring without repeating characters.
