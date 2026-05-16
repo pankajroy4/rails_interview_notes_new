@@ -545,15 +545,14 @@ Solution 4: (Using Heap and delete k times)
     n = arr.size
 
     build_heap(arr)
-
-    # remove max k-1 times
+    # remove max element k-1 times. We want loop to run k-1 times. 
+    # Start loop from n-1 -> last element index. Also n-(k-1) = n-k+1 
     (n - 1).downto(n - k + 1) do |i|
-      arr[0], arr[i] = arr[i], arr[0]
+      arr[0], arr[i] = arr[i], arr[0] # swap the root with last element.
 
-      heapify(arr, i, 0)
+      heapify(arr, i, 0) # i -> reduced arry size
     end
-
-    arr[0]
+    arr[0]  # Lastly retun the top element of max heap after k-1 times deletion
   end
 
   arr = [4, 10, 3, 5, 1]
