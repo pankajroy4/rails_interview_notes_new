@@ -29,6 +29,24 @@ It automatically frees memory of unreachable objects.
 It divides objects into young and old generations to optimize performance.
 
 Ruby’s GC works in three main phases: mark, sweep, and optional compaction. In the mark phase, Ruby starts from root references (global variables, stack, etc.) and marks reachable objects. In the sweep phase, unmarked objects are removed and memory is reclaimed. Ruby uses generational GC, meaning most objects die young, so minor GCs run frequently on young objects, and major GCs run less often. Modern Ruby also supports incremental marking and compaction to reduce memory fragmentation and pause times.
+                           ------------------------------------------
+Long Answer -> Ruby mainly uses a Mark-and-Sweep garbage collection mechanism.
+
+In the mark phase, Ruby starts from root references like global variables, local variables, stack references, classes, and threads. It traverses all reachable objects and marks them as alive.
+
+Then in the sweep phase, objects that are not marked are considered unreachable, and Ruby frees their memory.
+
+Modern Ruby also uses Generational Garbage Collection. The idea is that most objects die young. So Ruby divides objects into young generation and old generation.
+
+Young objects are checked frequently using Minor GC, which is faster. Objects that survive multiple GC cycles are promoted to old generation, and Major GC scans both young and old objects.
+
+Ruby also supports Incremental GC to reduce stop-the-world pause time by splitting GC work into smaller chunks. Newer Ruby versions also support Compaction GC, which helps reduce memory fragmentation and improves copy-on-write optimization in servers like Puma or Unicorn.
+
+In Rails, excessive object allocation can increase GC pressure and slow down the application. So we try to optimize memory usage using techniques like pluck instead of loading full ActiveRecord objects, find_each for batch processing, and avoiding unnecessary object creation.
+
+We can also monitor garbage collector statistics using GC.stat.
+
+One important point is that even after GC frees Ruby heap memory, the operating system memory may not reduce immediately because Ruby may keep heap pages for future allocations.
 
 ------------------------------------------------------------------------------------------------------
 Question 4: What is Duck Typing?
