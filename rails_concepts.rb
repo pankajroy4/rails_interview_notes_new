@@ -210,7 +210,22 @@ However, MRI Ruby has a Global Interpreter Lock (GIL).
 
 Threads improve I/O concurrency but not CPU parallelism.
 
-In MRI Ruby, the GIL ensures that only one thread executes Ruby code at a time. This prevents true parallel execution for CPU-bound tasks but allows efficient I/O-bound concurrency such as API calls or database operations. For true parallelism, we use multiple processes (Puma workers, Sidekiq processes) or alternative Ruby implementations like JRuby.
+In MRI(Matz’s Ruby Interpreter) Ruby, the GIL ensures that only one thread executes Ruby code at a time. This prevents true parallel execution for CPU-bound tasks but allows efficient I/O-bound concurrency such as API calls or database operations. For true parallelism, we use multiple processes (Puma workers, Sidekiq processes) or alternative Ruby implementations like JRuby.
+
+What is MRI?
+“MRI stands for Matz’s Ruby Interpreter. It is the original and most widely used implementation of Ruby, created by Yukihiro Matsumoto, who is also called Matz.
+
+When we normally say 'Ruby', most of the time we are actually referring to MRI Ruby.
+
+MRI is written in C and it executes Ruby code using the YARV virtual machine, which stands for Yet Another Ruby VM.
+
+Rails applications commonly run on MRI Ruby in production.
+
+One important interview point is that MRI uses a Global VM Lock, also called GVL or previously GIL. Because of this, multiple Ruby threads cannot execute Ruby code in parallel on multiple CPU cores at the exact same time. This affects CPU-bound multithreading performance.
+
+However, MRI still supports concurrency for I/O-bound operations like database calls, API requests, or file operations because threads can release the GVL while waiting for I/O.
+
+MRI also contains Ruby’s garbage collector, memory management system, object model, and thread management internally.
 
 ------------------------------------------------------------------------------------------------------
 Question 19: What is self in different contexts?
@@ -457,3 +472,36 @@ Answer -> Optimistic locking uses a version column.
 Pessimistic locking locks rows at database level.
 Optimistic locking assumes conflicts are rare and raises StaleObjectError if version mismatches. Pessimistic locking uses SELECT FOR UPDATE to prevent concurrent updates. Optimistic is lightweight; pessimistic is strict but reduces concurrency.
 
+------------------------------------------------------------------------------------------------------
+Question 46: Difference between rails 6, 7 and 8?
+Short Asnwer -> Rails 6 introduced Zeitwerk autoloading, multiple database support, and Action Text/Mailbox.
+
+Rails 7 focused heavily on Hotwire, Turbo, Stimulus, and reducing JavaScript dependency using import maps.
+
+Rails 8 focuses more on performance, simplified deployment using Kamal, and built-in infrastructure tools like Solid Queue and Solid Cache.
+
+Long answer -> While working across Rails 6, 7, and 8, I noticed several practical improvements and changes.
+
+In Rails 6, one major change was the Zeitwerk autoloader. Earlier, with classic autoloading, we sometimes faced issues with naming conventions and autoloading in development. Zeitwerk made autoloading much cleaner and thread-safe, but we also had to ensure file names and class names matched properly.
+
+Rails 6 also introduced multiple database support, which was useful for read replicas and sharding use cases.
+Another thing I noticed in Rails 6 was stronger integration with modern JavaScript using Webpacker.
+
+In Rails 7, the biggest practical shift was import maps and Hotwire.
+
+Earlier, most Rails apps heavily depended on Webpack, Node modules, and large frontend setups. With import maps, we could manage JavaScript without requiring Webpack in many cases.
+
+Turbo was another major addition. Instead of writing custom AJAX code for many features, we could use Turbo Frames and Turbo Streams for partial page updates and realtime-like behavior.
+
+Stimulus also became the preferred lightweight JavaScript framework for Rails.
+Rails 7 also introduced load_async, which allows asynchronous query loading.
+Another practical thing I noticed was better encrypted attributes support and improvements around frontend tooling flexibility like esbuild and Vite.
+
+In Rails 8, Rails is moving more toward built-in infrastructure tools.
+One major change is Solid Queue for background jobs and Solid Cache for caching.
+
+Earlier, many applications depended heavily on Redis for jobs and caching, but Rails 8 is providing database-backed alternatives.
+I also noticed changes in enum syntax and model APIs becoming cleaner.
+Kamal deployment integration is another major addition in Rails 8 for containerized deployments.
+
+Overall, Rails 8 feels more focused on simplifying infrastructure and reducing external dependencies while improving performance and developer productivity.”
