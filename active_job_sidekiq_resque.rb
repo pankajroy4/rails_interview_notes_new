@@ -344,7 +344,7 @@ Question 14: How queues work in Sidekiq? What is the lifecycle of a job in Sidek
       queue:critical → [job1_json, job2_json, job3_json]
     Each queue is a Redis List.
 
-    In case of Scheduled/Delayed Job enqueued with: MyWorker.perform_in(5.minutes, args)
+=> In case of Scheduled/Delayed Job enqueued with: MyWorker.perform_in(5.minutes, args)
       Sidekiq uses a Redis Sorted Set to manage scheduled jobs.
       Redis Key: schedule
       Each entry in the sorted set is a job JSON with a score representing the scheduled execution time (timestamp).
