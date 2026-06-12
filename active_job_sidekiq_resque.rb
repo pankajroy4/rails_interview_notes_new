@@ -332,51 +332,60 @@ Answer: A process is just an OS-level program instance. You simply start Sidekiq
 ------------------------------------------------------------------------------------------------
 
 Question 14: How queues work in Sidekiq? What is the lifecycle of a job in Sidekiq?
+
 => When you enqueue a job in Sidekiq using MyWorker.perform_async(args)
 
-Sidekiq serializes job JSON and pushes it to a Redis list corresponding to the queue (e.g., queue:default).
-Redis key: queue:default
-Redis Command: LPUSH queue:default <job_json>
+    Sidekiq serializes job JSON and pushes it to a Redis list corresponding to the queue (e.g., queue:default).
+    Redis key: queue:default
+    Redis Command: LPUSH queue:default <job_json>
 
-Queue structure in Redis: 
-  queue:default → [job1_json, job2_json, job3_json]
-  queue:critical → [job1_json, job2_json, job3_json]
-Each queue is a Redis List.
+    Queue structure in Redis: 
+      queue:default → [job1_json, job2_json, job3_json]
+      queue:critical → [job1_json, job2_json, job3_json]
+    Each queue is a Redis List.
 
-In case of Scheduled/Delayed Job enqueued with: MyWorker.perform_in(5.minutes, args)
-  Sidekiq uses a Redis Sorted Set to manage scheduled jobs.
-  Redis Key: schedule
-  Each entry in the sorted set is a job JSON with a score representing the scheduled execution time (timestamp).
-  Redis Command: ZADD schedule <timestamp> <job_json>
+    In case of Scheduled/Delayed Job enqueued with: MyWorker.perform_in(5.minutes, args)
+      Sidekiq uses a Redis Sorted Set to manage scheduled jobs.
+      Redis Key: schedule
+      Each entry in the sorted set is a job JSON with a score representing the scheduled execution time (timestamp).
+      Redis Command: ZADD schedule <timestamp> <job_json>
 
 How workers fetch jobs?
-Sidekiq server threads continuously poll Redis using: BRPOP queue:critical queue:default queue:low timeout
-This command blocks until a job is available in any of the specified queues. When a job is found, Redis returns the queue name and the job JSON.
-Sidekiq thread then deserializes the job JSON to get the class name and arguments.
-It instantiates the worker class and calls perform with those arguments.
+  # Sidekiq server threads continuously poll Redis using: BRPOP queue:critical queue:default queue:low timeout
+  Sidekiq server threads continuously wait for jobs from Redis using the blocking BRPOP command: BRPOP queue:critical queue:default queue:low timeout
+  This command blocks until a job is available in any of the specified queues. When a job is found, Redis returns the queue name and the job JSON.
+  Sidekiq thread then deserializes the job JSON to get the class name and arguments.
+  It instantiates the worker class and calls perform with those arguments.
+
+  NOTE: 
+    BRPOP is a blocking Redis command. When the queue is empty, the Sidekiq worker thread waits on the Redis connection instead of continuously polling the queue. 
+    Redis keeps the connection open and wakes the thread immediately when a new job is pushed into any monitored queue. 
+    This reduces CPU usage and unnecessary Redis requests.
 
 Job lifecycle in Sidekiq:
-1. Enqueue: MyWorker.perform_async(args) → Job JSON pushed to Redis list (queue).
-2. Fetch: Sidekiq thread blocks on BRPOP until a job is available.
-3. Deserialize: Sidekiq thread gets job JSON, deserializes it to get class and args.
-4. Execute: Sidekiq thread calls perform on the worker instance with the args.
-5. Complete: If perform succeeds, job is removed from Redis. If it raises an exception, Sidekiq handles retries based on configuration.
+  1. Enqueue: MyWorker.perform_async(args) → Job JSON pushed to Redis list (queue).
+  2. Fetch: Sidekiq thread blocks on BRPOP until a job is available.
+  3. Deserialize: Sidekiq thread gets job JSON, deserializes it to get class and args.
+  4. Execute: Sidekiq thread calls perform on the worker instance with the args.
+  5. Complete: If perform succeeds, job is removed from Redis. If it raises an exception, Sidekiq handles retries based on configuration.
+
 ------------------------------------------------------------------------------------------------
 
 Question 15: What happens when a job fails?
-=> Job is not lost. Goes to retry set (sorted set), Redis Key: retry
-Sidekiq will retry the job after a delay (exponential backoff).
-If it exceeds max retries, it goes to the Dead Job Queue (Redis List: dead).
+  => Job is not lost. Goes to retry set (sorted set), Redis Key: retry
+  Sidekiq will retry the job after a delay (exponential backoff).
+  If it exceeds max retries, it goes to the Dead Job Queue (Redis List: dead).
 
-Note: If worker crash after Pop, job is lost. To prevent this, we can use reliable fetch (Sidekiq Pro feature) which moves the job to a processing set before execution, allowing recovery if the worker crashes.
+  Note: If worker crash after Pop, job is lost. To prevent this, we can use reliable fetch (Sidekiq Pro feature) which moves the job to a processing set before execution, allowing recovery if the worker crashes.
 
-Flow:
-  Move job → "in-progress" list
-  Process job
-  Delete from in-progress after success
+  Flow:
+    Move job → "in-progress" list
+    Process job
+    Delete from in-progress after success
 -------------------------------------------------------------------------------------------------
 
 Question 16: When raw data is passed instead of object in sidekiq and why?
+
 Case 1: When using Sidekiq Directly (without ActiveJob):
   Sidekiq needs to serialize the job data to store it in Redis. It cannot store Ruby objects directly because Redis is a key-value store that only understands strings. So Sidekiq converts Ruby objects into JSON format (or another serialization format) before pushing them to Redis. When the worker fetches the job, it deserializes the JSON back into Ruby objects to execute the perform method.
 
