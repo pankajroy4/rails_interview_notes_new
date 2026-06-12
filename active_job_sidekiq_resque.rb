@@ -125,7 +125,7 @@ Answer:
       High performance tuning
       You want maximum performance
   
-  Note: when we use ActiveJob as abstraction layer, then id adds: Serialization overhead, Wrapper layer, Slight performance cost
+  Note: when we use ActiveJob as abstraction layer, then it adds: Serialization overhead, Wrapper layer, Slight performance cost
   So it effects the performance Slightly
 
 
