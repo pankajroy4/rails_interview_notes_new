@@ -61,8 +61,24 @@ We often use them together. For example:
   Here, we are joining tables and selecting only specific fields from both.
 
 one important point is:
-  🔸joins does not load associated records like includes does. It is mainly used for filtering or querying.
   🔸select can return partial objects, so accessing non-selected attributes can raise errors.
+  🔸joins does not load associated records like includes does. It is mainly used for filtering or querying.
+      Example: users = User.joins(:posts)
+               
+               Generated SQL query:
+                  SELECT users.*
+                  FROM users
+                  INNER JOIN posts ON posts.user_id = users.id
+
+              Notice the "SELECT users.*" , Here only user columns are selected.
+              So if you do: users.first.posts
+
+               Rails will fire another query:
+                SELECT *
+                FROM posts
+                WHERE user_id = ?
+
+              because the posts were not preloaded. So if you access post record like this in loop then it will case N+1 query problem.
 
 -----------------------------------------------------------------------------------------------
 What is the differecne between find, find_by, find_each and where? Can we pass an array in find method?
