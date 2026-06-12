@@ -362,6 +362,8 @@ How workers fetch jobs?
     Redis keeps the connection open and wakes the thread immediately when a new job is pushed into any monitored queue. 
     This reduces CPU usage and unnecessary Redis requests.
 
+    Sidekiq uses blocking queue consumption, not continuous polling. The worker thread waits on BRPOP until Redis has a job available.
+
 Job lifecycle in Sidekiq:
   1. Enqueue: MyWorker.perform_async(args) → Job JSON pushed to Redis list (queue).
   2. Fetch: Sidekiq thread blocks on BRPOP until a job is available.
