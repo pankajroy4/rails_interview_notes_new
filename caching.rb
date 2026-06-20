@@ -331,7 +331,86 @@ Answer: When many requests miss cache at same time and all hit DB then cache sta
         race_condition_ttl: 10.seconds) do
         Product.active.to_a
       end
+    
+    Solutions to Prevent Cache Stampede
+    1. race_condition_ttl:
+        Purpose: Allows stale cache data to be served temporarily while only one request regenerates the cache.
 
+          Rails.cache.fetch( "active_products", expires_in: 10.minutes, race_condition_ttl: 10.seconds ) do
+            Product.active.to_a
+          end
+        
+        How it works:
+          Cache expires after 10 minutes.
+          First request after expiration starts regenerating the cache.
+          Other requests continue receiving the old cached value for up to 10 seconds.
+          Once regeneration completes, the cache is updated.
+
+        Benefit: Prevents multiple requests from hitting the database simultaneously.
+
+    2. Random Expiry (Jitter)
+        Purpose: Prevents many cache keys from expiring at the exact same time.
+
+        Without Random Expiry:
+          Rails.cache.fetch("products", expires_in: 1.hour) { Product.all.to_a }
+          Rails.cache.fetch("orders", expires_in: 1.hour) { Order.all.to_a }
+          Rails.cache.fetch("users", expires_in: 1.hour) { User.all.to_a }
+
+        All caches expire after exactly 1 hour, potentially causing a surge of database queries.
+
+        With Random Expiry:
+          Rails.cache.fetch(
+            "products",
+            expires_in: 1.hour + rand(1..300).seconds
+          ) do
+            Product.all.to_a
+          end
+
+        OR:
+
+          Rails.cache.fetch(
+            "products",
+            expires_in: 55.minutes + rand(0..10).minutes
+          ) do
+            Product.all.to_a
+          end
+
+        Benefit: Cache expirations are spread over time, reducing sudden database load spikes.
+
+      3. Distributed Locking
+          Purpose: Ensures that only one process regenerates the cache while others wait.
+
+          Example (using Redis lock):
+
+            data = Rails.cache.read("products")
+            return data if data.present?
+
+            lock_acquired = Redis.current.set(
+              "products_lock",
+              "1",
+              nx: true,  # nx means: Only Set if key Not Exists, so 2nd reqst will not get locked and go to else case and wait
+              ex: 10     # ex means: Expire in 10 seconds
+            )
+
+            if lock_acquired
+              data = Product.active.to_a
+
+              Rails.cache.write("products", data)
+              Redis.current.del("products_lock")
+
+              data
+            else
+              sleep(0.1)
+              Rails.cache.read("products")
+            end
+
+          How it works:
+            Cache expires.
+            First request acquires the lock and queries the database.
+            Other requests cannot acquire the lock and wait.
+            After cache regeneration, waiting requests read the newly cached value.
+
+          Benefit: Only one database query is executed regardless of the number of concurrent requests.
 ------------------------------------------------------------------------------------------------------------
 Question: What is LRU?
 Answer: LRU stands for Least Recently Used.

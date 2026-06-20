@@ -129,3 +129,62 @@ Output:
     ["nat","tan"],
     ["ate","eat","tea"]
   ]
+
+
+-----------------------------------------------------------------------------------------------------------
+
+def first_occurrence(arr, k)
+  left = 0
+  right = arr.size - 1
+  ans = -1
+
+  while left <= right
+    mid = left + (right - left) / 2
+
+    if arr[mid] == k
+      ans = mid
+      right = mid - 1
+    elsif arr[mid] < k
+      left = mid + 1
+    else
+      right = mid - 1
+    end
+  end
+
+  ans
+end
+
+def last_occurrence(arr, k)
+  left = 0
+  right = arr.size - 1
+  ans = -1
+
+  while left <= right
+    mid = left + (right - left) / 2
+
+    if arr[mid] == k
+      ans = mid
+      left = mid + 1
+    elsif arr[mid] < k
+      left = mid + 1
+    else
+      right = mid - 1
+    end
+  end
+
+  ans
+end
+
+def find_frequency(arr, k)
+  first = first_occurrence(arr, k)
+
+  return 0 if first == -1
+
+  last = last_occurrence(arr, k)
+
+  last - first + 1
+end
+
+arr = [12, 19, 21, 21, 21, 21, 56, 78]
+
+puts find_frequency(arr, 21)
