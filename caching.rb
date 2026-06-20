@@ -324,13 +324,6 @@ Answer: When many requests miss cache at same time and all hit DB then cache sta
       Use race_condition_ttl
       Add random expiry
       Use distributed locking
-
-    Example:
-      Rails.cache.fetch("active_products",
-        expires_in: 10.minutes,
-        race_condition_ttl: 10.seconds) do
-        Product.active.to_a
-      end
     
     Solutions to Prevent Cache Stampede
     1. race_condition_ttl:
