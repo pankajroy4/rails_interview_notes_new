@@ -226,7 +226,7 @@ Associations:
               # role is a column on the loaded Membership instance
               user.memberships.first.role  # no additional query
 
-      ➤NOTE: If you only need the role and not the object, you can avoid instantiating it:
+      ➤NOTE: If you only need the role and not the object, you can avoid instantiating (इन्स-टैन-शी-एटिंग) it:
               user.memberships.order(:id).limit(1).pick(:role)  # one query, returns the value
 
       ➤N+1 avoidance (eager loading)
@@ -400,7 +400,7 @@ Associations:
 
    🔸Limitations
       →No inverse_of support
-        Rails ca not automatically set inverse associations for polymorphic relations, so inverse_of does not work here.
+        Rails can not automatically set inverse associations for polymorphic relations, so inverse_of does not work here.
           Example: comment.commentable.comments will not automatically include unsaved in-memory comments.
 
       →Querying can be less efficient
@@ -489,6 +489,7 @@ Associations:
 
     Now:
       web_plan = WebPlan.create!(name: "Starter Web Plan")
+
       # first plan is fine
       Plan.create!(name: "Basic Plan", planable: web_plan)
       # second plan for same web_plan will fail (because of uniqueness validation)
@@ -585,7 +586,7 @@ Associations:
     v = Vehicle.first
     v.class  # => Car
 
-   🔸Rails looks at the type column to instantiate the right Ruby class.
+   🔸Rails looks at the type column to instantiate (इन्स-टैन-शिएट) the right Ruby class.
    🔸How it works:
       The parent class (Vehicle) corresponds to the table (vehicles).
       The table must have a type string column (Rails uses it automatically).
@@ -632,7 +633,7 @@ Associations:
       Slower but safer.
 
     dependent: :delete_all
-      Issues a single SQL DELETE without instantiating child objects.
+      Issues a single SQL DELETE without instantiating (इन्स-टैन-शी-एटिंग) child objects.
       Does not run callbacks/validations.
       Much faster but can skip important cleanup logic.
 

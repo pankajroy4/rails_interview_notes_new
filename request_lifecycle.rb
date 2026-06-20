@@ -69,9 +69,9 @@ Answer -> I usually explain it in layers, from the outside world down to Rails i
 
         If no route matches → 404 Not Found
 
-    6.Controller Instantiation:
+    6.Controller instantiation (इन्स-टैन-शी-एशन):
       Rails:
-        Instantiates the controller class
+        instantiates (इन्स-टैन-शिएट्स) the controller class
         Injects request, response, params, session, cookies
 
       At this stage:

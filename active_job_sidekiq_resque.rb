@@ -355,7 +355,7 @@ How workers fetch jobs?
   Sidekiq server threads continuously wait for jobs from Redis using the blocking BRPOP command: BRPOP queue:critical queue:default queue:low timeout
   This command blocks until a job is available in any of the specified queues. When a job is found, Redis returns the queue name and the job JSON.
   Sidekiq thread then deserializes the job JSON to get the class name and arguments.
-  It instantiates the worker class and calls perform with those arguments.
+  It instantiates (इन्स-टैन-शिएट्स) the worker class and calls perform with those arguments.
 
   NOTE: 
     BRPOP is a blocking Redis command. When the queue (redis list) is empty, the Sidekiq worker thread waits on the Redis connection instead of continuously polling the queue. 

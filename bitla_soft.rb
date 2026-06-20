@@ -323,7 +323,7 @@ Answer ->In Ruby, select, map, and collect are all enumerable methods.
 
 🔸pluck directly queries specific columns from the database.
   It works at DB level, fetches only required columns.
-  It does not instantiate ActiveRecord objects.
+  It does not instantiate (इन्स-टैन-शिएट) ActiveRecord objects.
   It is much more efficient for large datasets.
 
   Example:

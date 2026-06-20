@@ -3,7 +3,7 @@ Class
   ➤ A class is a blueprint for creating objects (instances). It defines the properties/state (via instance variables) and behavior (via methods) of its instances.
 
   ➤ Key Features of a Class
-    - Can be instantiated using .new
+    - Can be instantiated (इन्स-टैन-शिएटेड) using .new
     - Methods inside a class are by default instance methods.
 
 Polymorphism

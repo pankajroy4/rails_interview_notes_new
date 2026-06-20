@@ -145,7 +145,7 @@ Solution to this is using distinct:
 
 ------------------------------------------------------------------------------------------------------
 8.How does ActiveRecord avoid duplicating parent records when using JOIN?
-Answer: When using eager loading via JOIN, ActiveRecord reconstructs object graphs from the flattened SQL result set. It uses internal join dependency logic to deduplicate parent records by primary key and aggregates associated records into collections, preventing multiple parent object initialzation/instantiations.
+Answer: When using eager loading via JOIN, ActiveRecord reconstructs object graphs from the flattened SQL result set. It uses internal join dependency logic to deduplicate parent records by primary key and aggregates associated records into collections, preventing multiple parent object initialzation/instantiations (इन्स-टैन-शी-एशन्स).
 
  ➤The Problem
   JOIN returns:
@@ -154,7 +154,7 @@ Answer: When using eager loading via JOIN, ActiveRecord reconstructs object grap
     1	            11
     1	            12
 
-  If naïvely instantiated, You would get 3 User objects.
+  If naïvely instantiated (इन्स-टैन-शिएटेड), You would get 3 User objects.
 
  ➤What Rails Actually Does:
   When using eager_load, rails uses: ActiveRecord::Associations::JoinDependency
@@ -520,12 +520,12 @@ The database executes the query and returns raw rows. At this point, all values 
 
 Then ActiveRecord performs type casting based on the model’s column definitions. For example, it converts string values into integers, booleans, or datetime objects as needed.
 
-Finally, Rails instantiates a User object, assigns the attributes, marks it as persisted, and returns the fully hydrated Ruby object.
+Finally, Rails instantiates (इन्स-टैन-शिएट्स) a User object, assigns the attributes, marks it as persisted, and returns the fully hydrated Ruby object.
 
 If no record is found, it raises ActiveRecord::RecordNotFound.
 
 So overall, the flow is:
-  ActiveRecord::Relation → Arel → SQL generation → Connection adapter → Query execution → Type casting → Object instantiation.”
+  ActiveRecord::Relation → Arel → SQL generation → Connection adapter → Query execution → Type casting → Object instantiation (इन्स-टैन-शी-एशन).”
 
 ------------------------------------------------------------------------------------------------------
 Question: Suppose, We need to store categories with a nested structure, where categories can have child categories, and this hierarchy can potentially go several levels deep. An example could be 'Electronics' → 'Devices' → 'Mobile' → 'Smart' and 'Feature'. How do you manage this in rails?

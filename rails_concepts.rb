@@ -106,7 +106,7 @@ Answer -> Modules are used for:
             Namespacing
             Mixins (code sharing)
             Utility functions
-            Modules cannot be instantiated.
+            Modules cannot be instantiated (इन्स-टैन-शिएटेड).
 
 Modules help organize code and avoid naming collisions using namespaces like Admin::User. They allow behavior sharing through include, extend, or prepend, solving Ruby’s single inheritance limitation. They are also used for grouping related utility methods without creating objects.
 
@@ -242,8 +242,8 @@ Understanding self is critical in Ruby. Inside a class definition, self refers t
 ------------------------------------------------------------------------------------------------------
 Question 20: Class vs Module
 
-Answer -> A class can be instantiated.
-A module cannot be instantiated.
+Answer -> A class can be instantiated (इन्स-टैन-शिएटेड).
+A module cannot be instantiated (इन्स-टैन-शिएटेड).
 
 Classes represent objects.
 Modules represent shared behavior or namespaces.

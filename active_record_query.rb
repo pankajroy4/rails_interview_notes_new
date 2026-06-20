@@ -67,7 +67,7 @@
   Dynamic LIKE safety: pattern = ActiveRecord::Base.sanitize_sql_like(query)
 
 🔸Picking columns (avoid loading whole rows)
-    User.pluck(:id, :email)     # returns arrays, no model instantiation
+    User.pluck(:id, :email)     # returns arrays, no model instantiation (इन्स-टैन-शी-एशन)
     User.pick(:email)           # single value (nil if none)
     User.ids                    # all IDs fast
     User.select(:id, :email)    # models but only selected attrs loaded

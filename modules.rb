@@ -1,11 +1,11 @@
 Modules:
 =======
   ➤ A module is a collection of methods, constants, and classes. 
-    It cannot be instantiated like a class but can be included or extended in other classes to share functionality.
+    It cannot be instantiated (इन्स-टैन-शिएटेड) like a class but can be included or extended in other classes to share functionality.
 
   ➤ Key Features of a Module:
     - Used to group related methods.
-    - Cannot be instantiated.
+    - Cannot be instantiated (इन्स-टैन-शिएटेड).
     - Can be included or extended to add functionality to classes.
     - Supports namespacing to organize code and avoid naming conflicts.
     - We cannot use instance methods of a module without including or extending (or prepending) it in some other class.
