@@ -381,7 +381,7 @@ Answer: When many requests miss cache at same time and all hit DB then cache sta
             lock_acquired = Redis.current.set(
               "products_lock",
               "1",
-              nx: true,  # nx means: Only Set if key Not Exists, so 2nd reqst will not get locked and go to else case and wait
+              nx: true,  # nx means: Only Set if key Not Exists, so all reqst except 1st rest, will get nil for lock_acquired and go to else case and wait
               ex: 10     # ex means: Expire in 10 seconds
             )
 
