@@ -67,6 +67,18 @@ eager_load
     LEFT OUTER JOIN "posts" ON "posts"."user_id" = "users"."id"
     WHERE "posts"."published" = true;
 
+
+  - SQL query:
+    SELECT users.*, posts.*   # Note that: users and posts both are loaded . The is the associated record loading.
+    FROM users
+    LEFT OUTER JOIN posts
+      ON posts.user_id = users.id
+    WHERE posts.published = true
+
+    Rails instantiates both:
+      User objects
+      ans associated Post objects
+
   - Use case:
     You need to filter or sort using fields in the posts table. Like
     Show all users who have published posts.
