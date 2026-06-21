@@ -65,16 +65,6 @@ Example:
     100 queries → fetch posts per user
     Total: 101 queries
 
----------------------------------------------------------------------------------------------------------
-6.Why N+1 Quesry Problem happens?
-Answer: ActiveRecord associations are lazy-loaded by default.
-When you call user.posts
-Rails executes a query at that moment: SELECT * FROM posts WHERE user_id = ?
-Inside the loop, that happens for each user.
-
-Rails has no idea ahead of time that you will need posts for all users.
-So it issues queries one by one.
-
 --------------------------------------------------------------------------------------------------------
 7.What happens if you call count vs size on preloaded associations?
 Answer: count always executes a SQL COUNT query regardless of preloading. size is smart — it uses in-memory records if already loaded, otherwise performs a COUNT query. 
@@ -141,11 +131,11 @@ Solution to this is using distinct:
   INNER JOIN posts ON posts.user_id = users.id
 
   Now duplicates removed at SQL level.
-  Now you can do:  User.joins(:messages).distinct.count . This will give uniq parent record count.
+  Now you can do:  User.joins(:posts).distinct.count . This will give uniq parent record count.
 
 ------------------------------------------------------------------------------------------------------
 8.How does ActiveRecord avoid duplicating parent records when using JOIN?
-Answer: When using eager loading via JOIN, ActiveRecord reconstructs object graphs from the flattened SQL result set. It uses internal join dependency logic to deduplicate parent records by primary key and aggregates associated records into collections, preventing multiple parent object initialzation/instantiations (इन्स-टैन-शी-एशन्स).
+Answer: When using eager loading via JOIN, ActiveRecord reconstructs object graphs from the flattened SQL result set. It uses internal join dependency logic to deduplicate parent records by primary key and aggregates associated records into collections, preventing multiple parent object instantiations (इन्स-टैन-शी-एशन्स).
 
  ➤The Problem
   JOIN returns:
