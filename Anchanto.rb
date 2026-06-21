@@ -1,7 +1,7 @@
 1. How does Rails automatically create getter/setter methods for DB columns?
 Answer: In Rails, models inherit from ApplicationRecord, which inherits from ActiveRecord::Base.
 
-When the application boots or when the model is first loaded, ActiveRecord connects to the database through the adapter and queries the table metadata using methods like columns and columns_hash.
+When the application boots, ActiveRecord connects to the database through the adapter and queries the table metadata using methods like columns and columns_hash.
 
 ActiveRecord then dynamically defines attribute methods using define_attribute_methods, which internally uses define_method to generate getter and setter methods for each column.
 
