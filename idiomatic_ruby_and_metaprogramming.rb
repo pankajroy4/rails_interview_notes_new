@@ -7,6 +7,44 @@
     Modify classes while the app is running
     Infer behavior from naming conventions
 
+  Example 1: define_method
+
+    class User
+      [:name, :email, :phone].each do |attribute|
+        define_method(attribute) do
+          puts "Fetching #{attribute}"
+        end
+      end
+    end
+
+    user = User.new
+
+    user.name       # Fetching name
+    user.email      # Fetching email
+    user.phone      # Fetching phone
+
+    There methods are being created at run time. This is metaprogramming.
+
+  Example 2: method_missing
+
+  class User
+    def method_missing(method_name, *args)
+      if method_name.to_s.start_with?("find_by_")
+        column = method_name.to_s.sub("find_by_", "")
+        puts "Searching by #{column}"
+      else
+        super
+      end
+    end
+  end
+
+  user = User.new
+
+  user.find_by_email        # Searching by email
+  user.find_by_name         # Searching by name
+
+  Here, Actually No method is exists, Ruby is handling it at runtime.
+
 ➤Why Rails uses metaprogramming?
 =============================
   Rails is built on Ruby, which is highly dynamic. Rails leverages this to:
@@ -561,3 +599,106 @@ Ruby Metaprogramming Cheatsheet
   - pluck for fast column retrieval.
   - find_each for batching.
   - find_or_create_by / first_or_initialize.
+
+
+==============================================================================================
+➤Metaprogramming: method_missing vs define_method in Rails
+
+🔸method_missing Example
+
+  class User
+    def method_missing(method_name, *args)
+      if method_name.to_s.start_with?("find_by_")
+        column = method_name.to_s.sub("find_by_", "")
+        puts "Searching by #{column}"
+      else
+        super
+      end
+    end
+  end
+
+  user = User.new
+
+  user.find_by_email # => Searching by email
+  user.find_by_name  # => Searching by name
+
+  In this example, find_by_email and find_by_name methods do not actually exist.
+
+  When Ruby cannot find a method, it calls method_missing, which allows us to handle the method dynamically at runtime.
+  This is a form of metaprogramming because the behavior is determined dynamically rather than through explicitly defined methods.
+
+🔸Dynamic Finders in Older Rails
+
+    Older versions of Rails supported dynamic finders such as:
+
+    User.find_by_email("abc@gmail.com")
+    User.find_by_name("Pankaj")
+
+    These methods were not explicitly defined in the model.
+
+    Rails used metaprogramming techniques (primarily method_missing) to intercept these method calls and generate the appropriate SQL queries.
+
+🔸Why method_missing Can Be Expensive
+
+    Suppose the following method is called: User.find_by_email("abc@gmail.com")
+
+    Since the method does not exist, Ruby performs method lookup:  User Class →  Superclass  →  Included Modules  →  method_missing
+
+    This lookup process happens every time the method is called.
+
+      Example:
+
+        1000.times do
+          User.find_by_email("abc@gmail.com")
+        end
+
+        Potentially, method_missing is invoked repeatedly, which adds runtime overhead.
+        Because of this repeated lookup, heavy reliance on method_missing can negatively affect performance.
+
+
+🔸Modern Rails Approach: define_method
+
+    Modern Rails prefers generating actual methods rather than relying on method_missing for every call.
+
+    For example, when an association is declared:
+
+      class Post < ApplicationRecord
+        belongs_to :user
+      end
+
+      Rails dynamically creates methods such as:
+
+      post.user
+      post.user=
+      post.build_user
+      post.create_user
+
+    Internally, Rails uses metaprogramming techniques such as define_method.
+
+    Conceptually:
+
+      define_method(:user) do
+        ...
+      end
+
+      These methods are added to the "method table" of the class. Every class has a table called "Method Table"
+      After the method is generated, Ruby can find it directly during method lookup without invoking method_missing.
+
+🔸Performance Benefit
+
+    Standard Flow, With define_method:
+      Method Call → Method Table Lookup → Execute Method
+
+    With method_missing:
+      Method Call → Class Lookup → Superclass Lookup → Module Lookup → method_missing → Execute Logic
+
+    Since define_method creates real methods, subsequent calls are faster and avoid the repeated overhead of method_missing.
+
+🔸Summary
+    method_missing handles undefined methods dynamically at runtime.
+    Older Rails dynamic finders (find_by_email, find_by_name) relied on metaprogramming and method_missing.
+    method_missing introduces runtime lookup overhead.
+
+    Modern Rails prefers generating actual methods using define_method.
+    Associations (belongs_to, has_many), enums, scopes, and many Rails DSLs use metaprogramming to create methods dynamically.
+    Generated methods are stored in the class's method table, making subsequent calls much more efficient.
