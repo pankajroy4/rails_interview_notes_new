@@ -153,3 +153,33 @@ def length_of_longest_substring(s)
     end
     [max, hash.count].max
 end
+
+
+
+arr = ["a", 1, 5, "b", "a", 1, 2, "2"]
+
+# hash =  Hash.new(0)
+# result = []
+
+# arr.each do | ele|
+#   hash[ele] +=1
+#   if hash[ele] > 1
+#     result << ele
+#   end
+# end
+
+# puts result.inspect
+
+
+result = []
+arr = ["a", 1, 5, "b", "a", 1, 2]
+
+(0...arr.length-1).each do |i|
+  (i+1...arr.length).each do |j|
+    if arr[i] == arr[j] && !result.include?(arr[i])
+      result << arr[i]
+    end
+  end
+end
+
+puts result.inspect

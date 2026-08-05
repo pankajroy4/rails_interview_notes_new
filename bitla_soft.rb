@@ -552,7 +552,7 @@ Solution 4: (Using Heap and delete k times)
   def build_heap(arr)
     last_non_leaf = (arr.size / 2) - 1
 
-    last_non_leaf.downto(0).each do |i|
+    last_non_leaf.downto(0) do |i|
       heapify(arr, arr.size, i)
     end
   end
