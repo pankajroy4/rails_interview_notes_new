@@ -36,7 +36,7 @@ Page Caching(Full HTML caching)
         caches_page :index
       end
 
-      When someone visits: GET /product
+      When someone visits: GET /products
       Rails generates:
         public/products.html
 
@@ -49,6 +49,27 @@ Page Caching(Full HTML caching)
         
       If needed today use gem like: gem 'actionpack-page_caching'
       But in real projects, we use reverse proxy caching (Nginx, Cloudflare, CDN).
+
+  We need a method call like: expire_page :action => :index to expire the page cache.
+
+  For exmaple, when a product is updated, expire the page cached.
+      class ProductsController < ApplicationController
+        caches_page :index
+
+        def index
+          @products = Product.all
+        end
+
+        def update
+          @product = Product.find(params[:id])
+
+          if @product.update(product_params)
+            expire_page :action => :index
+            redirect_to products_path
+          end
+        end
+      end
+
 
 Action Caching
 ==============
@@ -73,6 +94,8 @@ So unlike page caching, in Action caching:
   But if you still have to use then use the gem:
     gem 'actionpack-action_caching'
   But again — modern Rails apps rarely use this.
+
+  We need a method call like: expire_action :action => :index to expire the page cache, similar to page cache.
 
 Fragment Caching with Redis
 ===========================
