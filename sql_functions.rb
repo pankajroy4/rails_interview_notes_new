@@ -27,8 +27,8 @@
   Example: WHERE age > 25 AND city = 'Mumbai'
 
 🔸Range & Set Operators
-    BETWEEN        -- range check
-    NOT BETWEEN
+    BETWEEN        -- range check, NOTE: BETWEEN is inclusive
+    NOT BETWEEN     
     IN             -- matches any value in list
     NOT IN
 
