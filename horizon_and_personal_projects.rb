@@ -254,3 +254,68 @@ Answer: Post-deploy I'd watch error/exception tracking for a few minutes for any
 Q: Any performance cost to adding id to every ORDER BY clause?
 
 Answer: Negligible — id is the primary key, always indexed, and it's only a tiebreaker (last sort key), so it only affects rows that are already tied on the primary sort column, which in practice is a small fraction of rows. It doesn't change which index or scan strategy Postgres picks for the dominant sort.
+
+
+===========================
+Question: Walk me through the AI conversation feature you built — how does it work end to end?
+Answer → This was an AI-powered conversation-assistance feature inside a LinkedIn outreach automation platform (Castanet), used by outreach teams handling hundreds of prospect conversations daily across campaigns.
+
+The problem: every incoming LinkedIn reply had to be read by a rep from scratch, with no visibility into how engaged or interested the prospect actually was. At volume, this meant slow response times and inconsistent messaging quality across the team.
+
+I designed and built the full pipeline, end to end:
+
+Entry point: A Unipile webhook handler receives every inbound LinkedIn message. When a message is from the prospect (not us), it enqueues a background job — this keeps the webhook itself fast and idempotent, and pushes the actual AI work off the request cycle.
+
+Classification + generation, in one call: The background worker resolves the right "Conversation Agent" for that conversation (campaign-specific agent takes priority; falls back to the LinkedIn profile's default agent otherwise) and calls a service that builds a system prompt (the agent's own instructions plus a shared guardrail block) and sends it to GPT-4o in JSON mode. Critically, I designed this as one LLM call, not two — it returns both the suggested reply text and a 4-level interest classification (High/Medium/Neutral/Low) in the same structured response. That halves the API cost and latency versus running separate classification and generation calls, and avoids the two signals ever disagreeing with each other since they come from the same reasoning pass.
+
+Prompt generation from business context: Rather than a human hand-writing a 100+ line system prompt per client, I built a service that takes structured business context (offering, ideal customer profile, primary goal, social proof, booking link, etc.) and merges it into a reusable meta-prompt template via an LLM call, producing a complete, ready-to-use agent prompt automatically.
+
+Human-in-the-loop refinement: Reps or clients can improve an agent's behavior two ways — free-form instructions on the agent settings page, or by giving feedback on a specific rejected suggested reply. Either path goes through the same refinement service, which is deliberately instructed to generalize the feedback into a broad rule rather than hard-coding the example as a canned response, and returns a diff. That diff is shown for review — it's never auto-applied — before it's saved and starts influencing live conversations.
+
+Display and workflow: The suggestion is shown to the rep inside a "Focus Mode" — a single-conversation review queue I also helped build for high-volume triage — with the interest level shown as a colored icon. Whenever a new suggestion is generated for a conversation, any previous active suggestion for it is automatically dismissed, so a rep is never looking at a stale one.
+
+Safety, since this talks to real prospects: every generated prompt has a dedicated anti-hallucination instruction block appended at generation time — regardless of whatever the client's own edited prompt says — specifically forbidding fabricated case studies, statistics, or client names. And since the whole feature is advisory (never auto-sends anything), if the OpenAI call fails or times out for any reason, the worker just returns early — the rep sees no suggestion that cycle, but their normal manual workflow is completely unaffected. No error, no broken UI.
+
+============================= 60-SECOND VERSION =============================
+
+I built an AI suggested-reply feature for a LinkedIn outreach platform. Every inbound reply triggers a background job that calls GPT-4o once to both classify the prospect's interest level and draft a suggested reply, shown to the rep in a focused single-conversation review queue.
+
+I also built a system that auto-generates each client's agent prompt from their business context via an LLM meta-prompt, plus a human-in-the-loop refinement flow where feedback on a rejected reply gets turned into a generalized prompt rule — reviewed as a diff before it's applied.
+
+Because this talks directly to real prospects, I built in a hard anti-hallucination guardrail on every prompt and made the whole feature fail gracefully — if the AI call fails, the rep's normal workflow is unaffected, nothing breaks.
+
+
+
+Likely Cross-Questions + Answers
+Q: Why combine reply-generation and interest classification into a single LLM call instead of two separate calls?
+
+Cost and latency — one GPT-4o call instead of two, using JSON-mode structured output so I get a typed {reply, interest_level} object back reliably. It also avoids a subtle consistency bug: if you classify and generate separately, you can end up with a reply that reads as enthusiastic while the classifier scores the prospect "Low" — because they're two independent reasoning passes over the same conversation. One call means one coherent read of the conversation drives both outputs.
+
+Q: How do you stop the AI from hallucinating facts about the client's business — fake case studies, wrong pricing, invented results?
+
+Every agent prompt gets a dedicated factual-accuracy guardrail block injected at generation time, on top of whatever the client's own prompt says — explicitly instructing the model to never invent statistics, testimonials, or client names, and to fall back to the closest real example provided instead of fabricating one. It's appended server-side every time a reply is generated, so it can't be accidentally stripped out even if a client's stored prompt gets edited or refined later.
+
+Q: What happens if the OpenAI API call fails, times out, or returns something unparseable?
+
+The service returns nil on any failure — HTTP error, blank API key, JSON parse error — and the worker just returns early without creating a suggestion. Because this feature is purely advisory and never auto-sends anything, a failure has zero blast radius: the rep just doesn't see a suggestion for that message and replies manually, exactly as they would if the feature didn't exist. I deliberately designed it so a bad AI response degrades to "no assistance," never to a broken or incorrect UI state.
+
+Q: How do you let non-developers change the AI's behavior without touching code?
+
+Two paths, both going through the same refinement service. One is free-form instructions on the agent settings page ("stop mentioning pricing in the first message"). The other is reacting to a specific rejected suggestion with feedback on why it was wrong. In both cases the LLM is explicitly instructed to extract the general principle behind the request and edit the relevant section of the existing prompt, rather than pasting the example back verbatim as a hardcoded canned response — that's what makes it generalize instead of just memorizing one correction.
+
+Q: Why show a diff and require a review step instead of applying the refined prompt immediately?
+
+Because an LLM-rewritten prompt can over-generalize or introduce behavior nobody asked for, and this prompt is about to start controlling live conversations with real prospects — that's not something I wanted auto-applied blind. Showing the diff lets a human sanity-check the actual before/after wording in one glance before it goes live. The refine endpoint and the apply endpoint are two separate actions specifically so nothing is saved until someone reviews it.
+
+Q: How do you decide which agent's prompt to use, if a profile is running multiple campaigns?
+
+Priority order: first, the specific campaign tied to the conversation's active, non-network/non-blacklist campaign status — so different active campaigns on the same profile can run different pitches or personas. If there's no campaign-specific agent, it falls back to the LinkedIn profile's most recently created agent, so there's always a sane default rather than silently generating nothing.
+
+Q: How would this scale if inbound message volume grew 50x — where's the bottleneck?
+
+Each inbound message is one Sidekiq job making one synchronous OpenAI HTTP call with a 60-second timeout. At real scale the bottleneck shifts to OpenAI's own rate limits and cost, and Sidekiq concurrency on that queue. I'd isolate this onto its own dedicated queue so a burst of AI jobs can't starve other background work, add rate-limit-aware backoff on 429s, and consider de-duplicating near-identical low-signal replies (like repeated "thanks!" messages) before spending an API call classifying something that's almost certainly benign.
+
+Q: The interest level is a qualitative High/Medium/Neutral/Low label rather than a numeric confidence score — was that a deliberate choice?
+
+Yes — this signal is meant for a human to glance at (shown as a colored icon next to the suggestion), not to drive an automated decision, so a coarse, human-readable label was the right fit. If this were feeding an automated action instead of a human's judgment — for example auto-continuing a sequence or auto-dismissing a conversation without review — I'd want a numeric confidence score with an explicit threshold, precisely because a wrong automated action is far more costly than a rep glancing past an imprecise label.
+
