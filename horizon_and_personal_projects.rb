@@ -178,7 +178,7 @@ So overall, the strategy is: Detect early, stop damage automatically, shift traf
 ------------------------------------------------------------------------------------------------------------------------------------------------
 Question: Tell me about a time you diagnosed and fixed a serious performance issue.
 
-Answer: This was on a Rails 6.1 / Postgres 15 SaaS application — a LinkedIn outreach automation platform with a "Team Inbox" feature where users manage conversations(Incoming conversations ko review karna, prioritize karna, aur handle karn) from their assigned/connected LinkedIn accounts. 
+Answer: This was on a SaaS application — a LinkedIn outreach automation platform with a "Team Inbox" feature where users manage conversations(Incoming conversations ko review karna, prioritize karna, aur handle karn) from their assigned/connected LinkedIn accounts. 
 The core query — fetch_all_conversation_ids — pulls the filtered, sorted list of conversation IDs a rep should see, and it is used both by the paginated list view and a "Focus Mode" (one-conversation-at-a-time) view.
 
 For our larger organizations (1000+ LinkedIn profiles under one org), this query was intermittently taking 30 to over 170 seconds, causing request timeouts that surfaced to users as raw, unstyled Rails 500 error pages — both a generic "conversation failed to load" bug and a specific 500 when submitting a status change in Focus Mode.

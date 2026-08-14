@@ -36,7 +36,7 @@ Page Caching(Full HTML caching)
         caches_page :index
       end
 
-      When someone visits: GET /product
+      When someone visits: GET /products
       Rails generates:
         public/products.html
 
@@ -49,6 +49,27 @@ Page Caching(Full HTML caching)
         
       If needed today use gem like: gem 'actionpack-page_caching'
       But in real projects, we use reverse proxy caching (Nginx, Cloudflare, CDN).
+
+  We need a method call like: expire_page :action => :index to expire the page cache.
+
+  For exmaple, when a product is updated, expire the page cached.
+      class ProductsController < ApplicationController
+        caches_page :index
+
+        def index
+          @products = Product.all
+        end
+
+        def update
+          @product = Product.find(params[:id])
+
+          if @product.update(product_params)
+            expire_page :action => :index
+            redirect_to products_path
+          end
+        end
+      end
+
 
 Action Caching
 ==============
@@ -73,6 +94,8 @@ So unlike page caching, in Action caching:
   But if you still have to use then use the gem:
     gem 'actionpack-action_caching'
   But again — modern Rails apps rarely use this.
+
+  We need a method call like: expire_action :action => :index to expire the page cache, similar to page cache.
 
 Fragment Caching with Redis
 ===========================
@@ -299,11 +322,11 @@ Question: How Memcached Works (Internally)?
 Answer: Memcached is a distributed in-memory key-value store used purely for caching. It stores data in RAM and uses LRU(Least Recently Used) eviction. It is ideal for reducing database load by caching frequently accessed or expensive queries. Unlike Redis, it does not support persistence or complex data structures. 
 I would use Memcached when I only need fast ephemeral caching in high-traffic applications.
 
-Memcached is an in-memory caching system, so all the data is stored directly in RAM. Because it operates entirely in memory and does not touch disk, it is extremely fast — typically sub-millisecond latency.
+Memcached operates entirely in memory and does not touch disk, it is extremely fast — typically sub-millisecond latency.
 
 Internally, it uses an LRU eviction policy, which stands for Least Recently Used. That means when the allocated memory is full and new data needs to be added, Memcached automatically removes the least recently accessed keys to make space.
 
-In distributed environments, data is spread across multiple Memcached servers using consistent hashing. This ensures that keys are distributed evenly, and if a node is added or removed, only a small portion of keys need to be remapped.
+In distributed environments, data is spread across multiple Memcached servers using consistent hashing. This ensures that keys are distributed evenly, and if a node(i.e memcached server) is added or removed, only a small portion of keys need to be remapped.
 
 Memcached is also multi-threaded, so it can handle many concurrent client connections efficiently.
 
@@ -443,6 +466,8 @@ Answer: LRU stands for Least Recently Used.
       When you need to evict, remove the tail node (least recently used).
 
   This is how LRU achieves fast reads, writes, and evictions, all in constant time.
+
+  NOTE: head aur tail references Hash Map ya Doubly Linked List ke kisi node ke andar nahi hote. Usually ek LRU Cache object khud in dono references ko store karta hai. Issi wajh se Head aur Tail O(1) me access hota hai.
 
 ==============================================================================================================
 🔸HTTP Caching (Using ETag or Last-Modified):
