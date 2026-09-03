@@ -319,3 +319,68 @@ Q: The interest level is a qualitative High/Medium/Neutral/Low label rather than
 
 Yes — this signal is meant for a human to glance at (shown as a colored icon next to the suggestion), not to drive an automated decision, so a coarse, human-readable label was the right fit. If this were feeding an automated action instead of a human's judgment — for example auto-continuing a sequence or auto-dismissing a conversation without review — I'd want a numeric confidence score with an explicit threshold, precisely because a wrong automated action is far more costly than a rep glancing past an imprecise label.
 
+
+----------------------------------------------
+
+
+Question: Walk me through the Decision Engine you built — how does it work end to end?
+
+Answer → This was a follow-up project on the same LinkedIn outreach platform, building on top of the existing AI suggested-reply feature. The client's ask was: if incoming replies could be auto-classified and routed, roughly 75% of daily inbound messages (benign "thanks for connecting" replies, and clear "not interested" replies) could be handled without a human ever touching them — leaving Team Inbox for only the conversations that genuinely need judgment.
+
+The key design constraint the client gave me: never risk the existing, live app. So I built it around three non-negotiable rules:
+
+1.Additive-only — no existing method or endpoint gets edited. New behavior lives in new files/classes/columns that call existing, already-tested action endpoints (Resume Sequence, Not Interested) unchanged.
+2.Off-by-default flag, checked inside the new code, not at the call site — the webhook handler that receives inbound messages gets exactly one new line added (enqueuing a new worker), never a branch that replaces the existing suggested-reply worker call. Both workers just run; the new one self-gates internally.
+3.Shadow mode before any action — first ship classify-and-log-only, where nothing actually happens. Validate accuracy against real conversations. Only then enable real actions, one bucket at a time, lowest-risk first.
+
+Pipeline: same inbound-webhook entry point as the suggested-reply feature enqueues a second worker. That worker resolves whether the triggering campaign has the feature flag on; if so, it calls a standalone classifier service — a separate GPT-4o call (JSON mode) from the suggested-reply one, because it's answering a fundamentally different question. The suggested-reply classifier scores a 4-level interest gradient for a human to read; this one sorts into 4 mutually-exclusive routing buckets: continue (benign, resume the sequence), not_interested (send the decline response and dismiss), dismiss (benign reply but the lead is already closed/resolved — no message, just close it), and needs_human (the default — leave it in Team Inbox, today's normal behavior).
+
+For 2+ months this ran in pure shadow mode — every classification was written to a log table with action_taken: nil, visible to nobody except an internal report. I validated it against real dev conversations first, then against real production data once the client enabled it on a pilot campaign, before any action-taking code was even written.
+
+Only after the client reviewed real report data and confirmed accuracy did I build the second phase: a decision_engine_actions_enabled flag that lets the same classification actually act — calling the exact same continue_sequence/not_interested endpoints a rep's manual click already calls — gated by a confidence threshold, rolled out lowest-risk action first.
+
+============================= 60-SECOND VERSION =============================
+
+I built a Decision Engine that auto-classifies every inbound LinkedIn reply into 4 outcomes — continue sequence, not interested, dismiss (already-closed lead), or needs human — and routes the first three to existing, already-tested action endpoints instead of a rep clicking them manually.
+
+I shipped it shadow-mode first: for weeks it only classified and logged, took zero action, so we could validate accuracy against real production data with no risk. Only after the client confirmed accuracy did I add a second flag that lets it actually act, gated by a 90%+ confidence threshold, rolling out the lowest-risk actions first and the highest-risk one (Not Interested) last, after a dedicated refactor.
+
+Every flag is off by default and is an instant kill switch — flipping it false makes the feature fully inert for that campaign with no deploy needed.
+
+Likely Cross-Questions + Answers
+
+Q: Why build a second classifier instead of reusing the existing 4-level interest classifier from the suggested-reply feature?
+
+They answer different questions. The existing classifier scores an interest gradient (High/Medium/Neutral/Low) for a human to glance at — it's advisory, imprecise-by-design, never drives an action. The Decision Engine needs a routing decision — which of 4 mutually exclusive buckets, because a wrong bucket now triggers a real action (a real message sent, or a real conversation closed). Overloading one classifier to serve both purposes would mean any prompt tweak for one use case risks silently breaking the other. Keeping them fully independent — separate service, separate prompt, intentionally duplicated transcript-building logic rather than shared — meant I could iterate on one without any risk of regressing the other, which had already been live in production for months.
+
+Q: Why shadow mode first instead of just launching with actions on and monitoring for problems?
+
+Because the failure modes aren't symmetric. A false-positive "not interested" auto-dismiss can permanently lose a real, engaged lead — there's no undo once a decline message is sent and the conversation is closed out. Monitoring-after-launch only tells you about damage that already happened. Shadow mode gives you the same accuracy signal — real classifications against real conversations — with the cost of a wrong classification being literally zero, since nothing acts on it. I only greenlit real actions once I'd manually spot-checked shadow-mode output against the actual conversation text and the client had independently reviewed a report and confirmed it looked right.
+
+Q: How did you land on 90% as the confidence threshold, and why not lower it to catch more cases automatically?
+
+That number came directly from the client, not an arbitrary engineering choice — I asked how confident the engine should be before acting, and the answer was "very high, especially at the start; once the system's proven itself we can lower it." There was no exact number given, so 90% was my interpretation of "very high," documented explicitly as an interpretation rather than presented as their literal number — and it's a single constant in the worker, trivially adjustable later. The reasoning for starting high: the cost of a false positive (a lost lead) is much higher than the cost of a false negative (a message just sits in Team Inbox a little longer, which is today's default behavior anyway) — so an asymmetric, conservative threshold is the correct tradeoff until there's a track record to justify loosening it.
+
+Q: You said "continue sequence" was zero-touch but "not interested" wasn't — what does that mean, and why the difference?
+
+"Continue sequence" already had its logic sitting in a clean, reusable controller action, so the worker could call it directly with zero refactoring. "Not interested" was different — its logic lived inline inside the Team Inbox controller's manual-click action, mixed in with session-bound concerns like marking messages read and evicting a cache. Before the worker could safely call it, I had to extract the actual business logic (resolve the campaign status, decide whether to send a decline message or just dismiss) into a standalone service, while deliberately leaving the session-bound pieces in the controller since a background worker has no HTTP session to act on. I verified this extraction very carefully — including confirming, by reading the actual send-message method, that none of my test conversations could trigger a real outbound LinkedIn API call — because this is literally the highest-risk action in the whole feature.
+
+Q: How do you tell the difference in your data between an action a human took and one the engine took automatically?
+
+I added a source field to the existing lead-status-event logging — user_manual for a rep's click, automation for the engine — reusing a value that already existed in the codebase's enum but had never been wired up to anything. The human-click path passes the real user_id; the automated path passes user: nil with source: automation. I verified both paths produce distinguishable audit rows for the exact same underlying action, which matters both for debugging (was this a bad AI call or a rep mistake?) and for eventually answering the client's original "what % is actually automated" question with real numbers instead of an estimate.
+
+Q: What happens if the classifier call fails or times out?
+
+It fails safe, not silent. If the OpenAI call returns nothing after a retry, the worker treats that exactly like a needs_human classification — it logs the failure with an error field for later debugging, but takes no action and leaves the conversation for a rep, which is the same outcome as if the feature didn't exist at all for that message. I also added a single immediate retry inside the shared OpenAI service for transient network timeouts specifically because I hit one during manual testing — confirmed it was transient by retrying the identical call and having it succeed — and made that fix generically, since the existing suggested-reply feature shares the same underlying service and benefits from the same retry.
+
+Q: The client only confirmed 3 specific statuses count as "already closed" — what happened with the ones they didn't confirm, like "Won"?
+
+I was careful not to silently invent scope the client hadn't signed off on — the prompt's example list only contains the exact statuses they confirmed. But because this is an LLM classifying by meaning rather than string-matching a literal list, I found during verification that it still correctly classified a "Won" conversation as dismiss even though "Won" isn't in the prompt anywhere — it reasoned that a closed deal shouldn't get outreach messages either, the same way it did for the confirmed statuses. That's arguably correct behavior, but it's also model generalization the client didn't explicitly approve, so I flagged it back to them as an open question rather than treating it as a bug to suppress or a feature to quietly rely on.
+
+Q: Given a single flag now controls all three actions together, what's the actual blast radius if the classifier is wrong on a campaign that has the flag on?
+
+For continue and dismiss, the blast radius is low — worst case a sequence resumes a bit early, or a conversation gets tucked away that a rep would have tucked away themselves anyway. For not_interested, it's real — a wrong call could send an unwanted decline message or close out an engaged lead. That's exactly why the flag decision was explicit and documented as a risk tradeoff, not something I assumed silently: the client chose one combined flag over three separate ones for simplicity, which I implemented as asked, but I made sure the confidence threshold and shadow-mode validation happened before that flag existed at all, so by the time any campaign could reach that blast radius, the classifier already had a validated track record on real data.
+
+Q: How would you actually measure whether this hits the client's ~75% target?
+
+That's not something you get from a single test — it needs a real rollout period across live campaigns with the audit-trail source field I added, counting what fraction of inbound replies get an automation-sourced resolution versus landing in Team Inbox for a human. I was explicit with the client that 75% was their estimate going in, not a number I'd verified — proving it out is a longer-running rollout-and-measure phase, not something you can claim from dev testing.
