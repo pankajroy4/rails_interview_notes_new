@@ -77,11 +77,11 @@ Approach: fill from the back with two pointers to avoid overwriting — O(m+n) t
 --- Medium ---
 
 3Sum — (Pattern: Sorting + Two Pointers)
-Problem: Given an integer array nums, return all unique triplets [nums[i], nums[j], nums[k]]
+Problem: Given an integer array nums, return all UNIQUE triplets [nums[i], nums[j], nums[k]]
 such that i != j != k and they sum to 0.
 Input:  nums = [-1, 0, 1, 2, -1, -4]
 Output: [[-1, -1, 2], [-1, 0, 1]]
-Explanation: Both triplets sum to zero; duplicates are excluded.
+Explanation: Both triplets sum to zero; duplicates TRIPLETS are excluded.
 Constraints: 3 <= nums.length <= 3000, -10^5 <= nums[i] <= 10^5
 Approach: sort array, fix one element, two-pointer scan for the rest, skip duplicates — O(n^2) time, O(1) extra space
 

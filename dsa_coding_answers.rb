@@ -181,11 +181,11 @@ n = 3
 puts merge(nums1, nums2,m,n).inspect
 
 -----------------------------------------------------------------------------------------------------------------------------------
-7.Given an integer array nums, return all unique triplets [nums[i], nums[j], nums[k]]
+7.Given an integer array nums, return all UNIQUE triplets [nums[i], nums[j], nums[k]]
 such that i != j != k and they sum to 0.
 Input:  nums = [-1, 0, 1, 2, -1, -4]
 Output: [[-1, -1, 2], [-1, 0, 1]]
-Explanation: Both triplets sum to zero; duplicates are excluded.
+Explanation: Both triplets sum to zero; duplicates triplets are excluded.
 
 def unique_triplet(nums)
     nums = nums.sort
@@ -228,3 +228,30 @@ nums = [-1, 0, 1, 2, -1, -4]
 puts unique_triplet(nums).inspect
 
 -----------------------------------------------------------------------------------------------------------------------------------
+8.Given an array with only 0s, 1s, and 2s, sort it in-place in one pass without using a library sort.
+Input:  nums = [2, 0, 2, 1, 1, 0]
+Output: [0, 0, 1, 1, 2, 2]
+
+def sort_color(nums)
+    low = 0
+    mid = 0
+    high = nums.length-1 
+
+    while mid <= high
+        if nums[mid] == 0
+            nums[low], nums[mid] = nums[mid], nums[low]
+            low +=1
+            mid +=1
+        elsif nums[mid] == 1
+            mid +=1
+        else
+            nums[mid], nums[high] = nums[high], nums[mid]
+            high -= 1
+        end
+    end
+
+    return nums
+end
+
+nums = [2, 0, 2, 1, 1, 0]
+puts sort_color(nums).inspect
