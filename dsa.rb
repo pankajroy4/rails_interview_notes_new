@@ -37,6 +37,8 @@ Constraints: 1 <= prices.length <= 10^5, 0 <= prices[i] <= 10^4
 Approach: track min-price-so-far and max-profit-so-far in one pass — O(n) time, O(1) space
 
 Maximum Subarray — (Pattern: Kadanes Algorithm)
+NOTE: "Kadane's Algorithm finds the maximum sum of a contiguous subarray by maintaining the best sum ending at each position and choosing between extending the previous subarray or starting a new one."
+
 Problem: Given an integer array nums, find the contiguous subarray with the largest sum
 and return its sum.
 Input:  nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
@@ -82,6 +84,8 @@ Output: [[-1, -1, 2], [-1, 0, 1]]
 Explanation: Both triplets sum to zero; duplicates are excluded.
 Constraints: 3 <= nums.length <= 3000, -10^5 <= nums[i] <= 10^5
 Approach: sort array, fix one element, two-pointer scan for the rest, skip duplicates — O(n^2) time, O(1) extra space
+
+[-4, -1, -1, 0, 1, 2 ]
 
 Sort Colors — (Pattern: Dutch National Flag)
 Problem: Given an array with only 0s, 1s, and 2s, sort it in-place in one pass without
