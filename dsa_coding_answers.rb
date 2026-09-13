@@ -188,7 +188,7 @@ Output: [[-1, -1, 2], [-1, 0, 1]]
 Explanation: Both triplets sum to zero; duplicates triplets are excluded.
 
 def unique_triplet(nums)
-    nums = nums.sort
+    nums = nums.sort   #Sort the array
     answer = []
 
     (0...nums.length).each do |i|
@@ -255,3 +255,34 @@ end
 
 nums = [2, 0, 2, 1, 1, 0]
 puts sort_color(nums).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
+9.Given an array nums, return an array where each element is the product of all other elements, without using division.
+Input:  nums = [1, 2, 3, 4]
+Output: [24, 12, 8, 6]
+
+def product_of_array(nums)
+    n = nums.length
+    ans = Array.new(n, 1)
+
+    # prefix_pass
+    prefix  = 1
+    nums.each_with_index do |num, i|
+        ans[i] = prefix
+        prefix = prefix*num
+    end 
+
+    # suffix_pass
+    suffix = 1
+    (n-1).downto(0).each do |i|
+        ans[i] = suffix * ans[i]  # store after multiplying with already claculated prefix answers
+        suffix = suffix * nums[i] 
+    end
+
+    return ans
+end
+
+nums = [1, 2, 3, 4]
+puts product_of_array(nums).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
