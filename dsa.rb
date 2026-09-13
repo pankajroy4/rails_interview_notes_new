@@ -1729,6 +1729,505 @@ Approach: BFS/DFS coloring, assign alternating colors, fail if a neighbor alread
 has the same color — O(V+E) time, O(V) space
 
 ===========================================================================================
+31. GREEDY ALGORITHMS (was missing entirely — high frequency, esp. interval scheduling)
+===========================================================================================
+
+--- Easy ---
+
+166.Jump Game — (Pattern: Greedy)
+Problem: Given nums where nums[i] is the max jump length from index i, return true if
+you can reach the last index starting from index 0.
+Input:  nums = [2,3,1,1,4]
+Output: true
+Explanation: Jump 1 step to index 1, then 3 steps to reach the last index.
+Constraints: 1 <= nums.length <= 10^4
+Approach: greedily track the farthest reachable index while scanning left to right,
+fail if current index exceeds it — O(n) time, O(1) space
+
+--- Medium ---
+
+167.Jump Game II — (Pattern: Greedy)
+Problem: Given nums (guaranteed reachable), return the minimum number of jumps needed
+to reach the last index.
+Input:  nums = [2,3,1,1,4]
+Output: 2
+Explanation: Jump 1 step to index 1, then 3 steps to the last index — 2 jumps total.
+Constraints: 1 <= nums.length <= 10^4
+Approach: greedy layer expansion — track current jump's' farthest boundary and the
+farthest reachable overall, increment jumps when boundary is crossed — O(n) time, O(1) space
+
+168.Gas Station — (Pattern: Greedy)
+Problem: Given circular gas[i] and cost[i] arrays, return the starting station index
+from which a car can complete the circuit once, or -1 if impossible (answer is
+unique if it exists).
+Input:  gas = [1,2,3,4,5], cost = [3,4,5,1,2]
+Output: 3
+Explanation: Starting at station 3, the tank never goes negative around the loop.
+Constraints: n == gas.length == cost.length, 1 <= n <= 10^5
+Approach: a solution exists iff sum(gas) >= sum(cost); track running tank total,
+reset the candidate start to i+1 whenever the tank goes negative — O(n) time, O(1) space
+
+169.Meeting Rooms — (Pattern: Greedy / Sorting) — very common Amazon warm-up question
+Problem: Given an array of meeting time intervals, determine if one person could
+attend every meeting (i.e., no two intervals overlap).
+Input:  intervals = [[0,30],[5,10],[15,20]]
+Output: false
+Explanation: [0,30] overlaps both [5,10] and [15,20].
+Constraints: 0 <= intervals.length <= 10^4
+Approach: sort by start time, check that each interval's start >= previous interval's
+end — O(n log n) time, O(1) space
+
+170.Meeting Rooms II — (Pattern: Greedy + Min-Heap) — extremely common Amazon question
+Problem: Given meeting time intervals, return the minimum number of conference rooms
+required so no meeting waits.
+Input:  intervals = [[0,30],[5,10],[15,20]]
+Output: 2
+Explanation: [0,30] and [5,10] need separate rooms; once [5,10] ends, its room can be
+reused for [15,20].
+Constraints: 1 <= intervals.length <= 10^4
+Approach: min-heap of active end times — sort by start, for each meeting pop the heap
+if its earliest end <= current start (reuse a room), then push the current end; heap
+size at the end is the answer. (Equivalent alternative: sort starts and ends
+separately, two-pointer sweep.) — O(n log n) time, O(n) space
+
+--- Advanced ---
+
+171.Task Scheduler — (Pattern: Greedy + Max-Heap / Math)
+Problem: Given a list of CPU tasks and a cooldown n between two same tasks, return
+the minimum number of intervals (including idle slots) needed to finish all tasks.
+Input:  tasks = ["A","A","A","B","B","B"], n = 2
+Output: 8
+Explanation: One valid schedule: A B idle A B idle A B — 8 intervals.
+Constraints: 1 <= tasks.length <= 10^4, 0 <= n <= 100
+Approach: greedily schedule the most frequent remaining task each round (max-heap by
+frequency), or use the closed-form (maxFreq-1)*(n+1) + (count of tasks tied at
+maxFreq), capped below by tasks.length — O(n) time, O(1) space (fixed alphabet)
+
+===========================================================================================
+32. ADDITIONAL HIGH-FREQUENCY GAPS (Heap / Sliding Window / Sorting-Strings)
+===========================================================================================
+
+172.Minimum Size Subarray Sum — (Pattern: Variable Sliding Window)
+Problem: Given an array of positive integers and a target, return the minimal length
+of a contiguous subarray whose sum is >= target; return 0 if no such subarray exists.
+Input:  target = 7, nums = [2,3,1,2,4,3]
+Output: 2
+Explanation: The subarray [4,3] has sum 7, the smallest length achieving >= target.
+Constraints: 1 <= target <= 10^9, 1 <= nums.length <= 10^5
+Approach: variable sliding window — expand right, shrink left while sum >= target,
+track the minimum window length seen — O(n) time, O(1) space
+
+173.K Closest Points to Origin — (Pattern: Max-Heap / Quickselect) — classic Amazon favorite
+Problem: Given an array of points on the X-Y plane and an integer k, return the k
+points closest to the origin (any order).
+Input:  points = [[1,3],[-2,2]], k = 1
+Output: [[-2,2]]
+Explanation: distance(-2,2) = sqrt(8) < distance(1,3) = sqrt(10).
+Constraints: 1 <= k <= points.length <= 10^4
+Approach: max-heap of size k keyed by squared distance (pop the farthest when size
+exceeds k), or Quickselect for average O(n) — O(n log k) time (heap), O(k) space
+
+174.Minimum Cost to Connect Sticks — (Pattern: Min-Heap / Huffman-style) — classic Amazon favorite
+Problem: Given the lengths of sticks, repeatedly connect any two sticks at a cost
+equal to their combined length, until one stick remains; return the minimum total cost.
+Input:  sticks = [2,4,3]
+Output: 14
+Explanation: Connect 2+3 (cost 5) -> sticks [5,4]; connect 5+4 (cost 9); total 5+9=14.
+Constraints: 1 <= sticks.length <= 10^4
+Approach: min-heap — repeatedly pop the two smallest, push their sum, add the sum to
+the running cost — O(n log n) time, O(n) space
+
+175.Reorder Data in Log Files — (Pattern: Custom Comparator / Sorting) — reported Amazon OA question
+Problem: Each log is "identifier content...". Letter-logs (content is words) sort
+lexicographically by content, ties broken by identifier; digit-logs (content is
+digits) keep their original relative order and are placed after all letter-logs.
+Input:  logs = ["dig1 8 1 5 1","let1 art can","dig2 3 6","let2 own kit dig","let3 art zero"]
+Output: ["let1 art can","let3 art zero","let2 own kit dig","dig1 8 1 5 1","dig2 3 6"]
+Explanation: Letter-logs are sorted by content ("art can" < "art zero" < "own kit dig");
+digit-logs stay in input order, appended at the end.
+Constraints: 0 <= logs.length <= 100
+Approach: custom comparator — classify each log as digit/letter, sort with a stable
+sort using (content, identifier) as the key for letter-logs while leaving digit-logs
+in place at the end — O(n log n * L) time, O(n * L) space
+
+===========================================================================================
+33. SORTING ALGORITHMS (was missing entirely — mastery requires implementing these
+    from scratch, not just calling a library sort)
+===========================================================================================
+
+176.Merge Sort — (Pattern: Divide & Conquer)
+Problem: Implement merge sort to sort an array in ascending order from scratch.
+Input:  nums = [5, 2, 3, 1]
+Output: [1, 2, 3, 5]
+Explanation: Recursively split the array in half, sort each half, then merge the two
+sorted halves back together.
+Constraints: 1 <= nums.length <= 5*10^4
+Approach: divide into halves, recurse, merge two sorted halves using an auxiliary
+array — O(n log n) time (all cases), O(n) space; stable sort
+
+177.Quick Sort — (Pattern: Divide & Conquer / Partitioning)
+Problem: Implement quicksort to sort an array in-place from scratch.
+Input:  nums = [5, 2, 3, 1]
+Output: [1, 2, 3, 5]
+Explanation: Pick a pivot, partition elements smaller/larger around it in-place,
+recursively sort each side.
+Constraints: 1 <= nums.length <= 5*10^4
+Approach: Lomuto or Hoare partition scheme around a pivot, recurse on both sides;
+randomize the pivot choice to avoid the worst case on sorted/adversarial input — O(n log n) average / O(n^2) worst time, O(log n) space (recursion stack); not stable
+
+178.Heap Sort — (Pattern: Heap)
+Problem: Implement heap sort using an in-place binary heap.
+Input:  nums = [5, 2, 3, 1]
+Output: [1, 2, 3, 5]
+Explanation: Build a max-heap from the array, then repeatedly swap the root (current
+max) to the end and sift-down the reduced heap.
+Constraints: 1 <= nums.length <= 5*10^4
+Approach: heapify the array into a max-heap in O(n), repeatedly extract the max to
+the end and sift-down — O(n log n) time (all cases), O(1) space; not stable
+
+Discussion — Counting Sort / Radix Sort (Pattern: Non-comparison Sort)
+When the value range is small/bounded (e.g. sorting 0/1/2 as in Sort Colors, or
+sorting ages 0-120), a comparison sort's O(n log n) lower bound doesn't apply —
+counting sort (bucket by value, O(n + k)) or radix sort (sort digit-by-digit, O(d*(n+k)))
+can be faster. Recognize this pattern whenever "the values are bounded by a small k"
+appears in constraints.
+
+Discussion — Choosing a sort: quicksort is fastest in practice (cache-friendly,
+in-place) but worst-case O(n^2) and unstable; merge sort guarantees O(n log n) and is
+stable but needs O(n) extra space (good for linked lists, external sorting); heap
+sort is in-place and worst-case O(n log n) but not stable and worse cache behavior
+than quicksort in practice.
+
+===========================================================================================
+34. PREFIX SUM & DIFFERENCE ARRAY (was implicit only via Q9/Q18 — deserves its own pattern)
+===========================================================================================
+
+179.Range Sum Query - Immutable — (Pattern: Prefix Sum)
+Problem: Given an integer array (that never changes), design a structure to answer
+many sumRange(i, j) queries efficiently.
+Input:  nums = [-2,0,3,-5,2,-1]; sumRange(0,2); sumRange(2,5); sumRange(0,5)
+Output: 1, -1, -3
+Explanation: prefix[i] = sum of nums[0..i-1]; sumRange(i,j) = prefix[j+1] - prefix[i].
+Constraints: 1 <= nums.length <= 10^4, up to 10^4 queries
+Approach: precompute a prefix-sum array once — O(n) preprocessing, O(1) per query, O(n) space
+
+180.Range Sum Query 2D - Immutable — (Pattern: 2D Prefix Sum)
+Problem: Given a 2D matrix (that never changes), design a structure to answer
+sumRegion(r1, c1, r2, c2) queries efficiently.
+Input:  matrix = [[3,0,1,4,2],[5,6,3,2,1],[1,2,0,1,5],[4,1,0,1,7],[1,0,3,0,5]];
+        sumRegion(2,1,4,3)
+Output: 8
+Explanation: A 2D prefix-sum matrix allows any rectangular region's sum to be
+computed' in O(1) via inclusion-exclusion of its four corners.
+Constraints: 1 <= rows, cols <= 200
+Approach: precompute a 2D prefix-sum matrix once — O(rows*cols) preprocessing, O(1)
+per query, O(rows*cols) space
+
+181.Range Update — (Pattern: Difference Array)
+Problem: Given multiple range-increment updates [l, r, val] applied to an initially
+all-zero array of given length, return the final array after all updates.
+Input:  length = 5, updates = [[1,3,2],[2,4,3],[0,2,-2]]
+Output: [-2, 0, 3, 5, 3]
+Explanation: A difference array lets each update apply in O(1) at its boundaries
+(diff[l] += val, diff[r+1] -= val); the final array is the prefix sum of diff.
+Constraints: 1 <= length <= 10^5, up to 10^5 updates
+Approach: apply each update to a difference array in O(1), take one prefix-sum pass
+at the end to recover the final values — O(n + q) time, O(n) space
+
+(See also: Product of Array Except Self, Subarray Sum Equals K — under Arrays/Hashing,
+same Prefix Sum family)
+
+===========================================================================================
+35. STRING PATTERN MATCHING — ADVANCED (was missing — KMP/Rabin-Karp are fundamental
+    algorithms, not just "use built-in substring search")
+===========================================================================================
+
+182.KMP Algorithm (optimal strStr) — (Pattern: KMP / LPS Array)
+Problem: Given text and pattern, find occurrences of pattern in text in O(n+m),
+without re-scanning already-matched characters on a mismatch (unlike Q22 brute force).
+Input:  text = "ababcababcabc", pattern = "abcabc"
+Output: first match at index 7
+Explanation: A precomputed LPS ("longest proper prefix that is also a suffix") array
+tells the pattern pointer exactly how far to fall back on a mismatch, instead of
+restarting from scratch.
+Constraints: 1 <= pattern.length <= text.length <= 10^5
+Approach: build the LPS array for the pattern once (O(m)), then scan the text using
+it to skip redundant comparisons — O(n+m) time, O(m) space
+
+183.Rabin-Karp Algorithm — (Pattern: Rolling Hash)
+Problem: Find occurrences of pattern in text using a rolling hash to compare each
+window in O(1) amortized.
+Input:  text = "abcabcabc", pattern = "cab"
+Output: matches at indices [2, 5]
+Explanation: The rolling hash of each text window is compared against the pattern's
+hash; on a hash match', a direct character comparison confirms it (to rule out a
+hash collision).
+Constraints: 1 <= pattern.length <= text.length <= 10^5
+Approach: compute the pattern's hash and the first window's hash, then slide the
+window by removing the leftmost char's contribution and adding the new right char's
+in O(1) — O(n+m) average time (O(n*m) worst case under heavy collisions), O(1) space
+
+184.Manacher's Algorithm (Longest Palindromic Substring in true O(n)) — (Pattern: Manacher's)
+Problem: Same problem as Q25 (Longest Palindromic Substring), but solved in O(n)
+instead of O(n^2) — relevant once s.length grows past ~10^4.
+Input:  s = "babad"
+Output: "bab" (or "aba")
+Explanation: Transform the string by inserting separators between characters, then
+expand the palindrome radius at each center while reusing previously computed radii
+via the mirror property — avoiding the redundant re-expansion that expand-around-center does.
+Constraints: 1 <= s.length <= 10^5 (where O(n^2) expand-around-center is too slow)
+Approach: maintain the center and right boundary of the rightmost-known palindrome;
+mirror the known radius when the current center is inside it, expand only as needed — O(n) time, O(n) space
+
+===========================================================================================
+36. SEGMENT TREE / FENWICK TREE — RANGE QUERIES (was missing entirely — the key
+    data structure once "immutable" prefix sums (section 34) are not enough)
+===========================================================================================
+
+185.Range Sum Query - Mutable — (Pattern: Fenwick Tree / Binary Indexed Tree)
+Problem: Design a structure supporting update(i, val) and sumRange(i, j) both in
+O(log n) — unlike Q179, the array can change between queries here.
+Input:  nums = [1,3,5]; sumRange(0,2); update(1,2); sumRange(0,2)
+Output: 9, then 8
+Explanation: After updating index 1 from 3 to 2, the range sum reflects the change.
+Constraints: 1 <= nums.length <= 3*10^4, up to 3*10^4 calls
+Approach: Fenwick Tree (Binary Indexed Tree) — each index owns a range determined by
+its lowest set bit; update/query walk the tree by repeatedly adding/subtracting the
+lowest set bit — O(log n) time per update/query, O(n) space
+
+186.Range Minimum Query — (Pattern: Segment Tree)
+Problem: Design a structure supporting update(i, val) and queryMin(i, j) (minimum
+over a range) efficiently, over a mutable array.
+Input:  nums = [2,5,1,4,3]; queryMin(1,3); update(2,10); queryMin(1,3)
+Output: 1, then 4
+Explanation: Each segment-tree node stores an aggregate (here, min) of its range;
+updates/queries touch only O(log n) nodes.
+Constraints: 1 <= nums.length <= 10^5
+Approach: build a segment tree where each node stores an aggregate of its range,
+point-update propagates changes up O(log n) levels, range query combines O(log n)
+relevant nodes — O(n) build, O(log n) per update/query, O(n) space
+(The same template generalizes to sum/max/gcd range queries — only the merge
+function at each node changes.)
+
+===========================================================================================
+37. MATH / NUMBER THEORY (was missing — recurs constantly in OA rounds and as a
+    sub-step inside bigger problems)
+===========================================================================================
+
+187.GCD and LCM — (Pattern: Euclidean Algorithm) — Discussion + example
+Problem: Compute the greatest common divisor and least common multiple of two integers.
+Input:  a = 48, b = 18
+Output: gcd = 6, lcm = 144
+Explanation: gcd(48,18) = 6 via Euclid's algorithm; lcm = a*b/gcd = 864/6 = 144.
+Constraints: 1 <= a, b <= 10^9
+Approach: Euclidean algorithm — gcd(a,b) = gcd(b, a mod b), repeat until b == 0 — O(log(min(a,b))) time, O(1) space'
+
+188.Sieve of Eratosthenes — (Pattern: Prime Sieve)
+Problem: Given n, return all prime numbers less than n.
+Input:  n = 10
+Output: primes = [2, 3, 5, 7]
+Explanation: Starting from 2, mark every multiple of each found prime as composite;
+whatever remains unmarked is prime.
+Constraints: 0 <= n <= 5*10^6
+Approach: boolean sieve array; for each prime p found starting at 2, mark multiples
+of p starting from p*p as composite (smaller multiples are already marked) — O(n log log n) time, O(n) space
+
+189.Modular Exponentiation (Fast Power) — (Pattern: Divide & Conquer)
+Problem: Compute (base^exp) % mod efficiently, where exp can be very large.
+Input:  base = 2, exp = 10, mod = 1000
+Output: 24
+Explanation: 2^10 = 1024, 1024 % 1000 = 24.
+Constraints: exp can be up to 10^9 or larger
+Approach: binary exponentiation — square the base and halve the exponent each step,
+multiply the result whenever the current exponent bit is 1, taking mod after every
+multiplication to prevent overflow — O(log exp) time, O(1) space
+
+===========================================================================================
+38. ADVANCED DYNAMIC PROGRAMMING PATTERNS (section 15 covered the fundamentals —
+    these are the pattern FAMILIES that show up again and again with variations)
+===========================================================================================
+
+190.Maximum Product Subarray — (Pattern: DP, Kadane variant)
+Problem: Given an integer array, find the contiguous subarray with the largest product.
+Input:  nums = [2, 3, -2, 4]
+Output: 6
+Explanation: The subarray [2, 3] has the maximum product, 6.
+Constraints: 1 <= nums.length <= 2*10^4
+Approach: track BOTH the running max and running min product ending at each index
+(a negative number can flip the running min into the new max) — O(n) time, O(1) space
+
+191.Best Time to Buy and Sell Stock II (unlimited transactions) — (Pattern: Greedy/DP)
+Problem: Given prices, maximize profit allowing unlimited buy/sell transactions
+(must sell before buying again, no holding two positions).
+Input:  prices = [7,1,5,3,6,4]
+Output: 7
+Explanation: Buy at 1, sell at 5 (profit 4); buy at 3, sell at 6 (profit 3): total 7.
+Constraints: 1 <= prices.length <= 3*10^4
+Approach: greedily sum every positive day-to-day price difference — O(n) time, O(1) space
+
+192.Best Time to Buy and Sell Stock III / IV (at most k transactions) — (Pattern: 2D DP)
+Problem: Maximize profit with at most k buy/sell transactions (III is the special
+case k=2).
+Input:  k = 2, prices = [3,2,6,5,0,3]
+Output: 7
+Explanation: Buy at 2, sell at 6 (profit 4); buy at 0, sell at 3 (profit 3): total 7.
+Constraints: 0 <= k <= 100, 1 <= prices.length <= 1000
+Approach: dp[t][i] = max profit using at most t transactions through day i, computed
+via a running "best = max(best, dp[t-1][j] - price[j])" term to avoid an O(n) inner
+loop — O(n*k) time, O(k) space
+
+193.Best Time to Buy and Sell Stock with Cooldown / with Transaction Fee — (Pattern: State-Machine DP)
+Problem: Maximize profit with unlimited transactions, but either (a) a mandatory
+1-day cooldown after selling before buying again, or (b) a fixed fee charged per
+transaction.
+Input:  prices = [1,3,2,8,4,9], fee = 2
+Output: 8
+Explanation: Buy at 1 sell at 8 (profit 7 - 2 fee = 5), buy at 4 sell at 9 (profit
+5 - 2 fee = 3): total 8.
+Constraints: 1 <= prices.length <= 5*10^4
+Approach: state-machine DP over "holding" / "not holding" (add a "cooldown" state
+for that variant; subtract the fee on each sell for the fee variant) — O(n) time, O(1) space
+
+194.Longest Palindromic Subsequence — (Pattern: 2D DP — distinct from Longest
+Palindromic SUBSTRING, Q25/Q184; here characters need not be contiguous)
+Problem: Given a string, find the length of the longest subsequence that reads the
+same forwards and backwards.
+Input:  s = "bbbab"
+Output: 4
+Explanation: "bbbb" is a palindromic subsequence of length 4.
+Constraints: 1 <= s.length <= 1000
+Approach: identical recurrence to Longest Common Subsequence(s, reverse(s)); or
+direct interval DP: dp[i][j] = dp[i+1][j-1]+2 if s[i]==s[j] else
+max(dp[i+1][j], dp[i][j-1]) — O(n^2) time, O(n^2) space
+
+195.Palindrome Partitioning II (min cuts) — (Pattern: Interval DP)
+Problem: Given a string, return the minimum number of cuts needed so every resulting
+substring is a palindrome.
+Input:  s = "aab"
+Output: 1
+Explanation: "aa" | "b" requires only 1 cut.
+Constraints: 1 <= s.length <= 2000
+Approach: precompute isPalindrome[i][j] with interval DP, then minCuts[i] =
+min over all j < i with s[j..i] a palindrome of (minCuts[j-1] + 1) — O(n^2) time, O(n^2) space
+
+196.Egg Drop Puzzle — (Pattern: 2D DP, inverted formulation)
+Problem: Given k eggs and n floors, find the minimum number of trials needed in the
+worst case to determine the critical floor (below which eggs survive a drop, at/above
+which they break).
+Input:  k = 2, n = 10
+Output: 4
+Explanation: With 2 eggs and an optimal strategy, 4 trials suffice in the worst case
+to pinpoint the critical floor among 10.
+Constraints: 1 <= k <= 100, 1 <= n <= 10^4
+Approach: instead of the naive dp[eggs][floors] (O(k*n^2)), invert to
+dp[eggs][moves] = max floors distinguishable = dp[eggs-1][moves-1] + dp[eggs][moves-1]
++ 1, find the smallest "moves" where dp[k][moves] >= n — O(k log n) time, O(k log n) space
+
+197.Traveling Salesman Problem (Bitmask DP) — (Pattern: Bitmask DP) — the canonical
+"state = subset of items visited" pattern, foundational for advanced DP mastery
+Problem: Given a distance matrix between n cities, find the minimum cost to visit
+every city exactly once and return to the start.
+Input:  dist = [[0,10,15,20],[10,0,35,25],[15,35,0,30],[20,25,30,0]]
+Output: 80
+Explanation: Route 0->1->3->2->0 costs 10+25+30+15=80, the minimum over all
+permutations of visiting order.
+Constraints: 1 <= n <= 15 (a bitmask over n cities needs 2^n states — this bounds n)
+Approach: dp[mask][i] = min cost having visited exactly the cities in "mask", ending
+at city i; transition tries appending each unvisited city — O(n^2 * 2^n) time, O(n * 2^n) space
+
+===========================================================================================
+39. ADVANCED GRAPH ALGORITHMS (section 24-30 covered the essentials — these round
+    out graph mastery for harder onsite/advanced rounds)
+===========================================================================================
+
+198.Floyd-Warshall (All-Pairs Shortest Path) — (Pattern: DP over graphs)
+Problem: Given a weighted graph (negative edges allowed, no negative cycle), compute
+shortest distances between EVERY pair of nodes at once.
+Input:  n = 4, edges = [[0,1,5],[1,2,1],[2,3,1],[0,3,10]] (directed)
+Output: dist[0][3] = 7  (via 0->1->2->3 = 5+1+1)
+Explanation: Trying every node k as a possible intermediate point relaxes all pairs
+(i,j) via dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]).
+Constraints: 1 <= n <= 400 (the cubic time bounds how large n can be)
+Approach: triple nested loop — outer loop over intermediate node k, inner loops over
+i and j, relaxing distances — O(V^3) time, O(V^2) space
+
+199.Articulation Points and Bridges — (Pattern: DFS + Low-Link, Tarjan-style)
+Problem: Given an undirected graph, find all articulation points (nodes whose
+removal increases the number of connected components) and all bridges (edges whose
+removal disconnects the graph).
+Input:  n = 5, edges = [[0,1],[1,2],[2,0],[1,3],[3,4]]
+Output: articulation points = [1, 3]; bridges = [1,3] and [3,4]
+Explanation: Removing node 1 disconnects {3,4} from {0,2}; removing node 3
+disconnects {4} from the rest.
+Constraints: 1 <= n <= 10^5
+Approach: DFS tracking each node's discovery time and "low-link" value (the lowest
+discovery time reachable via one back-edge from its subtree); a non-root node is an
+articulation point if some child's low-link >= its own discovery time (root needs
+>=2 DFS children instead); an edge (u,v) is a bridge if child v's low-link > u's
+discovery time — O(V+E) time, O(V) space
+
+200.Strongly Connected Components (Kosaraju's / Tarjan's) — (Pattern: DFS-based SCC)
+Problem: Given a directed graph, find all strongly connected components (maximal
+groups of nodes where every node can reach every other node in the group).
+Input:  n = 5, edges = [[0,1],[1,2],[2,0],[2,3],[3,4]]
+Output: SCCs = [[0,1,2], [3], [4]]
+Explanation: 0, 1, 2 form a cycle and are mutually reachable; 3 and 4 are each their
+own singleton SCC.
+Constraints: 1 <= n <= 10^5
+Approach (Kosaraju's): DFS the graph once to get a finishing-time order, reverse all
+edges, DFS again processing nodes in reverse-finish order — each resulting DFS tree
+is exactly one SCC — O(V+E) time, O(V+E) space
+(Tarjan's finds the same answer in a single DFS pass using discovery time + low-link
++ an explicit on-stack marker — worth knowing both.)
+
+===========================================================================================
+40. ADDITIONAL BACKTRACKING & INTERVAL CLASSICS
+===========================================================================================
+
+201.Palindrome Partitioning — (Pattern: Backtracking)
+Problem: Given a string, return all possible ways to partition it such that every
+substring in the partition is a palindrome.
+Input:  s = "aab"
+Output: [["a","a","b"], ["aa","b"]]
+Explanation: Both partitions consist entirely of palindromic substrings.
+Constraints: 1 <= s.length <= 16
+Approach: backtracking — at each position, try every prefix of the remainder that is
+a palindrome, recurse on what is left — O(n * 2^n) worst case time, O(n) space (recursion depth)
+
+202.Sudoku Solver — (Pattern: Backtracking)
+Problem: Given a partially filled 9x9 Sudoku board, fill it so every row, column,
+and 3x3 sub-box contains the digits 1-9 exactly once.
+Input:  board with some cells '.', rest pre-filled per Sudoku rules
+Output: the fully solved board
+Explanation: Backtracking tries each valid digit in the first empty cell found,
+recursing until the board is complete or backtracking out of a dead end.
+Constraints: board is always 9x9, guaranteed to have a unique solution
+Approach: backtracking with row/column/box "digit used" sets for O(1) validity
+checks per placement — O(9^(empty cells)) worst case (heavily pruned in practice), O(1) extra space (fixed-size board)
+
+203.Non-overlapping Intervals (minimum removals) — (Pattern: Greedy / Interval Scheduling)
+Problem: Given a list of intervals, return the minimum number that must be removed
+so the rest are non-overlapping.
+Input:  intervals = [[1,2],[2,3],[3,4],[1,3]]
+Output: 1
+Explanation: Removing [1,3] leaves [1,2],[2,3],[3,4], which don't overlap.
+Constraints: 1 <= intervals.length <= 10^5
+Approach: sort by end time, greedily KEEP an interval if its start >= the last kept
+interval's end, otherwise discard it (the classic activity-selection greedy proof:
+always keep the interval that frees the resource soonest) — O(n log n) time, O(1) space
+
+204.Search a 2D Matrix — (Pattern: Binary Search over a flattened matrix)
+Problem: Given an m x n matrix where each row is sorted ascending and the first
+element of each row is greater than the last element of the previous row, determine
+if a target value exists.
+Input:  matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3
+Output: true
+Explanation: The matrix can be treated as one sorted array of length m*n via the
+index mapping row = mid / n, col = mid % n.
+Constraints: 1 <= m, n <= 100
+Approach: binary search over the range [0, m*n - 1], mapping each mid to (row, col) — O(log(m*n)) time, O(1) space
+
+===========================================================================================
                     PRIORITY SHORTLIST (minimal prep, maximum coverage)
 ===========================================================================================
 If short on time, these ~40 cover the vast majority of top-company rounds:
@@ -1742,6 +2241,13 @@ Arrays / Strings:
 Stack / Queue:
   Valid Parentheses, Next Greater Element / Daily Temperatures, Sliding Window Maximum
 
+Sliding Window:
+  Longest Substring Without Repeating Characters, Minimum Size Subarray Sum,
+  Minimum Window Substring
+
+Greedy:
+  Meeting Rooms II, Jump Game, Gas Station, Task Scheduler
+
 Linked List:
   Reverse Linked List, Linked List Cycle, Merge Two Sorted Lists,
   Merge K Sorted Lists, LRU Cache
@@ -1753,7 +2259,8 @@ Binary Search:
   Classic Binary Search, Search in Rotated Sorted Array
 
 Heap / Trie:
-  Top K Frequent Elements, Kth Largest Element, Implement Trie
+  Top K Frequent Elements, Kth Largest Element, K Closest Points to Origin,
+  Minimum Cost to Connect Sticks, Implement Trie
 
 Dynamic Programming:
   Climbing Stairs, House Robber, Longest Increasing Subsequence, 0/1 Knapsack,
@@ -1766,3 +2273,24 @@ Trees:
 Graphs:
   BFS, DFS, Number of Islands, Clone Graph, Course Schedule (Topological Sort),
   Number of Provinces / Union-Find, Network Delay Time (Dijkstra), Bipartite Graph Check
+
+===========================================================================================
+                    MASTERY EXTRAS (beyond interview minimums — sections 33-40)
+===========================================================================================
+The shortlist above is interview-scoped. For genuine DSA mastery and full pattern
+recognition, also drill these foundational algorithms/patterns — they recur as
+building blocks inside harder problems even when not asked directly:
+
+  Sorting from scratch:      Merge Sort, Quick Sort, Heap Sort (sec 33)
+  Prefix Sum family:         Range Sum Query (1D & 2D), Difference Array (sec 34)
+  String matching:           KMP, Rabin-Karp, Manacher Algorithm (sec 35)
+  Range query structures:    Fenwick Tree (BIT), Segment Tree (sec 36)
+  Number theory:             GCD/LCM (Euclid), Sieve of Eratosthenes, Modular
+                              Exponentiation (sec 37)
+  DP pattern families:       Max Product Subarray, Stock Trading I-IV/Cooldown/Fee,
+                              Longest Palindromic Subsequence, Palindrome
+                              Partitioning II, Egg Drop, Bitmask DP / TSP (sec 38)
+  Advanced graph:            Floyd-Warshall, Articulation Points & Bridges,
+                              Strongly Connected Components (sec 39)
+  Backtracking/Interval:     Sudoku Solver, Palindrome Partitioning, Non-overlapping
+                              Intervals, Search a 2D Matrix (sec 40)
