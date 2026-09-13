@@ -13,6 +13,341 @@ Progression per topic: Easy -> Medium -> Advanced
 Purely conceptual questions (no code) are marked "Discussion" instead of Input/Output.
 
 ===========================================================================================
+                                  PATTERN RECOGNITION
+===========================================================================================
+The single highest-leverage skill in a DSA interview is not knowing 204 solutions — it is
+recognizing, within the first 30 seconds of reading a NEW problem, which of ~30 known
+patterns it is an instance of. This table is that lookup: scan the "Problem Signal" column
+for phrasing that resembles what you are reading, jump to the "Likely Pattern," then to the
+cited question number(s) for a worked example. Use this to drill recognition speed during
+revision — cover the right two columns, read only the signal, and try to name the pattern
+and technique before revealing them.
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                          ARRAYS & TWO POINTERS                                          |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| two numbers sum to target, unsorted array        | Hashing (value -> index)              | Q1           |
+| find/compare from both ends of an array          | Two Pointers                          | Q4, Q10, Q15 |
+| sorted array, remove/dedupe in place             | Two Pointers (slow/fast)              | Q5           |
+| merge two sorted arrays in place                 | Three Pointers (fill from back)       | Q6           |
+| find triplets/quadruplets summing to target      | Sort + Two Pointers                   | Q7           |
+| partition array into 3 fixed values in place     | Dutch National Flag                   | Q8           |
+| running best value while scanning once           | Kadane / One-pass Greedy              | Q2, Q3       |
+| product of all elements except self, no division | Prefix/Suffix Product                 | Q9           |
+| merge/overlap a list of ranges                   | Sort + Sweep                          | Q11, Q12     |
+| rotate array in place by k                       | Reversal Trick                        | Q13          |
+| next lexicographic arrangement                   | Find pivot + swap + reverse suffix    | Q14          |
+| median of two sorted arrays, O(log(m+n))         | Binary Search on partition            | Q16          |
+| element appears more than n/2 times              | Boyer-Moore Voting                    | Q17          |
+| count subarrays with sum == k                    | Prefix Sum + Hashing                  | Q18          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                             SLIDING WINDOW                                              |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| contiguous subarray of FIXED size k, best sum    | Fixed Sliding Window                  | Q80          |
+| contiguous subarray, condition on sum/product    | Variable Sliding Window               | Q82          |
+| smallest subarray with sum >= target             | Shrinking Window                      | Q172         |
+| longest substring without repeating chars        | Sliding Window + Hash Set             | Q24          |
+| smallest window containing all chars of T        | Sliding Window + Need/Have Map        | Q29          |
+| substring is a permutation of another string     | Fixed Window + Frequency Compare      | Q81          |
+| longest substring after replacing <= k chars     | Window shrinks when invalid           | Q83          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                                 STRINGS                                                 |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| reverse or palindrome-check a string in place    | Two Pointers                          | Q19, Q21     |
+| check if two strings are anagrams                | Frequency Count                       | Q20          |
+| group strings by anagram signature               | Hashing (sorted-string key)           | Q23          |
+| longest palindromic substring                    | Expand Around Center / DP             | Q25          |
+| longest palindromic substring, n up to 10^5      | Manacher Algorithm (true O(n))        | Q184         |
+| compress repeated runs of characters             | Two Pointers (write on run end)       | Q26          |
+| parse a string into a number (atoi)              | State-machine Parsing                 | Q27          |
+| is s2 a rotation of s1?                          | Concatenation Trick (s+s)             | Q28          |
+| find first occurrence of pattern in text         | KMP (LPS array)                       | Q182         |
+| find pattern occurrences via hashing             | Rabin-Karp (rolling hash)             | Q183         |
+| match string against pattern with . and *        | 2D DP                                 | Q30          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                         HASHING / FREQUENCY MAP                                         |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| has this value been seen before?                 | Hash Set                              | Q31          |
+| first character that never repeats               | Frequency Map                         | Q32          |
+| consistent one-to-one char mapping               | Two Hash Maps (forward/back)          | Q33          |
+| repeated transform leads to a cycle?             | Hashing / Cycle Detection             | Q34          |
+| duplicate value within a distance k              | Hash Map of last-seen index           | Q35          |
+| k most frequent elements                         | Hashing + Heap / Bucket Sort          | Q36          |
+| longest run of consecutive integers, O(n)        | Hash Set (start only if n-1 absent)   | Q37          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                                  STACK                                                  |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| matching / balanced nested brackets              | Stack                                 | Q38          |
+| O(1) min or max alongside push/pop               | Auxiliary Stack                       | Q39          |
+| next greater/smaller element to the side         | Monotonic Stack                       | Q40, Q41     |
+| evaluate postfix (RPN) expression                | Stack                                 | Q42          |
+| decode a nested encoded string                   | Stack (string, repeat-count pairs)    | Q43          |
+| largest rectangle area under a histogram         | Monotonic Increasing Stack            | Q44          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                              QUEUE / DEQUE                                              |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| build FIFO behavior from two stacks              | Stack/Queue Design                    | Q45          |
+| first negative number in every window            | Deque of indices                      | Q46          |
+| state spreads outward one step per minute        | Multi-source BFS                      | Q47          |
+| max or min of every sliding window               | Monotonic Deque                       | Q48          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                               LINKED LIST                                               |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| reverse a list or a sublist of it                | Pointer Manipulation                  | Q49, Q55     |
+| find the middle node in one pass                 | Fast / Slow Pointers                  | Q50          |
+| detect a cycle, or find where it starts          | Floyd Tortoise and Hare               | Q52, Q53     |
+| remove the nth node from the end, one pass       | Two Pointers with a gap               | Q54          |
+| do two lists intersect at a node?                | Two Pointers (switch heads)           | Q56          |
+| add numbers stored as reversed-digit lists       | Simulation with carry                 | Q57          |
+| deep-copy a list with random pointers            | Hashing / Interweaving clones         | Q58          |
+| merge k sorted linked lists                      | Min-Heap / Divide & Conquer           | Q59          |
+| O(1) get/put with recency-based eviction         | HashMap + Doubly Linked List          | Q60          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                        RECURSION / BACKTRACKING                                         |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| all subsets / combinations / permutations        | Backtracking (include/exclude)        | Q64-Q69      |
+| place items so none conflict (N-Queens)          | Backtracking + Pruning                | Q70          |
+| does a word exist as a path in a grid?           | Backtracking + DFS                    | Q71          |
+| compute x^n fast                                 | Divide & Conquer (fast exponent.)     | Q63          |
+| partition a string so every piece is valid       | Backtracking over prefixes            | Q201         |
+| fill a board so every constraint holds           | Backtracking + constraint sets        | Q202         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                              BINARY SEARCH                                              |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| sorted array, find index / insert position       | Classic Binary Search                 | Q72          |
+| find first AND last occurrence of a value        | Binary Search x2 (L/R bound)          | Q74          |
+| search in a rotated sorted array                 | Modified Binary Search                | Q75, Q76     |
+| find a peak (local max) in an array              | Binary Search on the slope            | Q77          |
+| minimize the max, or find smallest feasible X    | Binary Search on the Answer           | Q78, Q79     |
+| flatten a row/col-sorted matrix and search       | Binary Search (index mapping)         | Q204         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                            BIT MANIPULATION                                             |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| every element appears twice except one           | XOR all elements                      | Q85          |
+| count the number of set bits                     | n & (n-1) clears lowest set bit       | Q86          |
+| check if a number is a power of two              | n & (n-1) == 0                        | Q87          |
+| set-bit counts for every i in 0..n               | DP + Bit Trick                        | Q88          |
+| find the missing number in 0..n                  | XOR / Sum Formula                     | Q89          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                          HEAP / PRIORITY QUEUE                                          |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| kth largest or smallest element                  | Min/Max Heap or Quickselect           | Q90          |
+| running median of a live data stream             | Two Heaps (max-half, min-half)        | Q91          |
+| k closest points / elements to a target          | Max-Heap of size k                    | Q173         |
+| repeatedly combine cheapest two values           | Min-Heap (Huffman-style)              | Q174         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                                  TRIE                                                   |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| prefix search / autocomplete over words          | Trie                                  | Q92          |
+| search a word set where '.' = any char           | Trie + DFS over children              | Q93          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                                 MATRIX                                                  |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| rotate an NxN matrix in place                    | Transpose then Reverse Rows           | Q95          |
+| traverse a matrix boundary inward                | Boundary Simulation                   | Q96          |
+| a 0 must zero its whole row and column           | Use first row/col as markers          | Q97          |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                       DYNAMIC PROGRAMMING - CORE                                        |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| count ways to reach n (steps of 1 or 2)          | 1D DP (Fibonacci-shaped)              | Q98          |
+| max sum picking non-adjacent elements            | 1D DP                                 | Q99          |
+| fewest coins / ways to make an amount            | Unbounded Knapsack                    | Q100, Q101   |
+| longest increasing subsequence                   | 1D DP or O(n log n) w/ tails array    | Q102         |
+| max value under a weight cap, item used once     | 0/1 Knapsack                          | Q103         |
+| count paths through a grid                       | Grid DP                               | Q104         |
+| assign +/- signs to hit a target sum             | DP as Subset Sum                      | Q105         |
+| can a string be split into dictionary words?     | 1D DP                                 | Q106         |
+| split array into two equal-sum halves?           | Subset Sum DP                         | Q107         |
+| longest common subsequence of two strings        | 2D DP                                 | Q108         |
+| min edits to turn one string into another        | 2D DP                                 | Q109         |
+| optimal order to multiply / merge / burst        | Interval DP                           | Q110, Q112   |
+| max profit picking non-overlapping jobs          | DP + Binary Search                    | Q111         |
+| rob a tree without robbing parent+child          | Tree DP (post-order pair)             | Q113         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                 DYNAMIC PROGRAMMING - ADVANCED FAMILIES                                 |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| max PRODUCT subarray (sign flips matter)         | DP tracking running max AND min       | Q190         |
+| unlimited buy/sell stock transactions            | Greedy (sum positive diffs)           | Q191         |
+| at most k buy/sell transactions                  | 2D DP                                 | Q192         |
+| stock trading with cooldown or fee               | State-machine DP                      | Q193         |
+| longest palindromic SUBSEQUENCE (not substr)     | 2D DP (or LCS with reverse)           | Q194         |
+| min cuts so every piece is a palindrome          | Interval DP                           | Q195         |
+| worst-case trials to find a critical floor       | DP inverted: dp[eggs][moves]          | Q196         |
+| visit every city once, min cost, return home     | Bitmask DP (TSP)                      | Q197         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                                 GREEDY                                                  |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| can you reach the end / min jumps to do so       | Greedy (farthest reachable)           | Q166, Q167   |
+| circular route, can you complete the loop?       | Greedy (running tank total)           | Q168         |
+| can one person attend all meetings?              | Sort by start + check overlap         | Q169         |
+| minimum conference rooms needed                  | Sort + Min-Heap of end times          | Q170         |
+| schedule tasks with a cooldown, min time         | Greedy + Max-Heap / formula           | Q171         |
+| min removals so intervals stop overlapping       | Sort by end + Greedy keep             | Q203         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                BINARY TREES - TRAVERSAL, PROPERTIES, BST                                |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| visit nodes in left/root/right order variants    | DFS (recursive or stack)              | Q114, Q115   |
+| visit nodes level by level                       | BFS with a queue                      | Q116, Q117   |
+| deepest or shallowest root-to-leaf path          | DFS or BFS                            | Q118, Q119   |
+| are two trees structurally identical?            | DFS                                   | Q120         |
+| mirror a tree / check tree is symmetric          | DFS / BFS swap or mirror-compare      | Q121, Q122   |
+| is this a valid BST?                             | DFS with min/max bounds               | Q123         |
+| search, insert, or delete in a BST               | BST property descent                  | Q124-Q126    |
+| lowest common ancestor IN a BST                  | BST property descent                  | Q127         |
+| kth smallest element in a BST                    | Inorder Traversal                     | Q128         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                         ADVANCED TREE PROBLEMS                                          |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| lowest common ancestor, general binary tree      | DFS (bubble node up)                  | Q129         |
+| longest path between any two nodes               | DFS post-order (return height)        | Q130         |
+| is the tree height-balanced?                     | DFS post-order, short-circuit -1      | Q131         |
+| root-to-leaf path sums to a target               | DFS subtracting remaining sum         | Q132         |
+| values visible from the right side               | BFS last-per-level / DFS right-first  | Q133         |
+| count nodes with nothing greater on their path   | DFS carrying running max              | Q134         |
+| max path sum between any two nodes               | DFS post-order, track global max      | Q135         |
+| rebuild a tree from two traversal orders         | Recursion + Hashing (find root)       | Q136, Q137   |
+| serialize a tree to a string and back            | DFS/BFS + explicit null markers       | Q138         |
+| flatten a tree into a right-skewed list          | DFS (Morris-style splice)             | Q139         |
+| group tree nodes into vertical columns           | DFS/BFS tracking (row,col) + sort     | Q140         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                    GRAPHS - TRAVERSAL & CONNECTIVITY                                    |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| visit reachable nodes level by level             | BFS                                   | Q141         |
+| go as deep as possible before backtracking       | DFS                                   | Q142         |
+| represent a graph from a list of edges           | Adjacency List / Matrix               | Q143, Q144   |
+| count separate groups of connected nodes         | DFS/BFS or Union-Find                 | Q145, Q146   |
+| count islands / connected land in a grid         | DFS/BFS Flood Fill                    | Q147, Q157   |
+| does an undirected graph contain a cycle?        | DFS w/ parent, or Union-Find          | Q148         |
+| does a directed graph contain a cycle?           | DFS + recursion-stack marker          | Q149         |
+| recolor a connected region in an image           | DFS/BFS Flood Fill                    | Q158         |
+| deep-copy a graph that may contain cycles        | DFS/BFS + Hashing (node->clone)       | Q160         |
+| group elements, then answer 'same group?'        | Union-Find / Disjoint Set             | Q162         |
+| find the one edge that creates a cycle           | Union-Find                            | Q163         |
+| 2-color a graph with no same-color edge          | BFS/DFS Coloring                      | Q165         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                               GRAPHS - ORDERING, SHORTEST PATH & ADVANCED                               |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| valid order respecting dependencies              | Topological Sort (DFS+stack / Kahn)   | Q150, Q151   |
+| can all courses/tasks finish given prereqs?      | Topological Sort / Cycle Check        | Q152, Q153   |
+| shortest #edges from source, unweighted          | BFS                                   | Q154         |
+| shortest path, all weights positive              | Dijkstra (min-heap)                   | Q155         |
+| shortest path, negative weights allowed          | Bellman-Ford                          | Q156         |
+| shortest path in a grid, 8 directions            | BFS                                   | Q159         |
+| shortest word-to-word transformation chain       | BFS over an implicit word graph       | Q161         |
+| min total edge weight connecting all nodes       | Kruskal (sort edges + Union-Find)     | Q164         |
+| shortest path between EVERY pair of nodes        | Floyd-Warshall                        | Q198         |
+| node/edge whose removal disconnects graph        | DFS + Low-Link (Tarjan-style)         | Q199         |
+| maximal mutually-reachable groups, directed      | Kosaraju's / Tarjan's SCC             | Q200         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                              SORTING, PREFIX SUM & RANGE QUERY STRUCTURES                               |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| sort from scratch, need stability guaranteed     | Merge Sort                            | Q176         |
+| sort in place, fastest average case              | Quick Sort                            | Q177         |
+| sort in place, O(n log n) worst case             | Heap Sort                             | Q178         |
+| many range-sum queries, array never changes      | Prefix Sum                            | Q179, Q180   |
+| many range-increment updates, read once at end   | Difference Array                      | Q181         |
+| range-sum queries AND the array is mutable       | Fenwick Tree (BIT)                    | Q185         |
+| range min/max queries AND the array is mutable   | Segment Tree                          | Q186         |
++--------------------------------------------------+---------------------------------------+--------------+
+
++--------------------------------------------------+---------------------------------------+--------------+
+|                                          MATH / NUMBER THEORY                                           |
++--------------------------------------------------+---------------------------------------+--------------+
+| Problem Signal                                   | Likely Pattern                        | Example (Q#) |
++--------------------------------------------------+---------------------------------------+--------------+
+| gcd or lcm of two numbers                        | Euclidean Algorithm                   | Q187         |
+| find all primes below n                          | Sieve of Eratosthenes                 | Q188         |
+| base^exponent mod m, huge exponent               | Modular / Fast Exponentiation         | Q189         |
++--------------------------------------------------+---------------------------------------+--------------+
+
+Note: many problems carry MULTIPLE valid signals at once (e.g. Q18 "count subarrays with
+sum == k" is both an Arrays problem and a Hashing problem — the table lists it under the
+signal that is most diagnostic). When a problem seems to match two rows, that is normal —
+try the cheaper/simpler pattern first, and fall back to the other if it does not fit.
+
+===========================================================================================
 1. ARRAYS
 ===========================================================================================
 
