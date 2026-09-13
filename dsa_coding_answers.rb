@@ -58,6 +58,24 @@ end
 nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
 puts max_subarray(nums)
 
+Note: The above solution will fail when the array contains only negative elements.
+example: nums = [-1]
+         expected_outout =  -1
+         output of above code = 0
+
+    To fix this, initialize both max_sum and current_sum with the first element of the array, and then iterate over the remaining elements.
+
+    def max_subarray(nums)
+        max_sum = nums[0]
+        current_sum = nums[0]
+
+        nums.drop(1).each do |num|
+            current_sum = [current_sum + num, num].max
+            max_sum = [max_sum, current_sum].max
+        end
+
+        max_sum
+    end
 -----------------------------------------------------------------------------------------------------------------------------------
 4.Problem: Given an array nums, move all 0s to the end while maintaining the relative order of the non-zero elements, in-place.
 Input:  nums = [0, 1, 0, 3, 12]
@@ -286,3 +304,35 @@ nums = [1, 2, 3, 4]
 puts product_of_array(nums).inspect
 
 -----------------------------------------------------------------------------------------------------------------------------------
+10.Given heights array, find two lines that together with the x-axis form a
+container holding the most water. Return the max area.
+Input:  height = [1, 8, 6, 2, 5, 4, 8, 3, 7]
+Output: 49
+Explanation: Lines at index 1 (height 8) and index 8 (height 7): area = 7 * min(8,7) = 49
+Constraints: 2 <= height.length <= 10^5, 0 <= height[i] <= 10^4
+Approach: two pointers from both ends, move the shorter side inward — O(n) time, O(1) space
+
+def most_water(height)
+    max_area = 0
+    current_area = 0
+    left = 0 
+    right = height.length-1
+
+    while left < right
+        current_area  = (right-left) * [height[left], height[right]].min
+        max_area = [max_area, current_area].max
+
+        if height[left] < height[right]
+            left +=1     
+        else
+            right -=1
+        end 
+    end
+    max_area
+end
+
+height = [1, 8, 6, 2, 5, 4, 8, 3, 7]
+puts most_water(height)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+11.
