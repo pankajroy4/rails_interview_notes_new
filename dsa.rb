@@ -15,7 +15,7 @@ Purely conceptual questions (no code) are marked "Discussion" instead of Input/O
 ===========================================================================================
                                   PATTERN RECOGNITION
 ===========================================================================================
-The single highest-leverage skill in a DSA interview is not knowing 204 solutions — it is
+The single highest-leverage skill in a DSA interview is not knowing 205 solutions — it is
 recognizing, within the first 30 seconds of reading a NEW problem, which of ~30 known
 patterns it is an instance of. This table is that lookup: scan the "Problem Signal" column
 for phrasing that resembles what you are reading, jump to the "Likely Pattern," then to the
@@ -245,6 +245,7 @@ and technique before revealing them.
 | minimum conference rooms needed                  | Sort + Min-Heap of end times          | Q170         |
 | schedule tasks with a cooldown, min time         | Greedy + Max-Heap / formula           | Q171         |
 | min removals so intervals stop overlapping       | Sort by end + Greedy keep             | Q203         |
+| make correct change with only 3 bill values      | Greedy (track small-bill counts)      | Q205         |
 +--------------------------------------------------+---------------------------------------+--------------+
 
 +--------------------------------------------------+---------------------------------------+--------------+
@@ -449,7 +450,7 @@ Explanation: Lines at index 1 (height 8) and index 8 (height 7): area = 7 * min(
 Constraints: 2 <= height.length <= 10^5, 0 <= height[i] <= 10^4
 Approach: two pointers from both ends, move the shorter side inward — O(n) time, O(1) space
 
-11.Merge Intervals — (Pattern: Sort + Sweep)
+11.Merge Intervals — (Pattern: Sort + Sweep) / Greedy
 Problem: Given an array of intervals, merge all overlapping intervals and return
 the non-overlapping intervals covering all input ranges.
 Input:  intervals = [[1,3],[2,6],[8,10],[15,18]]
@@ -2079,6 +2080,21 @@ Constraints: 1 <= nums.length <= 10^4
 Approach: greedily track the farthest reachable index while scanning left to right,
 fail if current index exceeds it — O(n) time, O(1) space
 
+205.Lemonade Change — (Pattern: Greedy)
+Problem: Each lemonade costs $5. Customers pay with a $5, $10, or $20 bill, one at a
+time and in order; you start with no change. Return true if you can give every
+customer the correct change.
+Input:  bills = [5, 5, 5, 10, 20]
+Output: true
+Explanation: Collect three $5s from the first three customers. The $10 customer gets
+one $5 back. The $20 customer gets a $10 + a $5 back (or three $5s) — either way,
+correct change is available at every step.
+Constraints: 1 <= bills.length <= 10^5, bills[i] is 5, 10, or 20
+Approach: greedy — track only counts of $5s and $10s held (never need $20s to make
+change); a $10 bill requires one $5 in hand; a $20 bill is best paid with a $10 + a $5
+if available (save $5s, since they are the only bill flexible enough to break a $10),
+otherwise three $5s — O(n) time, O(1) space
+
 --- Medium ---
 
 167.Jump Game II — (Pattern: Greedy)
@@ -2137,6 +2153,9 @@ Constraints: 1 <= tasks.length <= 10^4, 0 <= n <= 100
 Approach: greedily schedule the most frequent remaining task each round (max-heap by
 frequency), or use the closed-form (maxFreq-1)*(n+1) + (count of tasks tied at
 maxFreq), capped below by tasks.length — O(n) time, O(1) space (fixed alphabet)
+
+Non-overlapping Intervals (minimum removals) — see Backtracking & Interval Classics
+section (sec 40) — same Greedy / Interval Scheduling pattern as Meeting Rooms above
 
 ===========================================================================================
 32. ADDITIONAL HIGH-FREQUENCY GAPS (Heap / Sliding Window / Sorting-Strings)
@@ -2629,3 +2648,125 @@ building blocks inside harder problems even when not asked directly:
                               Strongly Connected Components (sec 39)
   Backtracking/Interval:     Sudoku Solver, Palindrome Partitioning, Non-overlapping
                               Intervals, Search a 2D Matrix (sec 40)
+
+===========================================================================================
+                    DSA MASTER PATTERN MAP (one-page mind-map view)
+===========================================================================================
+Transcribed from the handwritten notebook version of this same map — same branches, same
+groupings, just typed out so it stays legible and versioned alongside the rest of this file.
+Array and String are merged into one branch below because in the original they both arrow
+into the same four patterns (Two Pointers, Sliding Window, Kadane, Binary Search Based) —
+that's not a simplification of meaning, it's exactly what the crossing arrows meant: these
+patterns are shared between the two topics, not owned by either one alone.
+
+Use this the way you would use the notebook page: as a 10-second "where does this problem live"
+check before diving into the Pattern Recognition table (top of file) for the precise signal,
+or into the numbered section itself for the full worked problems.
+
+DSA
+│
+├── ARRAY & STRING  (share the same core patterns — see note above)
+│   │
+│   ├── Two Pointers
+│   │   ├── Opposite Ends            (converge from both sides — Q10, Q15, Q21)
+│   │   ├── Same Direction           (slow/fast, read/write — Q5, Q26)
+│   │   └── Dutch National Flag      (3-way in-place partition — Q8)
+│   │
+│   ├── Sliding Window
+│   │   ├── Fixed Size               (window length never changes — Q80, Q81)
+│   │   └── Variable Size
+│   │       ├── Expand / Shrink      (grow right, shrink left on violation — Q24, Q29, Q172)
+│   │       └── Monotonic            (deque keeps window max/min — Q48)
+│   │
+│   ├── Kadane Algorithm           (best running sum/product — Q3, Q190)
+│   │
+│   └── Binary Search Based
+│       ├── On Index                 (classic sorted-array search — Q72, Q74-Q77)
+│       └── On Answer                (binary search the answer space — Q78, Q79)
+│
+├── HASHING
+│   ├── Frequency Based              (counts/anagrams — Q20, Q23, Q36)
+│   ├── Lookup Based                 (seen-before checks — Q1, Q31, Q35)
+│   ├── Set Based                    (membership, sequences — Q37)
+│   └── Index / Grouping             (value -> position/group — Q18, Q23)
+│
+├── STACK
+│   ├── Monotonic Stack              (Q40, Q41, Q44)
+│   ├── Nearest Element              (next greater/smaller — Q40, Q41)
+│   ├── Range / Span                 (largest rectangle, span queries — Q44)
+│   ├── Min / Max Tracking           (auxiliary stack — Q39)
+│   └── Expression Evaluation        (RPN, nested decode — Q42, Q43)
+│
+├── QUEUE
+│   ├── Level-order Processing       (BFS layer by layer — Q116, Q117)
+│   ├── Deque                        (both-end access — Q46, Q48)
+│   └── FIFO                         (Q45)
+│
+├── LINKED LIST
+│   ├── Fast / Slow Pointers         (middle, cycle detection — Q50, Q52, Q53)
+│   ├── Cycle Detection              (Floyd — Q52, Q53)
+│   ├── Reversal                     (whole list or sublist — Q49, Q55)
+│   └── Merge Lists                  (Q51, Q59)
+│
+├── TREE
+│   ├── Traversal
+│   │   ├── DFS                      (in/pre/postorder — Q114, Q115)
+│   │   └── BFS                      (level order — Q116, Q117)
+│   ├── Path
+│   │   ├── Max Sum                  (Q135)
+│   │   └── Height / Depth           (Q118, Q119, Q130, Q131)
+│   └── BST  (specialization of Tree — property-driven descent)
+│       └── search / insert / delete / kth-smallest / LCA — Q123-Q128
+│
+├── RECURSION
+│   ├── Exploration -> Backtracking  (subsets, permutations, N-Queens — Q64-Q71, Q201, Q202)
+│   └── Divide & Conquer
+│       ├── Merge Sort               (Q176)
+│       ├── Kth Largest              (quickselect — Q90)
+│       └── Count Problems           (count-based recursive splits)
+│
+├── HEAP
+│   ├── Top / Kth Element            (Q90, Q173)
+│   ├── Greedy + Heap                (Q170, Q171, Q174)
+│   └── K-way Merge                  (Q59)
+│
+├── GRAPH
+│   ├── Traversal
+│   │   ├── BFS                      (Q141, Q154)
+│   │   └── DFS                      (Q142)
+│   ├── Cycle Detection              (Q148, Q149)
+│   ├── Topological Sort             (Q150-Q153)
+│   ├── Shortest Path                (BFS/Dijkstra/Bellman-Ford/Floyd-Warshall — Q154-Q156, Q198)
+│   └── Spanning Tree                (Kruskal / Union-Find — Q164)
+│
+├── TRIE
+│   ├── Prefix Based                 (autocomplete, word search — Q92, Q93)
+│   └── Bitwise Trie                 (max-XOR-pair style problems — not yet a full worked
+│                                      problem in this file; flagged here for later depth)
+│
+├── DYNAMIC PROGRAMMING
+│   ├── Core
+│   │   ├── 1D                       (Q98, Q99, Q102)
+│   │   └── 2D                       (Q108, Q109, Q194)
+│   ├── Digit DP                     (not yet a full worked problem in this file; flagged
+│   │                                  here for later depth)
+│   ├── Transition Style
+│   │   ├── Linear DP                (dp[i] depends on a few prior dp[j] — Q98-Q102)
+│   │   └── Grid DP                  (Q104)
+│   ├── Pattern
+│   │   ├── Knapsack                 (0/1 and Unbounded — Q100, Q101, Q103, Q107)
+│   │   └── Interval DP              (Q110, Q112, Q195)
+│   └── Approach
+│       ├── Memoization              (top-down, cache recursive calls)
+│       └── Tabulation               (bottom-up, fill a table iteratively)
+│
+├── GREEDY
+│   ├── Interval Scheduling          (Q169, Q170, Q203)
+│   ├── Task Scheduling              (Q171)
+│   ├── Huffman-style                (repeatedly combine cheapest two — Q174)
+│   ├── Merge Cost                   (Q174)
+│   └── Simulation / Running State   (track a running resource, e.g. change on hand — Q205)
+│
+└── BIT MANIPULATION
+    ├── Core: XOR / Bit Tricks       (Q85-Q89)
+    └── Usage: Subsets via Bitmask   (bitmask as a subset representation — Q64, Q197)
