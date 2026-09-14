@@ -335,4 +335,27 @@ height = [1, 8, 6, 2, 5, 4, 8, 3, 7]
 puts most_water(height)
 
 -----------------------------------------------------------------------------------------------------------------------------------
-11.
+11.Given an array of intervals, merge all overlapping intervals and return the non-overlapping intervals covering all input ranges.
+Input:  intervals = [[1,3],[2,6],[8,10],[15,18]]
+Output: [[1,6],[8,10],[15,18]]
+
+def merge_overlap(intervals)
+    intervals = intervals.sort_by { |interval| interval[0] }
+
+    ans = [intervals[0]]
+
+    intervals[1..].each do |current|
+        previous = ans[-1] # last element (an arry) of ans. NOTE: This is reference, so any change in previous array, will be reflected in ans array
+
+        if current[0] <= previous[1]
+            previous[1] = [previous[1], current[1]].max
+        else
+            ans << current
+        end
+    end
+    ans
+end
+
+intervals = [[1,3],[2,6],[8,10],[15,18]] 
+
+puts merge_overlap(intervals).inspect
