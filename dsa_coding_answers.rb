@@ -359,3 +359,103 @@ end
 intervals = [[1,3],[2,6],[8,10],[15,18]] 
 
 puts merge_overlap(intervals).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
+12. Given a sorted, non-overlapping list of intervals and a new interval, insert it and merge if necessary. Return the resulting list.
+
+Input:  intervals = [[1,3],[6,9]], newInterval = [2,5]
+Output: [[1,5],[6,9]]
+Explanation: [2,5] overlaps [1,3], merges into [1,5]; [6,9] stays separate.
+Constraints: 0 <= intervals.length <= 10^4
+
+def insert_interval(intervals, newInterval)
+  ans = []
+
+  intervals.each do |interval|
+    # Current interval is completely before newInterval
+    if interval[1] < newInterval[0]
+      ans << interval
+
+    # Current interval is completely after newInterval
+    elsif interval[0] > newInterval[1]
+      ans << newInterval
+      newInterval = interval   #"Hum newInterval ko continuously update karte hain
+
+    # Overlapping intervals → merge
+    else
+      newInterval[0] = [newInterval[0], interval[0]].min
+      newInterval[1] = [newInterval[1], interval[1]].max
+    end
+  end
+
+   #"Hum newInterval ko continuously update karte hain, aur appropriate time par ans mein insert kar dete hain; end mein jo last newInterval bachta hai usko bhi insert kar dete hain."
+  ans << newInterval
+  ans
+end
+
+intervals = [[1, 3], [6, 9]]
+newInterval = [2, 5]
+
+puts insert_interval(intervals, newInterval).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
+13.Given an array nums, rotate it to the right by k steps, in-place.
+Input:  nums = [1,2,3,4,5,6,7], k = 3
+Output: [5,6,7,1,2,3,4]
+
+def rotate_array(nums, k)
+    n = nums.length
+    k = k%n
+
+    nums.reverse!  #1. Reverse the full array!
+    nums[0...k] = nums[0...k].reverse #2. Reverse the first k element
+    nums[k...n] = nums[k...n].reverse #3. Rverse the rest remaining element
+
+    nums
+end
+
+nums = [1,2,3,4,5,6,7]
+k = 3
+puts rotate_array(nums, k).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
+14.Rearrange numbers into the lexicographically next greater permutation. If none exists, rearrange to the lowest possible order (sorted ascending).
+Input:  nums = [1, 2, 3]
+Output: [1, 3, 2]
+
+
+def fun(nums)
+    pivot_index = -1
+    n = nums.length-2
+
+    n.downto(0).each do |i|
+        if nums[i]< nums[i+1]
+            pivot_index = i
+            break
+        end
+    end
+
+    return nums.reverse! if pivot_index == -1
+
+    swap_index = -1
+
+    (nums.length-1).downto(pivot_index+1).each do |i|
+        if nums[i]> nums[pivot_index]
+            swap_index = i
+            break
+        end
+    end
+
+    nums[pivot_index], nums[swap_index] = nums[swap_index], nums[pivot_index]
+
+    nums[pivot_index+1..] = nums[pivot_index+1..].reverse
+
+    return nums
+
+end
+
+nums = [1, 2, 3]
+puts fun(nums).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
+15.

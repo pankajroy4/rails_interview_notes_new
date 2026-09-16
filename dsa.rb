@@ -483,7 +483,9 @@ Input:  nums = [1, 2, 3]
 Output: [1, 3, 2]
 Explanation: The next permutation after [1,2,3] is [1,3,2].
 Constraints: 1 <= nums.length <= 100
-Approach: find rightmost ascent, swap with next-larger suffix element, reverse suffix — O(n) time, O(1) space
+Approach: find rightmost ascent, swap with next-larger suffix element, reverse suffix — O(n) time, O(1) space.
+
+Next permutation (agla dictionary order) nikalne ka seedha sa funda ye hai: Array ko peeche se (right to left) check karke pehla aisa number (Breakpoint) dhundo jo apne right wale se chhota ho. Phir dubara peeche se hi ek aisa number dhundo jo is Breakpoint se "just bada" ho, aur dono ko aapas mein Swap kar do. Swap ke baad, Breakpoint ke aage ka bacha hua hissa (suffix) hamesha apne sabse bade (descending) order mein hi rehta hai, isliye minimum possible agla sequence banane ke liye us bache hue hisse ko seedha Reverse kar do. (Bonus point: Agar shuru mein koi breakpoint na mile, matlab number already maximum hai, toh bina kuch soche poore array ko reverse kar do).
 
 --- Advanced ---
 
