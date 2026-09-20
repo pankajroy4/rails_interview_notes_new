@@ -117,7 +117,7 @@ def remove_duplicates(nums)
         j+=1  
     end
 
-    return nums.slice(0,i).length
+    return nums.slice(0,i).length # or simply return i+1
 end
 
 nums = [1, 1, 2, 2, 3]
@@ -458,4 +458,114 @@ nums = [1, 2, 3]
 puts fun(nums).inspect
 
 -----------------------------------------------------------------------------------------------------------------------------------
-15.
+19.Reverse a character array in-place without using extra space or built-ins.
+Input:  s = ['h','e','l','l','o']
+Output: ['o','l','l','e','h']
+
+def reverse_string(s)
+    i = 0
+    j = s.length-1
+
+    while i<j
+        s[i], s[j] = s[j], s[i]
+        i+=1
+        j-=1
+    end
+    s
+end
+
+s = ['h','e','l','l','o']
+puts reverse_string(s).inspect
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+20.Given two strings s and t, return true if t is an anagram of s.
+Input:  s = "anagram", t = "nagaram"
+Output: true
+
+def is_anagram?(s, t)
+  return false if s.length != t.length
+
+  count = Hash.new(0)
+
+  s.each_char do |char|
+    count[char] += 1
+  end
+
+  t.each_char do |char|
+    count[char] -= 1
+  end
+
+  count.values.all?(&:zero?)
+end
+
+s = "anagram" 
+t = "nagaram"
+puts is_anagram?(s,t)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+21.Given a string s, check if it is a palindrome after converting to lowercase and removing non-alphanumeric characters.
+Input:  s = "A man, a plan, a canal: Panama"
+Output: true
+Explanation: Cleaned string "amanaplanacanalpanama" reads the same forwards and backwards.
+
+def is_palindrome?(str)
+    return true if str.length == 0
+
+    i=0
+    j=str.length-1
+
+    while i<j
+        while str[i].downcase.ord < 97 || str[i].downcase.ord > 122
+            i+=1
+        end
+
+        while str[j].downcase.ord < 97 || str[j].downcase.ord > 122
+            j-=1
+        end
+
+        return false if str[i].downcase != str[j].downcase
+        i+=1
+        j-=1
+    end
+
+    true
+end
+
+str = "A man, a plan, a canal: Panama"
+puts is_palindrome?(str)
+
+# ----------- More clean solution -------------------
+
+def alphabet?(char)
+  char.downcase.ord.between?(97, 122)
+end
+
+def is_palindrome?(str)
+    return true if str.length == 0
+
+    i=0
+    j=str.length-1
+
+    while i<j
+        while !alphabet?(str[i])
+            i+=1
+        end
+
+        while !alphabet?(str[j])
+            j-=1
+        end
+
+        return false if str[i].downcase != str[j].downcase
+        i+=1
+        j-=1
+    end
+
+    true
+end
+
+str = "A man, a plan, a canal: Panama"
+puts is_palindrome?(str)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+22.
