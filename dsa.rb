@@ -562,7 +562,7 @@ Input:  haystack = "sadbutsad", needle = "sad"
 Output: 0
 Explanation: "sad" first occurs at index 0.
 Constraints: 1 <= haystack.length, needle.length <= 10^4
-Approach: sliding window / brute force or KMP for optimal — O(n+m) time with KMP, O(m) space
+Approach: Brute-force substring matching using a fixed-size window / Brute-force or KMP for optimal — O(n+m) time with KMP, O(m) space
 
 --- Medium ---
 
@@ -2298,7 +2298,7 @@ same Prefix Sum family)
     algorithms, not just "use built-in substring search")
 ===========================================================================================
 
-182.KMP Algorithm (optimal strStr) — (Pattern: KMP / LPS Array)
+182.KMP Algorithm (optimal strStr) — (Pattern: KMP / LPS Array - Longest Proper Prefix Suffix.)
 Problem: Given text and pattern, find occurrences of pattern in text in O(n+m),
 without re-scanning already-matched characters on a mismatch (unlike Q22 brute force).
 Input:  text = "ababcababcabc", pattern = "abcabc"
@@ -2334,6 +2334,26 @@ via the mirror property — avoiding the redundant re-expansion that expand-arou
 Constraints: 1 <= s.length <= 10^5 (where O(n^2) expand-around-center is too slow)
 Approach: maintain the center and right boundary of the rightmost-known palindrome;
 mirror the known radius when the current center is inside it, expand only as needed — O(n) time, O(n) space
+
+185. Z Algorithm (Linear-time Pattern Matching) — (Pattern: Z Array / Z-Function)
+
+Problem: Given a text and pattern, find occurrences of the pattern in the text in O(n+m)
+using the Z-function, which computes how many characters from each position match the
+prefix of the combined string.
+Input:  text = "ababcababcabc", pattern = "abcabc"
+Output: first match at index 7
+Explanation: Combine the pattern and text with a separator:
+"abcabc#ababcababcabc"
+The Z array stores, for every position, the length of the longest substring starting
+there that matches the prefix of the combined string. Whenever Z[i] == pattern.length,
+the pattern occurs in the text at index i - pattern.length - 1.
+Constraints: 1 <= pattern.length <= text.length <= 10^5
+Approach: Build the combined string pattern + separator + text, then compute its Z array
+in O(n+m) using a [left, right] window representing the rightmost substring that matches
+the prefix. Reuse previously computed Z values whenever the current position lies inside
+this window, expanding only when necessary.
+Time: O(n+m)
+Space: O(n+m)
 
 ===========================================================================================
 36. SEGMENT TREE / FENWICK TREE — RANGE QUERIES (was missing entirely — the key
