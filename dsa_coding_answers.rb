@@ -568,4 +568,32 @@ str = "A man, a plan, a canal: Panama"
 puts is_palindrome?(str)
 
 -----------------------------------------------------------------------------------------------------------------------------------
-22.
+22.Given haystack and needle strings, return the index of the first occurrence of
+needle in haystack, or -1 if not found.
+Input:  haystack = "sadbutsad", needle = "sad"
+Output: 0
+
+Brute-force implementation:
+
+def implement_str(haystack, needle)
+    n = needle.length
+
+    left = 0
+    right = n-1
+
+    while right < haystack.length
+        if haystack[left..right] == needle
+            return left
+        else
+            left+=1
+            right+=1
+        end
+    end
+
+    return -1
+end
+
+
+haystack = "sadbutsad"
+needle = "pad"
+puts implement_str(haystack, needle)
