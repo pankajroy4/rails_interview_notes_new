@@ -573,7 +573,7 @@ needle in haystack, or -1 if not found.
 Input:  haystack = "sadbutsad", needle = "sad"
 Output: 0
 
-Brute-force implementation:
+# Brute-force implementation 1:
 
 def implement_str(haystack, needle)
     n = needle.length
@@ -596,4 +596,55 @@ end
 
 haystack = "sadbutsad"
 needle = "pad"
+puts implement_str(haystack, needle)
+
+# Brute-force implementation 2:
+
+def implement_str(haystack, needle)
+    i=0
+    # atleast needle ki length jitna string availabe ho haystack me, whi tak loop krenge. Matlab jis index ke baad niddle fit hi nahi hoga uske aage loop krne ka koi matlab nahi hai.
+    while i <= haystack.length - needle.length
+        j = i
+        k = 0
+
+        while k < needle.length
+            if haystack[j] != needle[k]
+                break
+            end
+            j+=1
+            k+=1
+        end
+
+        return i if k == needle.length
+        i+=1
+    end
+    -1
+end
+
+haystack = "sadbutsad"
+needle = "but"
+puts implement_str(haystack, needle)
+
+# Brute-force implementation 3:
+
+def implement_str(haystack, needle)
+    i=0
+    while i <= haystack.length - needle.length
+        j = 0
+
+        while j < needle.length
+            if haystack[i+j] != needle[j]
+                break
+            end
+            j+=1
+        end
+
+        return i if j == needle.length
+        i+=1
+    end
+    -1
+end
+
+haystack = "sadbutsad"
+needle = "but"
 puts implement_str(haystack, needle)
