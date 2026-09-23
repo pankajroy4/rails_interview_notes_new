@@ -509,6 +509,7 @@ Input:  s = "A man, a plan, a canal: Panama"
 Output: true
 Explanation: Cleaned string "amanaplanacanalpanama" reads the same forwards and backwards.
 
+# This will fail if string is alphanumeric
 def is_palindrome?(str)
     return true if str.length == 0
 
@@ -516,11 +517,11 @@ def is_palindrome?(str)
     j=str.length-1
 
     while i<j
-        while str[i].downcase.ord < 97 || str[i].downcase.ord > 122
+        while i<j && ( str[i].downcase.ord < 97 || str[i].downcase.ord > 122)
             i+=1
         end
 
-        while str[j].downcase.ord < 97 || str[j].downcase.ord > 122
+        while i< j && ( str[j].downcase.ord < 97 || str[j].downcase.ord > 122 )
             j-=1
         end
 
@@ -537,31 +538,29 @@ puts is_palindrome?(str)
 
 # ----------- More clean solution -------------------
 
-def alphabet?(char)
-  char.downcase.ord.between?(97, 122)
-end
-
 def is_palindrome?(str)
-    return true if str.length == 0
+    i = 0
+    j = str.length - 1
 
-    i=0
-    j=str.length-1
-
-    while i<j
-        while !alphabet?(str[i])
-            i+=1
+    while i < j
+        while i < j && !alphanumeric?(str[i])
+            i += 1
         end
 
-        while !alphabet?(str[j])
-            j-=1
+        while i < j && !alphanumeric?(str[j])
+            j -= 1
         end
 
         return false if str[i].downcase != str[j].downcase
-        i+=1
-        j-=1
+        i += 1
+        j -= 1
     end
-
     true
+end
+
+def alphanumeric?(char)
+    ascii = char.downcase.ord
+    (ascii >= 97 && ascii <= 122) || (ascii >= 48 && ascii <= 57)
 end
 
 str = "A man, a plan, a canal: Panama"
@@ -648,3 +647,28 @@ end
 haystack = "sadbutsad"
 needle = "but"
 puts implement_str(haystack, needle)
+
+------------------------------------------
+
+def generate_lps_array(str)
+    lps = []
+    lps[0] = 0
+
+    i=0
+    j=1
+
+    while j<str.length
+        if str[i] == str[j]
+            lps[j] = lps[i]+1
+            i+=1
+            j+=1
+        else
+
+        end
+    end
+
+    return lps
+end
+
+str = "aababbaa"
+puts generate_lps_array(str)
