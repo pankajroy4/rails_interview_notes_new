@@ -648,7 +648,7 @@ haystack = "sadbutsad"
 needle = "but"
 puts implement_str(haystack, needle)
 
-------------------------------------------
+# Optimised Implementation using LPS and KMP algo:
 
 def generate_lps_array(str)
     lps = []
@@ -659,16 +659,54 @@ def generate_lps_array(str)
 
     while j<str.length
         if str[i] == str[j]
-            lps[j] = lps[i]+1
+            lps[j] = i+1
             i+=1
             j+=1
         else
-
+            if i == 0
+                lps[j] = 0
+                j+=1
+            else
+                i = lps[i-1]
+            end
         end
     end
 
     return lps
 end
 
-str = "aababbaa"
-puts generate_lps_array(str)
+
+def implement_str(haystack, needle)
+    lps = generate_lps_array(needle)
+ 
+    i= 0
+    j = 0
+
+    while i < haystack.length
+        
+        if haystack[i] == needle[j]
+            i+=1
+            j+=1
+        else
+            if  j == 0 
+                i+=1
+            else
+                j = lps[j-1]
+            end
+        end
+
+        return i-j if j == needle.length
+    end
+
+    -1
+end
+
+puts implement_str("sadbutsad", "but") # => 3
+puts implement_str("hello", "ll") # => 2
+puts implement_str("aaaaa", "aaa") # => 0
+puts implement_str("abc", "xyz") # => -1
+puts implement_str("abc", "abcd") # => -1
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+23.
