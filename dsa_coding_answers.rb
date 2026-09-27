@@ -799,7 +799,7 @@ def longest_substring(s)
 
     while right<s.length
         c = s[right]
-        if hash.key?(c) && left < hash[c]  # left pointer never goes back
+        if hash.key?(c) && left <= hash[c]  # left pointer never goes back
             left = hash[c]+1
         end
 
