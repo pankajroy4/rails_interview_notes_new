@@ -487,6 +487,13 @@ Approach: find rightmost ascent, swap with next-larger suffix element, reverse s
 
 Next permutation (agla dictionary order) nikalne ka seedha sa funda ye hai: Array ko peeche se (right to left) check karke pehla aisa number (Breakpoint) dhundo jo apne right wale se chhota ho. Phir dubara peeche se hi ek aisa number dhundo jo is Breakpoint se "just bada" ho, aur dono ko aapas mein Swap kar do. Swap ke baad, Breakpoint ke aage ka bacha hua hissa (suffix) hamesha apne sabse bade (descending) order mein hi rehta hai, isliye minimum possible agla sequence banane ke liye us bache hue hisse ko seedha Reverse kar do. (Bonus point: Agar shuru mein koi breakpoint na mile, matlab number already maximum hai, toh bina kuch soche poore array ko reverse kar do).
 
+14.Find All Duplicates in an Array — (Pattern: Index Marking / Negative Marking)
+Problem:Given an integer array nums of length n where all the integers of nums are in the range [1, n] and each integer appears at most twice, return an array of all the integers that appears twice.
+You must write an algorithm that runs in O(n) time and uses only constant auxiliary space, excluding the space needed to store the output
+Input: nums = [4,3,2,7,8,2,3,1]
+Output: [2,3]
+Approach: Use each number as an array index and mark the corresponding position as negative. If the position is already negative, the number is a duplicate — O(n) time, O(1) extra space (excluding the output array).
+
 --- Advanced ---
 
 15.Trapping Rain Water — (Pattern: Two Pointers / Prefix Max)

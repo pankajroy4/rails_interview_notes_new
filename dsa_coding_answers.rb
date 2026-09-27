@@ -458,6 +458,30 @@ nums = [1, 2, 3]
 puts fun(nums).inspect
 
 -----------------------------------------------------------------------------------------------------------------------------------
+14.Find All Duplicates in an Array — (Pattern: Index Marking / Negative Marking)
+Problem:Given an integer array nums of length n where all the integers of nums are in the range [1, n] and each integer appears at most twice, return an array of all the integers that appears twice.
+You must write an algorithm that runs in O(n) time and uses only constant auxiliary space, excluding the space needed to store the output
+Input: nums = [4,3,2,7,8,2,3,1]
+Output: [2,3]
+
+def find_duplicate(nums)
+    ans = []
+
+    nums.each do |num|
+        num = num.abs
+        if nums[num-1] < 0
+            ans << num
+        else
+            nums[num-1] = -nums[num-1]
+        end
+    end
+    ans
+end
+
+nums = [4,3,2,7,8,2,3,1]
+puts find_duplicate(nums).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
 19.Reverse a character array in-place without using extra space or built-ins.
 Input:  s = ['h','e','l','l','o']
 Output: ['o','l','l','e','h']
@@ -707,6 +731,204 @@ puts implement_str("aaaaa", "aaa") # => 0
 puts implement_str("abc", "xyz") # => -1
 puts implement_str("abc", "abcd") # => -1
 
+-----------------------------------------------------------------------------------------------------------------------------------
+23.Given an array of strings, group the anagrams together.
+Input:  strs = ["eat","tea","tan","ate","nat","bat"]
+Output: [["eat","tea","ate"],["tan","nat"],["bat"]]
+
+def group_anagrams(strs)
+    hash = {}
+
+    strs.each do |str|
+        # key = str.chars.sort_by(&:downcase).join
+        key = str.chars.sort.join # if guaranteed that strings will contain only lowecase alphabet
+
+        if hash.key?(key)
+            hash[key] << str
+        else
+            hash[key] = [str]
+        end
+    end
+
+    hash.values
+end
+
+strs = ["eat","tea","tan","ate","nat","bat"]
+puts group_anagrams(strs).inspect
 
 -----------------------------------------------------------------------------------------------------------------------------------
-23.
+24.Longest Substring Without Repeating Characters — (Pattern: Sliding Window)
+Problem: Given a string s, find the length of the longest substring without repeating
+characters.
+Input:  s = "abcabcbb"
+Output: 3
+Explanation: The answer "abc" or "cab" both valid, with length 3.
+
+# Approach 1: Hash + Shrinking Window # Duplicate milne par left se characters ko one-by-one delete karte hain # jab tak duplicate key remove nahi ho jata. Correct O(n) solution hai, but extra deletion/shrinking karna padta hai.
+def longest_substring(s)
+    hash = {}
+    left = 0
+    right = 0
+    max_length = 0
+
+    while right < s.length
+        c = s[right]
+        while hash[c]
+            hash.delete(s[left])
+            left+=1
+        end
+
+        hash[c] = true
+        max_length = [max_length, right-left+1].max
+        right+=1
+    end
+
+    return max_length
+end
+
+s = "abcdbcbb"
+puts longest_substring(s)
+
+# Approach 2: Last Seen Index — Better Approach # Har character ki last position store karte hain. # Duplicate milne par left ko directly previous seen position + 1 par jump kar dete hain. Isliye delete ya inner while loop ki need nahi hai. O(n) time and cleaner approach.
+
+def longest_substring(s)
+    hash = {}
+    left = 0
+    right = 0
+    max_length = 0
+
+    while right<s.length
+        c = s[right]
+        if hash.key?(c) && left < hash[c]  # left pointer never goes back
+            left = hash[c]+1
+        end
+
+        max_length = [max_length,right-left+1].max
+        hash[c] = right
+        right+=1
+    end
+    max_length
+end
+
+s = "abcdbcbb"
+puts longest_substring(s)
+
+----------------------------------------------------------------------------------------------------------------------------------- 
+25.Longest Palindromic Substring — (Pattern: Expand Around Center / DP)
+Problem: Given a string s, return the longest palindromic substring.
+Input:  s = "babad"
+Output: "bab"  (or "aba", both valid)
+Explanation: "bab" and "aba" are both palindromes of length 3; either is accepted.
+Constraints: 1 <= s.length <= 1000
+Approach: expand around each center (odd & even) — O(n^2) time, O(1) space
+
+def longest_palindrome(s)
+    longest_p = "" 
+    max_length = 0
+
+    (0...s.length).each do |i|
+        # Considering odd length
+        left =  i
+        right = i
+
+        while left>=0 && right<s.length && s[left] == s[right]
+            current_length = right - left + 1
+
+            if current_length > max_length
+                max_length = current_length
+                longest_p = s[left..right]
+            end
+
+            left -=1
+            right +=1
+        end
+
+        # Considering even length
+        left =  i
+        right = i+1
+      
+        while left>=0 && right<s.length && s[left] == s[right]
+            current_length = right - left + 1
+
+            if current_length > max_length
+                max_length = current_length
+                longest_p = s[left..right]
+            end
+
+            left -=1
+            right +=1
+        end
+    end
+    longest_p
+end
+
+s = "bdaa"
+puts longest_palindrome(s)
+
+        #----------------------- Cleaner version ------------------------------------
+
+def longest_palindrome(s)
+  result = ""
+
+  (0...s.length).each do |i|
+    odd_palindrome = expand(s, i, i)
+    even_palindrome = expand(s, i, i + 1)
+
+    result = odd_palindrome if odd_palindrome.length > result.length
+    result = even_palindrome if even_palindrome.length > result.length
+  end
+
+  result
+end
+
+def expand(s, left, right)
+  while left >= 0 && right < s.length && s[left] == s[right]
+    left -= 1
+    right += 1
+  end
+
+  s[(left + 1)..(right - 1)]
+end
+
+s = "bdaa"
+puts longest_palindrome(s)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+26.String Compression — (Pattern: Two Pointers)
+Problem: Compress a character array in-place using counts of repeated characters,
+return the new length.
+Input:  chars = ['a','a','b','b','c','c','c']
+Output: 6, chars = ['a','2','b','2','c','3']
+Explanation: 'a' repeats twice, 'b' twice, 'c' three times.
+Constraints: 1 <= chars.length <= 2000
+Approach: two pointers, write char + count when a run ends — O(n) time, O(1) space
+
+
+# def compress_string(chars)
+#     i = 0
+#     j = 0
+#     count = 0
+
+#     while j<chars.length
+#         if chars[i] != chars[j]
+#             count = j-i
+
+#             if count <=1
+#                 chars[]
+#             else
+#                 chars[i+1] = j-i
+#                 i+=2
+#             end
+
+#         end
+#         j+=1
+#     end
+
+#     chars[i+1] = (j-1)-i
+#     chars[0..(i+1)]
+# end
+
+# chars = ['a','a','b','c','c']
+# puts compress_string(chars).inspect
+
+
