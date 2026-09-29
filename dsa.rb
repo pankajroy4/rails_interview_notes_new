@@ -599,13 +599,19 @@ Constraints: 1 <= s.length <= 1000
 Approach: expand around each center (odd & even) — O(n^2) time, O(1) space
 
 26.String Compression — (Pattern: Two Pointers)
-Problem: Compress a character array in-place using counts of repeated characters,
-return the new length.
-Input:  chars = ['a','a','b','b','c','c','c']
-Output: 6, chars = ['a','2','b','2','c','3']
-Explanation: 'a' repeats twice, 'b' twice, 'c' three times.
+Problem: Compress a character array in-place using counts of consecutive repeated characters, and return the new length.
+Input: chars = ['a','a','b','b','c','c','c']
+Output: 6
+Modified chars: ['a','2','b','2','c','3']
+Explanation: 'a' repeats twice → a2, 'b' twice → b2, 'c' three times → c3. If a character appears only once, don't write 1. If a character's count has multiple digits, write each digit separately — e.g. a count of 12 should be written as '1','2'.
+
+Input: chars = ["a","b","b","b","b","b","b","b","b","b","b","b","b"]
+Output: 4
+Explanation: The groups are "a" and "bbbbbbbbbbbb". This compresses to "ab12".
+After modifying the input array in-place, the first 4 characters of chars should be ["a","b","1","2"].
+
 Constraints: 1 <= chars.length <= 2000
-Approach: two pointers, write char + count when a run ends — O(n) time, O(1) space
+Approach: Two pointers — read_pointer scans groups, write_pointer writes the character + count when a run ends. For counts greater than 9, write each digit separately. O(n) time, O(1) space.
 
 27.String to Integer (atoi) — (Pattern: String Parsing)
 Problem: Implement atoi: convert a string to a 32-bit signed integer, handling

@@ -819,8 +819,6 @@ Problem: Given a string s, return the longest palindromic substring.
 Input:  s = "babad"
 Output: "bab"  (or "aba", both valid)
 Explanation: "bab" and "aba" are both palindromes of length 3; either is accepted.
-Constraints: 1 <= s.length <= 1000
-Approach: expand around each center (odd & even) — O(n^2) time, O(1) space
 
 def longest_palindrome(s)
     longest_p = "" 
@@ -895,40 +893,47 @@ puts longest_palindrome(s)
 
 -----------------------------------------------------------------------------------------------------------------------------------
 26.String Compression — (Pattern: Two Pointers)
-Problem: Compress a character array in-place using counts of repeated characters,
-return the new length.
-Input:  chars = ['a','a','b','b','c','c','c']
-Output: 6, chars = ['a','2','b','2','c','3']
-Explanation: 'a' repeats twice, 'b' twice, 'c' three times.
-Constraints: 1 <= chars.length <= 2000
-Approach: two pointers, write char + count when a run ends — O(n) time, O(1) space
+
+Problem: Compress a character array in-place using counts of consecutive repeated characters, and return the new length.
+
+Input: chars = ['a','a','b','b','c','c','c']
+Output: 6
+Modified chars: ['a','2','b','2','c','3']
+Explanation: 'a' repeats twice → a2, 'b' twice → b2, 'c' three times → c3. If a character appears only once, do not write 1. If a character count has multiple digits, write each digit separately — e.g. a count of 12 should be written as '1','2'.
+
+Input: chars = ["a","b","b","b","b","b","b","b","b","b","b","b","b"]
+Output: 4
+Explanation: The groups are "a" and "bbbbbbbbbbbb". This compresses to "ab12".
+After modifying the input array in-place, the first 4 characters of chars should be ["a","b","1","2"].
+
+Constraints:1 <= chars.length <= 200
+            chars[i] is a lowercase English letter, uppercase English letter, digit, or symbol.
 
 
-# def compress_string(chars)
-#     i = 0
-#     j = 0
-#     count = 0
 
-#     while j<chars.length
-#         if chars[i] != chars[j]
-#             count = j-i
+def compress(chars)
+    read = 0
+    write = 0
 
-#             if count <=1
-#                 chars[]
-#             else
-#                 chars[i+1] = j-i
-#                 i+=2
-#             end
+    while read < chars.length
+        current_char = chars[read]
+        count = 0
 
-#         end
-#         j+=1
-#     end
+        while read < chars.length && chars[read] == current_char
+            read += 1
+            count += 1
+        end
 
-#     chars[i+1] = (j-1)-i
-#     chars[0..(i+1)]
-# end
+        chars[write] = current_char
+        write += 1
 
-# chars = ['a','a','b','c','c']
-# puts compress_string(chars).inspect
+        if count > 1
+            count.to_s.each_char do |digit|
+                chars[write] = digit
+                write += 1
+            end
+        end
+    end
 
-
+    write
+end
