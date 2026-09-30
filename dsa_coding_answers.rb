@@ -1084,4 +1084,52 @@ s2 = "erbottlewat"
 puts rotate_string(s1,s2)
 
 -----------------------------------------------------------------------------------------------------------------------------------
-29.
+31.Contains Duplicate — (Pattern: Hashing)
+Problem: Given an array nums, return true if any value appears at least twice.
+Input:  nums = [1, 2, 3, 1]
+Output: true
+Explanation: 1 appears twice.
+Constraints: 1 <= nums.length <= 10^5
+Approach: hash set, return true on first repeat — O(n) time, O(n) space
+
+
+def contains_duplicate?(nums)
+    hash = {}
+
+    nums.each do |num|
+        return true if hash.key?(num)
+        hash[num] = true
+    end
+
+    false
+end
+
+nums = [1, 2, 3, 1]
+puts contains_duplicate?(nums)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+32.First Non-Repeating (unique) Character in a String — (Pattern: Frequency Map)
+Problem: Given a string s, return the index of the first character that does not
+repeat; return -1 if none exists.
+Input:  s = "leetcode"
+Output: 0
+Explanation: 'l' is the first character that appears only once.
+Constraints: 1 <= s.length <= 10^5, lowercase English letters
+Approach: frequency count pass, then scan for first count == 1 — O(n) time, O(1) space (fixed alphabet)
+
+def unique_char(str)
+    hash = Hash.new(0)
+    # first_unique_char = -1
+
+    str.each_char.with_index do |c, i|
+        hash[c] +=1
+
+ 
+    end
+
+    # first_unique_char
+end
+
+s = "leetlcode"
+puts unique_char(s)
+

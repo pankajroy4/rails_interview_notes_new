@@ -668,7 +668,7 @@ Explanation: 1 appears twice.
 Constraints: 1 <= nums.length <= 10^5
 Approach: hash set, return true on first repeat — O(n) time, O(n) space
 
-32.First Non-Repeating Character in a String — (Pattern: Frequency Map)
+32.First Non-Repeating (unique) Character in a String — (Pattern: Frequency Map)
 Problem: Given a string s, return the index of the first character that does not
 repeat; return -1 if none exists.
 Input:  s = "leetcode"
