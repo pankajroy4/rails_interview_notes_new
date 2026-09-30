@@ -992,3 +992,96 @@ int main(){
     return 0;
 }
 
+
+-----------------------------------------------------------------------------------------------------------------------------------
+28.Given strings s1 and s2, check if s2 is a rotation of s1.
+Input:  s1 = "waterbottle", s2 = "erbottlewat"
+Output: true
+Explanation: s2 is rotation of s1.
+
+Input:  s1 = "abc", s2 = "ab"
+Output: false
+Explanation: s2 can never be rotation of s1 as their length are different.
+Constraints: 0 <= s1.length == s2.length <= 10^4
+
+
+#Brute froce searching of substring after concatenation.
+def rotate_string(s, goal)
+    return false if s.length != goal.length
+
+    s = s+s
+    i=0
+
+    while i < s.length
+        k = i
+        j = 0
+
+        while j < goal.length &&  s[k] == goal[j]
+            j+=1
+            k+=1
+        end
+
+        if j == goal.length
+            return true
+        end
+
+        i+=1;
+    end
+    false;
+end
+
+s1 = "waterbottle"
+s2 = "erbottlewat"
+puts rotate_string(s1,s2)
+
+
+#Efficient searching of substring after concatenation.
+def generate_lps(str)
+    lps = []
+    lps[0] = 0
+    i=0
+    j=1
+
+    while j< str.length
+        if str[i] == str[j]
+            lps[j] = i+1
+            j+=1
+            i+=1         
+        else
+            if i==0
+               lps[j] = 0
+               j+=1 
+            else
+                i = lps[i-1]
+            end
+        end
+    end
+
+    lps
+end
+
+def rotate_string(s, goal)
+    str = s+s
+    lps = generate_lps(goal)
+
+    i = 0
+    j = 0
+
+    while i < str.length
+        if str[i] == goal[j]
+            i+=1
+            j+=1
+        else
+            j = lps[j-1]
+        end
+        return true if j == goal.length
+    end
+    false
+end
+
+s1 = "waterbottle"
+s2 = "erbottlewat"
+puts rotate_string(s1,s2)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+29.

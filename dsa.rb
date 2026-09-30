@@ -626,7 +626,11 @@ Approach: careful state-machine parsing — O(n) time, O(1) space
 Problem: Given strings s1 and s2 of equal length, check if s2 is a rotation of s1.
 Input:  s1 = "waterbottle", s2 = "erbottlewat"
 Output: true
-Explanation: s2 appears as a substring of s1 + s1.
+Explanation: s2 is rotation of s1
+Input2:  s1 = "abc", s2 = "ab"
+Output: false
+Explanation: s2 can never be rotation of s1 as their length are different.
+
 Constraints: 0 <= s1.length == s2.length <= 10^4
 Approach: check if s2 is a substring of (s1 + s1) — O(n) time (with efficient substring search), O(n) space
 
