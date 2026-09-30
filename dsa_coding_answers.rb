@@ -909,8 +909,6 @@ After modifying the input array in-place, the first 4 characters of chars should
 Constraints:1 <= chars.length <= 200
             chars[i] is a lowercase English letter, uppercase English letter, digit, or symbol.
 
-
-
 def compress(chars)
     read = 0
     write = 0
@@ -937,3 +935,60 @@ def compress(chars)
 
     write
 end
+
+-----------------------------------------------------------------------------------------------------------------------------------
+27. Implement atoi: convert a string to a 32-bit signed integer, handling
+leading whitespace, optional sign, digits, and overflow clamping.
+Input:  s = "   -42"
+Output: -42
+Explanation: Leading spaces are skipped, sign is captured, digits parsed until non-digit.
+Constraints: 0 <= s.length <= 200, result clamped to [-2^31, 2^31 - 1]
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    int myAtoi(string s) {
+
+        int i = 0;
+        int num = 0;
+        int sign = 1;
+
+        while (i < s.size() && s[i] == ' ') {
+            i++;
+        }
+
+        if (i < s.size() && (s[i] == '+' || s[i] == '-')) {
+            sign = (s[i] == '-') ? -1 : 1;
+            i++;
+        }
+
+        while (i < s.size() && isdigit(s[i])) {
+            int digit = s[i] - '0';
+
+            //-2147483648, 2147483647
+            if (num > INT_MAX / 10 || (num == INT_MAX / 10 && digit > 7)) {
+                return sign == 1 ? INT_MAX : INT_MIN;
+            }
+
+            num = num * 10 + digit;
+            i++;
+        }
+
+        return num * sign;
+    }
+};
+
+int main(){
+    Solution obj;
+
+    int ans1  = obj.myAtoi("    -12b34"); // => -12
+    int ans2  = obj.myAtoi("0-4"); // => 0
+    int ans3  = obj.myAtoi("42"); // => 42
+    int ans4  = obj.myAtoi("    -042"); // => -42
+    int ans5  = obj.myAtoi("1337c0d3"); // => 1337
+    cout << "Answers are :"<<ans1 <<", "<<ans2<<", "<<ans3 <<", "<<ans4<<", "<<ans5<<endl;
+    return 0;
+}
+
