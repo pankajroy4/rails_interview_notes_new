@@ -675,7 +675,7 @@ Input:  s = "leetcode"
 Output: 0
 Explanation: 'l' is the first character that appears only once.
 Constraints: 1 <= s.length <= 10^5, lowercase English letters
-Approach: frequency count pass, then scan for first count == 1 — O(n) time, O(1) space (fixed alphabet)
+Approach: frequency count pass, then scan the string for first count == 1 with map — O(n) time, O(1) space (fixed alphabet)
 
 33.Isomorphic Strings — (Pattern: Hashing)
 Problem: Given strings s and t, return true if the characters in s can be replaced to

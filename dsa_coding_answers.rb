@@ -988,7 +988,7 @@ int main(){
     int ans3  = obj.myAtoi("42"); // => 42
     int ans4  = obj.myAtoi("    -042"); // => -42
     int ans5  = obj.myAtoi("1337c0d3"); // => 1337
-    cout << "Answers are :"<<ans1 <<", "<<ans2<<", "<<ans3 <<", "<<ans4<<", "<<ans5<<endl;
+    cout << "Answers are :"<< ans1 <<", "<< ans2<<", "<< ans3 <<", "<< ans4<<", "<< ans5<< endl;
     return 0;
 }
 
@@ -1033,7 +1033,6 @@ end
 s1 = "waterbottle"
 s2 = "erbottlewat"
 puts rotate_string(s1,s2)
-
 
 #Efficient searching of substring after concatenation.
 def generate_lps(str)
@@ -1119,17 +1118,38 @@ Approach: frequency count pass, then scan for first count == 1 — O(n) time, O(
 
 def unique_char(str)
     hash = Hash.new(0)
-    # first_unique_char = -1
 
-    str.each_char.with_index do |c, i|
+    str.each_char do |c|
         hash[c] +=1
-
- 
     end
 
-    # first_unique_char
+    str.each_char.with_index do |c, i|
+      return i if hash[c] == 1
+    end
+    return -1
 end
 
 s = "leetlcode"
 puts unique_char(s)
 
+#Highly optimsed one. Use almost zero memory.
+def unique_char(str)
+    arr = Array.new(26,0)
+
+    # Count frequencies using ASCII math ('a' becomes index 0)
+    str.each_char do |c|
+        arr[c.ord - 'a'.ord] +=1
+    end
+
+    str.each_char.with_index do |c, i|
+      return i if arr[c.ord - 'a'.ord] == 1
+    end
+
+    return -1
+end
+
+s = "leetlcode"
+puts unique_char(s)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+33.
