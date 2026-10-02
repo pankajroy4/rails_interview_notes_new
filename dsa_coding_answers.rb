@@ -1152,4 +1152,40 @@ s = "leetlcode"
 puts unique_char(s)
 
 -----------------------------------------------------------------------------------------------------------------------------------
-33.
+33.Isomorphic Strings — (Pattern: Hashing)
+Problem: Given strings s and t, return true if the characters in s can be replaced to
+get t, with a consistent one-to-one mapping.
+Input:  s = "egg", t = "add"
+Output: true
+Explanation: 'e'->'a', 'g'->'d' is a consistent bijective mapping.
+
+
+def isomorphic_string(s,t)
+    return false if s.length != t.length
+
+    h1 = {}
+    h2 = {}
+
+    i=0
+
+    while i < s.length
+        c1 = s[i]
+        c2 = t[i]
+
+        # Har source character ki ek fixed destination honi chahiye, aur har destination ko sirf ek source character own kar sakta hai.
+
+        if h1.key?(c1) || h2.key?(c2)
+            return false if ( h1[c1] != c2  || h2[c2] != c1 )
+        end
+
+        h1[c1] = c2
+        h2[c2] = c1
+        i+=1
+    end
+
+    return true
+end
+
+s = "foo"
+t = "bar"
+puts isomorphic_string(s,t)
