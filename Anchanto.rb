@@ -352,25 +352,6 @@ There are multiple strategies to Handle Deduplication.
     Distributed systems guarantee at-least-once, not exactly-once.
     So our design operations must be idempotent.
 
----------------------------------------------------------------------------------------------------------
-14.REST Principles
-Answer: REST stands for Representational State Transfer. It is an architectural style for designing scalable and maintainable APIs. It enforces stateless communication, resource-oriented URLs, proper HTTP verb usage, and client-server separation. It relies on HTTP semantics and idempotent operations for predictability.
-
-First principle is statelessness — each request must contain all required information. The server should not store client session state.
-
-Second is resource-based design — everything is treated as a resource, identified by a URL like /users/10.
-
-Third is proper use of HTTP methods — GET for read, POST for create, PUT or PATCH for update, DELETE for remove.
-
-Fourth is standard HTTP status codes — like 200, 201, 400, 401, 404, 500.
-
-Fifth is idempotency — for example, calling PUT multiple times should not change the result.
-
-And finally, REST APIs should be cacheable when possible and follow uniform interface principles.
-
-  🔸Is POST idempotent? Answer-> No
-  🔸Is PUT idempotent? Answer-> Yes — calling it multiple times produces same result.
-
 ----------------------------------------------------------------------------------------------------------
 15. What is Webhook Signature Verification and how do you manage it?
 Answer: Webhook signature verification ensures that incoming webhook requests are actually sent by a trusted provider and not by an attacker.
@@ -610,8 +591,9 @@ So to fix this:
   Add rate limiting
 
 --------------------------------------------------------------------------------------------------------
-Question: What is Convention over Configuration in Rails?
-Answer: Convention over Configuration in Rails means that Rails follows predefined naming conventions and project structure, so developers do not have to write a lot of manual configuration.
+Question: What is Convention over Configuration in Rails? OR What is Rails Philosophy?
+Answer: Rails follows Convention over Configuration and DRY. 
+Convention over Configuration in Rails means that Rails follows predefined naming conventions and project structure, so developers do not have to write a lot of manual configuration.
 
 For example, if I create a model class called User, Rails automatically assumes the database table name is users. I do not need to explicitly configure that mapping.
 

@@ -22,15 +22,7 @@ Strings are mutable and each "name" creates a new object in memory. They are use
 
 ------------------------------------------------------------------------------------------------------
 Question 3: How does Ruby Garbage Collection work?
-
-Answer -> Ruby uses a generational mark-and-sweep garbage collector.
-It automatically frees memory of unreachable objects.
-
-It divides objects into young and old generations to optimize performance.
-
-Ruby’s GC works in three main phases: mark, sweep, and optional compaction. In the mark phase, Ruby starts from root references (global variables, stack, etc.) and marks reachable objects. In the sweep phase, unmarked objects are removed and memory is reclaimed. Ruby uses generational GC, meaning most objects die young, so minor GCs run frequently on young objects, and major GCs run less often. Modern Ruby also supports incremental marking and compaction to reduce memory fragmentation and pause times.
-                           ------------------------------------------
-Long Answer -> Ruby mainly uses a Mark-and-Sweep garbage collection mechanism.
+Answer -> Ruby mainly uses a Mark-and-Sweep garbage collection mechanism.
 
 In the mark phase, Ruby starts from root references like global variables, local variables, stack references, classes, and threads. It traverses all reachable objects and marks them as alive.
 
@@ -40,13 +32,7 @@ Modern Ruby also uses Generational Garbage Collection. The idea is that most obj
 
 Young objects are checked frequently using Minor GC, which is faster. Objects that survive multiple GC cycles are promoted to old generation, and Major GC scans both young and old objects.
 
-Ruby also supports Incremental GC to reduce stop-the-world pause time by splitting GC work into smaller chunks. Newer Ruby versions also support Compaction GC, which helps reduce memory fragmentation and improves copy-on-write optimization in servers like Puma or Unicorn.
-
-In Rails, excessive object allocation can increase GC pressure and slow down the application. So we try to optimize memory usage using techniques like pluck instead of loading full ActiveRecord objects, find_each for batch processing, and avoiding unnecessary object creation.
-
-We can also monitor garbage collector statistics using GC.stat.
-
-One important point is that even after GC frees Ruby heap memory, the operating system memory may not reduce immediately because Ruby may keep heap pages for future allocations.
+So the main benefit of Generational GC is that Ruby does not have to scan the entire heap every time. It focuses frequent GC work on young, short-lived objects, which makes garbage collection more efficient.
 
 ------------------------------------------------------------------------------------------------------
 Question 4: What is Duck Typing?
@@ -181,7 +167,8 @@ Exceptions unwind the stack until a matching rescue block is found.
 
 By default, rescue catches StandardError.
 
-When an error occurs, Ruby raises an exception and stops normal execution. Control transfers to the nearest rescue block. ensure always runs, even if an error occurs, making it ideal for cleanup logic. Developers can define custom exceptions by inheriting from StandardError. Proper exception handling ensures graceful error recovery without crashing the application.
+When an error occurs, Ruby raises an exception and stops normal execution. Control transfers to the nearest rescue block. ensure always runs, even if an error occurs, making it ideal for cleanup logic. We can also define custom exceptions by inheriting from StandardError. 
+Proper exception handling ensures graceful error recovery without crashing the application.
 
 ------------------------------------------------------------------------------------------------------
 Question 16: What is Monkey Patching?
@@ -208,24 +195,21 @@ Question 18: How does Ruby handle Threads?
 Answer -> Ruby supports native threads.
 However, MRI Ruby has a Global Interpreter Lock (GIL).
 
-Threads improve I/O concurrency but not CPU parallelism.
+Threads improve I/O concurrency but not CPU parallelism due to GIL.
 
-In MRI(Matz’s Ruby Interpreter) Ruby, the GIL ensures that only one thread executes Ruby code at a time. This prevents true parallel execution for CPU-bound tasks but allows efficient I/O-bound concurrency such as API calls or database operations. For true parallelism, we use multiple processes (Puma workers, Sidekiq processes) or alternative Ruby implementations like JRuby.
+In MRI (Matz Ruby Interpreter) Ruby, the GIL ensures that only one thread executes Ruby code at a time. 
+This prevents true parallel execution for CPU-bound tasks but allows efficient I/O-bound concurrency such as API requests, database calls or file operations because threads can release the GVL while waiting for I/O.
+For true parallelism, we use multiple processes (Puma workers, Sidekiq processes) or alternative Ruby implementations like JRuby.
+MRI also contains Rubys garbage collector, memory management system, object model, and thread management internally.
 
-What is MRI?
-“MRI stands for Matz’s Ruby Interpreter. It is the original and most widely used implementation of Ruby, created by Yukihiro Matsumoto, who is also called Matz.
+    ------ What is MRI? --------
+    MRI stands for Matzs Ruby Interpreter. It is the original and most widely used implementation of Ruby, created by Yukihiro Matsumoto, who is also called Matz.
 
-When we normally say 'Ruby', most of the time we are actually referring to MRI Ruby.
+    When we normally say 'Ruby', most of the time we are actually referring to MRI Ruby.
+    MRI is written in C and it executes Ruby code using the YARV virtual machine, which stands for Yet Another Ruby VM.
+    Rails applications commonly run on MRI Ruby in production.
 
-MRI is written in C and it executes Ruby code using the YARV virtual machine, which stands for Yet Another Ruby VM.
-
-Rails applications commonly run on MRI Ruby in production.
-
-One important interview point is that MRI uses a Global VM Lock, also called GVL or previously GIL. Because of this, multiple Ruby threads cannot execute Ruby code in parallel on multiple CPU cores at the exact same time. This affects CPU-bound multithreading performance.
-
-However, MRI still supports concurrency for I/O-bound operations like database calls, API requests, or file operations because threads can release the GVL while waiting for I/O.
-
-MRI also contains Ruby’s garbage collector, memory management system, object model, and thread management internally.
+    One important point is that MRI uses a Global VM Lock, also called GVL or previously GIL. Because of this, multiple Ruby threads cannot execute Ruby code in parallel on multiple CPU cores at the exact same time. This affects CPU-bound multithreading performance.
 
 ------------------------------------------------------------------------------------------------------
 Question 19: What is self in different contexts?
@@ -251,34 +235,7 @@ Modules represent shared behavior or namespaces.
 Classes are blueprints for creating objects and support inheritance and state. Modules are used for namespacing and behavior sharing via include, extend, or prepend. Ruby supports single inheritance for classes but allows multiple modules to be mixed in.
 
 =================================== Rails Core Concepts ===================================
-Question 21: What is Rails Philosophy?
-
-Answer -> Rails follows Convention over Configuration and DRY.
-It provides sensible defaults to reduce boilerplate code.
-
-Rails focuses on developer productivity and clean architecture.
-
-Convention over Configuration means Rails assumes default patterns (like table naming) so developers write less configuration code. DRY ensures that logic is defined once and reused. Rails follows MVC architecture and RESTful principles, emphasizing simplicity and maintainability.
-
-------------------------------------------------------------------------------------------------------
-Question 22: MVC Flow in Rails Request Lifecycle
-
-Answer -> A request passes through middleware → routing → controller → model → view → response.
-
-Rails strictly follows MVC architecture.
-When a client sends an HTTP request, it first goes through Rack middleware. Routing determines the controller and action. The controller processes parameters and interacts with models. The model handles business logic and database queries. Finally, the view renders HTML or JSON, and the response is sent back through middleware to the client.
-
-------------------------------------------------------------------------------------------------------
-Question 23: What happens when you hit a Rails URL?
-
-Answer -> Web server → Rack → Middleware → Routing → Controller → Model → View → Response.
-
-Rails is built on top of Rack.
-
-When a request hits a Rails app, the web server converts it into a Rack env hash. The request travels through middleware for sessions, logging, and security. Routing maps the request to a controller action. The controller executes business logic and renders a response. The response travels back through middleware before reaching the client.
-
-------------------------------------------------------------------------------------------------------
-Question 24: What is Rack?
+Question 22: What is Rack?
 
 Answer -> Rack is a minimal interface between Ruby web servers and frameworks.
 A Rack app responds to call(env) and returns [status, headers, body].
@@ -287,7 +244,7 @@ Rails is built on Rack.
 Rack standardizes communication between web servers like Puma and frameworks like Rails. Middleware sits between them and processes requests and responses. This design makes Rails modular and extensible.
 
 ------------------------------------------------------------------------------------------------------
-Question 25: What is Middleware Stack?
+Question 23: What is Middleware Stack?
 
 Answer -> Middleware is a chain of components between the web server and Rails app.
 Each middleware can modify request and response.
@@ -295,7 +252,7 @@ Each middleware can modify request and response.
 Middleware receives the env hash, can process or modify it, and either return a response or pass control to the next middleware using @app.call(env). On the way back, middleware can also modify the response. Order matters because execution is sequential.
 
 =================================== Rails Routing & Request Handling ===================================
-Question 26: How does Routing work in Rails?
+Question 24: How does Routing work in Rails?
 
 Answer -> Routing maps an incoming HTTP request to a controller action.
 Routes are defined in config/routes.rb.
@@ -305,7 +262,7 @@ Routes are matched top to bottom.
 When a request reaches Rails, ActionDispatch::Routing checks routes sequentially. It matches the HTTP verb and URL pattern. Once a match is found, Rails extracts parameters (like :id) and dispatches the request to the corresponding controller and action. If no route matches, Rails returns a 404 error. Route order matters because the first matching route wins.
 
 ------------------------------------------------------------------------------------------------------
-Question 27: What are RESTful Routing Principles?
+Question 25: What are RESTful Routing Principles?
 
 Answer -> REST treats everything as a resource.
 HTTP verbs define actions, not the URL.
@@ -321,7 +278,7 @@ In RESTful routing, the same URL behaves differently depending on the HTTP metho
 Rails supports REST using resources :users, which automatically generates standard CRUD routes. This keeps APIs predictable and consistent.
 
 ------------------------------------------------------------------------------------------------------
-Question 28: What is ActionDispatch?
+Question 26: What is ActionDispatch?
 
 Answer -> ActionDispatch is the layer between Rack and Rails MVC.
 
@@ -330,32 +287,34 @@ It handles routing, sessions, cookies, and request/response objects.
 ActionDispatch extends Rack and provides structured request and response handling. It manages routing (RouteSet), session middleware, parameter parsing, and exception handling. It is responsible for converting low-level Rack data into Rails-friendly objects like ActionDispatch::Request.
 
 =================================== Rails Security & Parameters ===================================
-Question 29: What are Strong Parameters?
+Question 27: What are Strong Parameters?
 
-Answer ->Strong Parameters prevent mass assignment vulnerabilities.
-Only permitted attributes can be assigned.
+Answer ->Strong Parameters prevent mass assignment security threats.
+It make sure that only permitted attributes can be assigned.
 
 In Rails, parameters come from user input and cannot be trusted. Using params.require(:user).permit(:name, :email) ensures only allowed fields are mass assigned. This prevents users from injecting protected attributes like admin: true.
 
 ------------------------------------------------------------------------------------------------------
-Question 30: What is Mass Assignment Protection?
+Question 28: What is Mass Assignment Protection?
 
 Answer -> Mass assignment allows assigning multiple attributes at once.
 Strong parameters ensure only safe attributes are allowed.
 
-When calling User.create(params[:user]), Rails could update all fields. Strong parameters enforce whitelisting to protect sensitive attributes. Database constraints should still exist as a final safety layer.
+When calling User.create(params[:user]), Rails could update all fields. Strong parameters enforce whitelisting to protect sensitive attributes. 
+Database constraints should still exist as a final safety layer.
 
 ------------------------------------------------------------------------------------------------------
-Question 31: Cookies vs Sessions
+Question 29: Cookies vs Sessions
 
 Answer -> Cookies are stored on the client.
 Sessions represent user state across requests.
 Rails uses cookies to store session identifiers.
 
-Cookies are small pieces of data stored in the browser and sent with each request. Sessions store user-specific state (like logged-in user). By default, Rails uses CookieStore, meaning the entire session is encrypted and stored in the browser, but protected with signing and encryption.
+Cookies are small pieces of data stored in the browser and sent with each request. Sessions store user-specific state (like logged-in user). 
+By default, Rails uses CookieStore, meaning the entire session is encrypted and stored in the browser, but protected with signing and encryption.
 
 ------------------------------------------------------------------------------------------------------
-Question 32: How does Rails handle Sessions?
+Question 30: How does Rails handle Sessions?
 
 Answer -> Rails manages sessions via middleware.
 
@@ -364,7 +323,7 @@ By default, session data is stored in encrypted cookies.
 When a request comes in, Rails reads the session cookie, verifies it using the secret key, decrypts it, and exposes it as the session hash. If modified, Rails re-serializes and sends it back. For large-scale apps, server-side stores like Redis can be used.
 
 ------------------------------------------------------------------------------------------------------
-Question 33: What is CSRF Protection?
+Question 31: What is CSRF Protection?
 
 Answer -> CSRF protection prevents forged requests from other sites.
 Rails embeds authenticity tokens in forms.
@@ -372,7 +331,7 @@ Rails embeds authenticity tokens in forms.
 When a form is rendered, Rails includes a hidden token. On submission, Rails verifies that the token matches the user session. If not, the request is rejected. This prevents attackers from tricking users into performing unintended actions.
 
 ------------------------------------------------------------------------------------------------------
-Question 34: What is an Authenticity Token?
+Question 32: What is an Authenticity Token?
 
 Answer -> An authenticity token is a per-session secret.
 It verifies that the request originated from the application.
@@ -380,7 +339,7 @@ It verifies that the request originated from the application.
 Rails generates a unique token for each session. It is embedded in forms and AJAX headers. If the token is missing or invalid, Rails raises an error.
 
 =================================== Autoloading & Application Structure ===================================
-Question 35: What is Zeitwerk?
+Question 33: What is Zeitwerk?
 
 Answer -> Zeitwerk is Rails’ modern code loader.
 It automatically loads classes based on file paths.
@@ -392,7 +351,7 @@ Zeitwerk maps constants to file names. For example:
 It ensures consistent autoloading and thread safety. In production, it eager loads all files for performance.
 
 ------------------------------------------------------------------------------------------------------
-Question 36: How does Autoloading work in Rails?
+Question 34: How does Autoloading work in Rails?
 
 Answer -> Rails loads constants on demand.
 Zeitwerk builds a constant-to-file map at boot.
@@ -400,30 +359,22 @@ Zeitwerk builds a constant-to-file map at boot.
 When Ruby encounters an uninitialized constant, Zeitwerk loads the corresponding file automatically. In development, files reload on each request. In production, everything loads at boot for thread safety.
 
 ------------------------------------------------------------------------------------------------------
-Question 37: Eager Load vs Lazy Load
+Question 35: Eager Load vs Lazy Load
 
 Answer -> Lazy loading loads code when needed.
 Eager loading loads all code at boot.
-In development, Rails uses lazy loading for faster startup and reloading. In production, eager loading improves performance and prevents race conditions in multi-threaded environments.
+In development, Rails uses lazy loading for faster startup and reloading. 
+In production, eager loading improves performance and prevents race conditions in multi-threaded environments.
 
 ------------------------------------------------------------------------------------------------------
-Question 38: Rails Environments Differences
-
-Answer -> Development → productivity.
-Test → isolation and repeatability.
-Production → performance and stability.
-
-Development reloads code and shows detailed errors. Test runs with cached classes and minimal logging. Production eager loads code, enables caching, disables detailed errors, and optimizes for performance.
-
-------------------------------------------------------------------------------------------------------
-Question 39: What are Initializers?
+Question 36: What are Initializers?
 
 Answer -> Initializers configure the application at boot.
 They live in config/initializers.
 Initializers run after Rails loads frameworks but before the app starts handling requests. They configure gems, middleware, global settings, and constants. They should be fast and idempotent.
 
 =================================== Active Record & Database ===================================
-Question 40: What is Active Record Pattern?
+Question 37: What is Active Record Pattern?
 
 Answer -> Active Record maps objects to database rows.
 Models handle both persistence and domain logic.
@@ -431,25 +382,7 @@ Models handle both persistence and domain logic.
 Each model class represents a table. Each instance represents a row. Active Record provides CRUD methods, validations, associations, and callbacks. It simplifies database interaction but can lead to fat models if not structured properly.
 
 ------------------------------------------------------------------------------------------------------
-Question 41: What is the N+1 Query Problem?
-
-Answer -> N+1 occurs when one query loads records and additional queries load associations.
-It causes performance degradation.
-
-Example: loading 100 posts and calling post.comments inside a loop triggers 101 queries. Solution: use includes, preload, or eager_load to load associations efficiently.
-
-------------------------------------------------------------------------------------------------------
-Question 42: includes vs joins vs preload vs eager_load
-
-Answer -> joins → SQL join for filtering.
-includes → eager loads and may use join or separate queries.
-preload → separate queries only.
-eager_load → forces LEFT OUTER JOIN.
-
-joins does not load associated records into memory. includes prevents N+1 queries and decides strategy automatically. preload always runs multiple queries. eager_load forces a single joined query.
-
-------------------------------------------------------------------------------------------------------
-Question 43: Validations vs Database Constraints
+Question 38: Validations vs Database Constraints
 
 Answer -> Validations are application-level.
 Database constraints are database-level.
@@ -458,22 +391,7 @@ Use both for safety.
 Validations provide user-friendly errors but can be bypassed. Database constraints like NOT NULL, UNIQUE, and FOREIGN KEY ensure absolute data integrity, especially in concurrent systems.
 
 ------------------------------------------------------------------------------------------------------
-Question 44: Transactions Usage
-
-Answer -> Transactions ensure atomic operations.
-All operations succeed or all fail.
-
-Using ActiveRecord::Base.transaction, Rails wraps operations in a database transaction. If an exception occurs, everything rolls back. after_commit is the correct place for external side effects.
-
-------------------------------------------------------------------------------------------------------
-Question 45: Optimistic vs Pessimistic Locking
-
-Answer -> Optimistic locking uses a version column.
-Pessimistic locking locks rows at database level.
-Optimistic locking assumes conflicts are rare and raises StaleObjectError if version mismatches. Pessimistic locking uses SELECT FOR UPDATE to prevent concurrent updates. Optimistic is lightweight; pessimistic is strict but reduces concurrency.
-
-------------------------------------------------------------------------------------------------------
-Question 46: Difference between rails 6, 7 and 8?
+Question 39: Difference between rails 6, 7 and 8?
 Short Asnwer -> Rails 6 introduced Zeitwerk autoloading, multiple database support, and Action Text/Mailbox.
 
 Rails 7 focused heavily on Hotwire, Turbo, Stimulus, and reducing JavaScript dependency using import maps.

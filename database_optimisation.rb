@@ -334,8 +334,8 @@ Transactions and Isolation Levels in Rails (Advance)
             Queries for an available seat.
             Now if two threads find the same seat is available, they may try to book it at the same time. This is what the problem might occur.
 
- Race Conditions in DB
- ========================
+Race Conditions in DB
+========================
   ➤ A race condition occurs when two or more concurrent operations access the same data, and at least one of them modifies it, causing unintended or incorrect results.
   Example (Bank Transfer). Assume account has ₹10.
 

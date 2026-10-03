@@ -1,5 +1,6 @@
 Rails Performance Optimization & N+1 Problem  
 ============================================
+N+1 happens when ActiveRecord lazily loads associations inside a loop.
 
 Eager loading Part -1
 -------------------------------------------------------------------------------
@@ -53,7 +54,7 @@ preload
 
 eager_load
 ==========
-  - Forces an SQL JOIN, loading everything in one query. Useful when you want to filter, sort, or search using columns from the association.
+  - Forces an SQL LEFT OUTER JOIN, loading everything in one query. Useful when you want to filter, sort, or search using columns from the association.
     Needed when WHERE clause uses associated table.
     Gives 1 joined query.
 
@@ -142,7 +143,7 @@ Smart includes: When It Switches Behavior
     This requires looking into the posts table (because of posts.published = true), so Rails must JOIN the posts table to evaluate the condition.
     Thus, Rails auto-converts includes(:posts) into eager_load(:posts), which uses a LEFT OUTER JOIN.
 
-  If you do nott touch the associated table in the query, Rails can safely preload (2 separate queries).
+  If you do not touch the associated table in the query, Rails can safely preload (2 separate queries).
   If you do touch it (filter/order), it needs to JOIN, because SQL can not filter something it has not fetched yet.
 
 Avoiding Eager Load Bloat

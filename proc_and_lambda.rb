@@ -338,7 +338,7 @@ Example 1: Closure in methods.
   end
 
   my_proc = outer_method # Method call finished
-  my_proc.call #Output: "Hello"
+  my_proc.call #Output: "Hello"  # The proc still remembered the message variable even after method call finished earlier. 
 
   Here:
     message is a local variable inside outer_method

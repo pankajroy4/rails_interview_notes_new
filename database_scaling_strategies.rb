@@ -26,13 +26,44 @@ Database Scaling Strategies
     🔸More database nodes
     🔸More application servers
     🔸Often combined with load balancers
-    You run 4 instances of your app server (e.g., Puma, Passenger) behind an Nginx load balancer
-    You set up a PostgreSQL cluster with multiple nodes
+    You set up a PostgreSQL cluster with multiple nodes.
+    You run 4 instances of your app server (e.g., Puma, Passenger) behind an Nginx load balancer:
       upstream app_servers {
         server app1.example.com;
         server app2.example.com;
         server app3.example.com;
       }
+
+                    Internet
+                       |
+                       v
+                ┌───────────────┐
+                │    NGINX      │
+                │ Load Balancer │
+                └──────┬────────┘
+                       |
+          ┌────────────┼────────────┐
+          ↓            ↓            ↓
+      Rails App 1  Rails App 2  Rails App 3
+          |            |            |
+          └────────────┼────────────┘
+                       |
+                  DB Connection
+                       |
+              ┌────────┴────────┐
+              │                 │
+           WRITE              READ
+              │                 │
+              ↓                 ↓
+        ┌────────────┐      ┌──────────┐
+        │ PostgreSQL │      │  Router  │
+        │ Primary    │      └────┬─────┘
+        └─────┬──────┘           |
+              │            ┌─────┴─────┐
+          Replication      ↓           ↓
+              ├───────→  Replica 1  Replica 2
+              │
+              └───────→  (READ ONLY)
 
     It is Good for:
       Enterprise-level apps

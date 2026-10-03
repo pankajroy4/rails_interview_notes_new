@@ -114,6 +114,14 @@
 
     Here, we just modified Rubys built-in String class.
 
+    OR, we can also do like this:
+
+      String.define_method(:shout) do
+        upcase + "!!!"
+      end
+
+      "hello".shout # => "HELLO!!!"
+
   Example 2: Overriding an existing method.
     class String
       def upcase
@@ -529,6 +537,7 @@ Ruby Metaprogramming Cheatsheet
     puts Person.new.hello #=> Error
 
     Class is an object, so on that object( i.e on person), a singleton method gets defined here.
+    class_eval executes the block in the context of the class, so a method defined with def becomes an instance method of that class.
 
     Person.class_eval do
       def greet

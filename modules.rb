@@ -159,7 +159,7 @@ Difference betwwen require, include, extend and prepend
     - Since module B was included last, its method runs first.
     - super then moves up the chain and calls module A method.
 
-Singleton Methods:
+Singleton Methods: 
 =============================================================
   ➤In Ruby, every object (including classes, since classes are objects too) can have methods only defined on that object — these are called singleton methods.
   ➤Note that : Classes are objects too.

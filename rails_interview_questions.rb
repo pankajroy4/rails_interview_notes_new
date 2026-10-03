@@ -65,13 +65,18 @@ Answer -> Rails provides strong security defaults, but securing an application s
 
 First, I rely on Rails’ built-in protections like CSRF tokens, strong parameters, and automatic SQL injection prevention. I never interpolate user input directly into SQL or HTML.
 
-Authentication and authorization are clearly separated—authentication handled by Devise or similar, and authorization enforced via Pundit policies or similar mechanisms. This ensures access control is explicit and testable.
+Authentication and authorization are clearly separated: authentication handled by Devise or similar, and authorization enforced via Pundit policies or similar mechanisms.
 
-I also enforce secure headers (CSP, HSTS, X-Frame-Options) and always store secrets using encrypted credentials or environment variables, never in source control.
+I also enforce secure headers (CSP, HSTS, X-Frame-Options).
+For sensitive data, I would never hardcode secrets or credentials in the codebase. I would use environment variables or a proper secret manager, and sensitive data should be encrypted both in transit and, where necessary, at rest.
 
-On the data side, I validate and sanitize all inputs and avoid exposing sensitive fields in APIs or logs. Regular dependency updates and security audits via tools like bundler-audit are part of my routine.
+On the data side, I validate and sanitize all inputs and avoid exposing sensitive fields in APIs or logs. 
+I would use parameterized queries or ActiveRecord instead of constructing raw SQL with user input, which helps prevent SQL injection.
+Regular dependency updates and security audits via tools like bundler-audit are part of my routine.
 
-Ultimately, security is about layers—no single feature protects you. It’s about combining framework protections, good coding habits, and operational discipline.
+I would also configure secure cookies, HTTPS, appropriate security headers, rate limiting for sensitive endpoints, and proper logging and monitoring without exposing passwords, tokens, or other sensitive information.
+
+Finally, I would regularly run dependency and security scans and follow the principle of least privilege for database users, APIs, and other services.
 
 Short Answer -> I follow layered security. At the Rails level: strong parameters, CSRF protection, secure cookies, and avoiding mass assignment. At the dependency level: regular bundle audits and Brakeman scans.
 
@@ -106,9 +111,28 @@ For user experience, I never expose raw exception messages. Instead, I render fr
 Overall, the best practice is to treat errors as first-class citizens: catch what you expect, monitor what you do not, log everything responsibly, and always protect the user experience.
 
 ------------------------------------------------------------------------------------------------------
+9.REST Principles
+Answer: REST stands for Representational State Transfer. It is an architectural style for designing scalable and maintainable APIs. It enforces stateless communication, resource-oriented URLs, proper HTTP verb usage, and client-server separation.
+
+First principle is statelessness — each request must contain all required information. The server should not store client session state.
+
+Second is resource-based design — everything is treated as a resource, identified by a URL like /users/10.
+
+Third is proper use of HTTP methods — GET for read, POST for create, PUT or PATCH for update, DELETE for remove.
+
+Fourth is standard HTTP status codes — like 200, 201, 400, 401, 404, 500.
+
+Fifth is idempotency — for example, calling PUT multiple times should not change the result.
+
+And finally, REST APIs should be cacheable when possible and follow uniform interface principles.
+
+  🔸Is POST idempotent? Answer-> No
+  🔸Is PUT idempotent? Answer-> Yes — calling it multiple times produces same result.
+
+------------------------------------------------------------------------------------------------------
 Question 10: How would you design a RESTful API in Rails, and what are some conventions or best practices you follow when building APIs?
 
-Answer -> When designing a RESTful API in Rails, I start by modeling the API around resources, not actions. Each resource maps cleanly to standard HTTP verbs—GET, POST, PUT/PATCH, and DELETE—which keeps the API intuitive and predictable.
+Answer -> When designing a RESTful API in Rails, I start by modeling the API around resources, not actions. Each resource maps cleanly to standard HTTP verbs—GET, POST, PUT/PATCH, and DELETE— which keeps the API intuitive and predictable.
 
 I typically namespace APIs under /api and version them, such as /api/v1, to allow backward compatibility as the system evolves. This is critical in production systems where multiple clients may depend on older versions.
 
@@ -152,27 +176,45 @@ After deployment, I always verify logs, background workers, and monitoring tools
 ------------------------------------------------------------------------------------------------------
 Question 13: How do you typically set up and manage background jobs in Rails, and what tools do you prefer?
 
-Answer -> In a Rails application, I use background jobs whenever I have tasks that are time-consuming and don't need to run during the main web request. I typically define these jobs using Active Job, which gives me a nice unified interface, and then I use Sidekiq and Redis as the backend to actually process those jobs. This is really useful for things like sending emails, generating big reports, or any other heavy lifting that I don't want to slow down the user experience. By using background jobs, I can keep the main app response fast and let the longer tasks run behind the scenes.
+Answer -> In a Rails application, I use background jobs whenever I have tasks that are time-consuming and do not need to run during the main web request. I typically define these jobs using Active Job, which gives me a nice unified interface, and then I use Sidekiq and Redis as the backend to actually process those jobs. This is really useful for things like sending emails, generating big reports, or any other heavy lifting that I do not want to slow down the user experience. By using background jobs, I can keep the main app response fast and let the longer tasks run behind the scenes.
 
 ------------------------------------------------------------------------------------------------------
 Question 14: If you needed to scale a Rails app to handle a much larger number of users, what steps would you take?
 
-Answer -> When scaling a Rails application, I always start by identifying where the bottleneck is, rather than scaling blindly.
+Answer -> I would scale a Rails application at multiple levels.
+I would first identify the bottleneck using monitoring and profiling. I would look at things like request latency, CPU and memory usage, database query performance, throughput, Sidekiq queues, and error rates.
 
-The first step is usually database optimization, because that is often the biggest bottleneck. I look at slow queries, add proper indexes, remove N+1 queries, and optimize data access patterns.
+For the application tier scaling, I would make the Rails application horizontally scalable by adding multiple statless application servers nodes behind the Nginx or a load balancer to distribute traffic between them.
 
-Next, I focus on caching—fragment caching, low-level caching, and HTTP caching where applicable. Caching reduces repeated work and significantly improves response times.
+For database scaling, I would first optimize queries, fix any N+1 queries, add the right indexes, use cursor based pagination for large datasets and use connection pooling. 
+If read traffic becomes high, I would introduce read replicas and route read queries to replicas while keeping writes on the primary database. 
+If the dataset itself becomes too large, then I would consider partitioning or sharding.
 
-After that, I scale the application layer by running multiple application servers behind a load balancer. Background jobs are also separated into their own workers so long-running tasks do not affect web requests.
+For background processing, I would move heavy or asynchronous work to Sidekiq with Redis and scale the number of workers independently from the web servers.
 
-If the app continues to grow, I may introduce read replicas for the database, move heavy workloads into background jobs, or even extract certain responsibilities into separate services. The key idea is to scale incrementally and based on evidence, not assumptions.
+I would also use caching, for example Redis, memchached or Rails caching, for frequently accessed data and expensive computations.
+
+NOTE: By stateless, I mean the Rails servers should not keep important user or application state locally. Shared state should be stored in external systems like the database, Redis, or object storage, so any request can be handled by any application server.
+
+For example, if a user's session is stored only in Rails Server 1's memory, and the next request goes to Server 2, Server 2 will not know about that session.
+
+              Load Balancer
+              /           \
+             ↓             ↓
+        Rails App 1    Rails App 2
+             \             /
+              \           /
+                  Redis
+             (shared session)
+
+Now, whether the request goes to App 1 or App 2, both can access the same session from Redis. That is what makes the Rails application stateless and horizontally scalable.
 
 ------------------------------------------------------------------------------------------------------
 Question 15: How would you handle adding a new feature to a legacy Rails application that you did not originally build? What steps would you take to make sure it is integrated smoothly?
 
 Answer -> When working on a legacy Rails application, my first priority is to understand the existing system before writing any new code.
 
-I start by reading the relevant parts of the codebase, understanding the data models, and checking what test coverage exists. If tests are missing or weak in the area I am touching, I usually add characterization tests first. This helps me understand current behavior and protects against accidental regressions.
+I start by reading the relevant parts of the codebase, understanding the data models, and checking what test coverage exists. This helps me understand current behavior and protects against accidental regressions.
 
 Once I am confident I understand the flow, I design the new feature in a way that fits the existing architecture rather than forcing a completely new pattern. I try to make changes incremental and isolated, avoiding large refactors unless absolutely necessary.
 
@@ -200,7 +242,7 @@ For file uploads, I usually rely on Active Storage in modern Rails applications.
 
 My approach is to avoid storing files directly on the application server, especially in production. Instead, files are stored externally, which makes scaling much easier.
 
-I always validate file size and content type to prevent abuse. If files need processing, like image resizing or document conversion, I move that work into background jobs so uploads don’t block user requests.
+I always validate file size and content type to prevent abuse. If files need processing, like image resizing or document conversion, I move that work into background jobs so uploads do not block user requests.
 
 Security is also important, so I make sure access to private files is properly controlled.
 
@@ -322,16 +364,7 @@ Answer -> The Rails asset pipeline is a framework for managing and serving stati
 In newer versions of Rails, there’s been a shift toward using tools like Importmap, which lets you manage JavaScript dependencies without a build step, and there are also newer tools like Propshaft that aim to simplify asset management further. The idea is to make it easier to handle assets in a more modern, lightweight way while still benefiting from things like caching and fingerprinting.
 
 ------------------------------------------------------------------------------------------------------
-Question 30: Can you explain how Rails handles caching and what types of caching are available out of the box?
-
-Answer -> Rails provides several caching mechanisms out of the box to improve performance.
-
-There is fragment caching, which caches parts of a view, and low-level caching, which allows caching arbitrary data. Rails also supports HTTP caching using ETags and conditional GETs.
-
-By combining these caching strategies with a proper cache store like Redis or Memcached, Rails applications can significantly reduce load and improve response times.
-
-------------------------------------------------------------------------------------------------------
-Question 31: Can you explain what concerns are in Rails and how they help with organizing code?
+Question 31: Can you explain what concerns are in Rails and how they help with organizing code? 
 
 Answer -> In Rails, concerns are a way to extract and share reusable behavior across models or controllers without duplicating code. They are essentially Ruby modules that are included where needed. it also supports models life cycles method.
 
@@ -341,7 +374,7 @@ Concerns help keep classes smaller and more focused. However, I try not to overu
 
 ------------------------------------------------------------------------------------------------------
 Question 32: How concerns are different from service objects?
-
+ 
 Answer -> Concerns are typically used to share reusable bits of logic that might be sprinkled across multiple models or controllers. They are all about mixing in behavior that is relevant to more than one class. So if you have a few models that all need the same set of methods, you put those methods in a concern and include it wherever needed. Concern supports lifecylce methods of model like callbacks(before_save, after_save etc).
 
 Service objects, on the other hand, are used to encapsulate a specific unit of business logic that might not really belong in a model or a controller. They are more about handling a complex process or a single operation that can be called from multiple places. For example, if you have a complex checkout process or a payment workflow, you would put that in a service object rather than a concern.

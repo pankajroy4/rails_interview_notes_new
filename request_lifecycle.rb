@@ -40,6 +40,8 @@ Answer -> I usually explain it in layers, from the outside world down to Rails i
         Managing Ruby processes / threads
         Passing the request into the Rack stack
 
+      The app server converts the request into a Rack env hash.
+
     4.Request Enters the Rack Layer:
 
       Rails is a Rack application, so every request goes through Rack first.
