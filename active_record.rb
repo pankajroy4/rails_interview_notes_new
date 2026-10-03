@@ -78,6 +78,7 @@ ActiveRecord Models - Validations, Callbacks, Scopes, Enums, Attribute API, Conc
 
 
 ╰➤What enum does:
+    Enum is a way to represent a fixed set of named states for a model attribute.
     When you declare:
       class Booking < ApplicationRecord
         enum status: { pending: 0, confirmed: 1, cancelled: 2 }

@@ -34,18 +34,18 @@ Question 4: Can you explain the difference between a has_many and a belongs_to a
 
 Answer -> belongs_to defines ownership and holds the foreign key, while has_many defines the inverse collection. The important part is lifecycle and dependency.
 
-For example, an Order belongs_to :user and User has_many :orders. The belongs_to side is required by default in modern Rails, which enforces presence unless marked optional. I also think about dependent behavior — like has_many :orders, dependent: :nullify or :destroy — depending on business rules.
+For example, an Order belongs_to :user and User has_many :orders. 
+The belongs_to side is required by default in modern Rails, which enforces presence unless marked optional. 
+I also think about dependent behavior — like has_many :orders, dependent: :nullify or :destroy — depending on business rules.
 
 ------------------------------------------------------------------------------------------------------
 Question 5: How do you handle environment-specific configuration in Rails? So for example, how do you manage settings that are different in development, test, and production?
 
 Answer -> Rails already gives a strong foundation for this with separate environments: development, test, and production.
 
-For configuration that differs per environment, I typically use a combination of environment files and environment variables. For example, logging levels, caching behavior, and class loading are configured inside config/environments.
+For environment-specific configuration, I typically use a combination of environment files and environment variables. For example, logging levels, caching behavior, and class loading are configured inside config/environments.
 
 For sensitive or deploy-specific data like API keys, database credentials, or third-party tokens, I always rely on environment variables. In modern Rails, credentials.yml.enc is also a good option, especially when combined with per-environment credentials.
-
-The key idea is that code stays the same across environments, but configuration changes based on where the app is running.
 
 ------------------------------------------------------------------------------------------------------
 Question 6: How would you handle a task that takes a long time to process, like sending out a bunch of emails or generating a big report?
@@ -59,54 +59,49 @@ For example, sending bulk emails, generating reports, or syncing with third-part
 This approach keeps the application responsive and scalable.
 
 ------------------------------------------------------------------------------------------------------
-Question 7: What are some best practices to secure a Rails app against common vulnerabilities?
+Question 7(VVI): What are some best practices to secure a Rails app against common vulnerabilities?
 
 Answer -> Rails provides strong security defaults, but securing an application still requires deliberate effort.
 
-First, I rely on Rails’ built-in protections like CSRF tokens, strong parameters, and automatic SQL injection prevention. I never interpolate user input directly into SQL or HTML.
-
+First, I rely on Rails built-in protections like CSRF tokens, strong parameters, and automatic SQL injection prevention.
 Authentication and authorization are clearly separated: authentication handled by Devise or similar, and authorization enforced via Pundit policies or similar mechanisms.
 
-I also enforce secure headers (CSP, HSTS, X-Frame-Options).
-For sensitive data, I would never hardcode secrets or credentials in the codebase. I would use environment variables or a proper secret manager, and sensitive data should be encrypted both in transit and, where necessary, at rest.
+For sensitive data, I would never hardcode secrets or credentials in the codebase. I would use environment variables or a proper secret manager, and sensitive data should be encrypted both in transit and at rest.
 
 On the data side, I validate and sanitize all inputs and avoid exposing sensitive fields in APIs or logs. 
 I would use parameterized queries or ActiveRecord instead of constructing raw SQL with user input, which helps prevent SQL injection.
-Regular dependency updates and security audits via tools like bundler-audit are part of my routine.
 
-I would also configure secure cookies, HTTPS, appropriate security headers, rate limiting for sensitive endpoints, and proper logging and monitoring without exposing passwords, tokens, or other sensitive information.
+I would also configure secure cookies, HTTPS, appropriate security headers (CSP, HSTS, X-Frame-Options), rate limiting and throttling for sensitive endpoints to prevent the API abuse, and proper logging and monitoring without exposing passwords, tokens, or other sensitive information.
+
+  CSP: Controls which sources the browser is allowed to load resources like JavaScript, CSS, images, and fonts from.
+  HSTS: Force HTTPS. Example: config.force_ssl = true
+  X-Frame-Options: Controls whether the application can be embedded inside an <iframe> and helps protect against clickjacking attacks.
 
 Finally, I would regularly run dependency and security scans and follow the principle of least privilege for database users, APIs, and other services.
-
-Short Answer -> I follow layered security. At the Rails level: strong parameters, CSRF protection, secure cookies, and avoiding mass assignment. At the dependency level: regular bundle audits and Brakeman scans.
-
-At the infrastructure level: HTTPS everywhere, proper CORS rules for APIs, and rate limiting using Rack::Attack if needed. Security is not one feature — it is multiple layers working together.
 
 ------------------------------------------------------------------------------------------------------
 Question 8: What are a couple of ways you can improve the performance of a Rails app if you notice it is getting a bit slow?
 
-Answer -> When a Rails app starts slowing down, the first thing I do is measure before optimizing. I use tools like Bullet, Skylight, New Relic, or Rails logs to identify bottlenecks—whether they are database-related, rendering-related, or network-related.
+Answer -> When a Rails app starts slowing down, the first thing I do is measure before optimizing. I use tools like Bullet, Skylight, New Relic, or Rails logs to identify bottlenecks — whether they are database-related, rendering-related, or network-related.
 
 Most performance issues come from the database layer, so I look for N+1 queries, missing indexes, and inefficient queries. Adding proper indexes, using includes, and avoiding unnecessary object loading often gives immediate gains.
 
 Next, I focus on caching. Fragment caching, low-level caching, and HTTP caching (ETags, conditional GETs) can dramatically reduce response times when used correctly.
 
-For heavy or slow tasks—like sending emails or processing files—I move the work to background jobs using Sidekiq or Active Job so user requests stay fast.
-
-Finally, I review view rendering and asset delivery, ensuring partials are not overused and assets are properly compressed and cached. Performance is usually about fixing a few high-impact problems rather than rewriting the entire system.
+For heavy or slow tasks—like sending emails or processing files — I move the work to background jobs using Sidekiq or Active Job so user requests stay fast.
 
 ------------------------------------------------------------------------------------------------------
 Question 9: How do you typically handle exceptions in a Rails application, and what are some best practices for making sure errors are logged and users see friendly messages?
 
 Answer -> In a Rails application, I approach exception handling at multiple layers rather than relying on a single global solution.
 
-At the controller level, I use rescue_from to catch known, expected exceptions—such as ActiveRecord::RecordNotFound, authorization errors from Pundit, or custom business logic errors. This allows me to return meaningful HTTP responses like 404, 403, or 422 while keeping controllers clean and predictable.
+At the controller level, I use rescue_from to catch known, expected exceptions — such as ActiveRecord::RecordNotFound, authorization errors from Pundit, or custom business logic errors. This allows me to return meaningful HTTP responses like 404, 403, or 422 while keeping controllers clean and predictable.
 
 For unexpected or system-level errors, I let Rails handle them naturally and rely on a centralized error tracking tool like Sentry, Honeybadger, or Bugsnag. These tools capture stack traces, request context, user IDs, and environment details, which is far more effective than relying only on log files.
 
-From a logging perspective, I ensure that errors are logged with enough context—such as request IDs, user information, and parameters (with sensitive data filtered). Rails’ tagged logging helps a lot here, especially in distributed systems.
+From a logging perspective, I ensure that errors are logged with enough context—such as request IDs, user information, and parameters (with sensitive data filtered). Rails tagged logging helps a lot here, especially in distributed systems.
 
-For user experience, I never expose raw exception messages. Instead, I render friendly, non-technical error pages or JSON responses like “Something went wrong, please try again later.” The goal is to be transparent but not alarming.
+For user experience, I never expose raw exception messages. Instead, I render friendly, non-technical error pages or JSON responses like “Something went wrong, please try again later.”
 
 Overall, the best practice is to treat errors as first-class citizens: catch what you expect, monitor what you do not, log everything responsibly, and always protect the user experience.
 
@@ -130,9 +125,9 @@ And finally, REST APIs should be cacheable when possible and follow uniform inte
   🔸Is PUT idempotent? Answer-> Yes — calling it multiple times produces same result.
 
 ------------------------------------------------------------------------------------------------------
-Question 10: How would you design a RESTful API in Rails, and what are some conventions or best practices you follow when building APIs?
+Question 10(VVI): How would you design a RESTful API in Rails, and what are some conventions or best practices you follow when building APIs?
 
-Answer -> When designing a RESTful API in Rails, I start by modeling the API around resources, not actions. Each resource maps cleanly to standard HTTP verbs—GET, POST, PUT/PATCH, and DELETE— which keeps the API intuitive and predictable.
+Answer -> When designing a RESTful API in Rails, I start by modeling the API around resources, not actions. Each resource maps to standard HTTP verbs—GET, POST, PUT/PATCH, and DELETE— which keeps the API intuitive and predictable.
 
 I typically namespace APIs under /api and version them, such as /api/v1, to allow backward compatibility as the system evolves. This is critical in production systems where multiple clients may depend on older versions.
 
@@ -145,11 +140,6 @@ From a standards perspective, I use:
   Token-based authentication (JWT or Devise Token Auth)
 
 Security-wise, I avoid exposing unnecessary fields, validate all inputs, and throttle requests where needed. Overall, my goal is to make the API predictable, stable, secure, and easy to consume, not just functional.
-
-Short Answer: 
-  I follow REST conventions strictly — proper HTTP verbs, status codes, and resource-based routes. I keep controllers thin and move logic to services.
-
-  I also handle versioning from the start, use token-based authentication, and ensure consistent JSON response structure with serializers. Good APIs are predictable and backward-compatible.
 
 ------------------------------------------------------------------------------------------------------
 Question 11: What testing frameworks do you like to use with Rails, and how do you structure your tests to make sure your application is reliable?
@@ -284,23 +274,12 @@ The most common approach I use is namespace-based versioning, such as api/v1 and
 
 When introducing a new version, I avoid breaking changes in the existing one. Instead, I add the new behavior to the next version and slowly deprecate the older one. This gives consumers time to migrate.
 
-Overall, API versioning is about stability and trust—clients should feel confident that updates will not unexpectedly break their integration.
-
-------------------------------------------------------------------------------------------------------
-Question 22: Can you tell me about a time when you faced a significant challenge in a project and how you handled it?
-
-Answer -> One significant challenge I faced was dealing with serious performance issues in a production Rails application. The application worked fine initially, but as data grew, response times became unacceptable.
-
-Instead of immediately jumping to scaling infrastructure, I started by analyzing logs and profiling database queries. I discovered a combination of N+1 queries and missing database indexes that were slowing down critical endpoints.
-
-I fixed the query issues using eager loading, added the necessary indexes, and introduced caching where appropriate. I also added monitoring so we could catch similar issues earlier in the future.
-
-The result was a noticeable improvement in performance and stability. More importantly, the experience taught me to measure first, then optimize, rather than guessing.
+Overall, API versioning is about stability and trust — clients should feel confident that updates will not unexpectedly break their integration.
 
 ------------------------------------------------------------------------------------------------------
 Question 23: Can you describe a situation where you had to collaborate with a difficult team member, and how you handled it?
 
-Answer -> Yes, I have definitely encountered that situation. In one case, a team member was very strong technically but resistant to feedback and collaboration, which started affecting the team’s productivity.
+Answer -> Yes, I have definitely encountered that situation. In one case, a team member was very strong technically but resistant to feedback and collaboration, which started affecting the teams productivity.
 
 Instead of confronting them directly in a negative way, I focused on clear communication. I tried to understand their perspective and aligned discussions around shared goals, like code quality and delivery timelines.
 
@@ -316,37 +295,6 @@ In Rails, I use transactions when updating multiple related records where partia
 Best practices include keeping transactions short and focused, avoiding external API calls inside them, and handling exceptions properly so that failed operations are rolled back cleanly.
 
 Used correctly, transactions are a powerful tool for maintaining data integrity.
-
-------------------------------------------------------------------------------------------------------
-Question 25: Can you explain how Rails handles background jobs and what role Active Job plays in that process?
-
-Answer -> Rails handles background jobs through Active Job, which acts as a framework-level abstraction. Active Job provides a consistent interface for defining and running jobs, regardless of which backend is used.
-
-The actual job execution is handled by adapters like Sidekiq, Delayed Job, or Resque. This separation is useful because it allows you to switch job backends without rewriting your job code.
-
-Active Job also integrates nicely with Rails features like retries, callbacks, and logging. In practice, it helps standardize background processing across the application.
-
-------------------------------------------------------------------------------------------------------
-Question 26: Can you explain the difference between before_action, after_action, and around_action filters in Rails controllers, and when you might use each one?
-
-Answer -> Controller filters allow you to run code at different points in the request lifecycle.
-
-before_action runs before the controller action and is commonly used for things like authentication, authorization, or loading shared resources.
-
-after_action runs after the action is completed, usually for tasks like logging or cleanup, although it’s used less frequently.
-
-around_action wraps the entire action, which makes it useful for cases like measuring performance or handling transactions around a request.
-
-I use filters carefully to avoid hidden logic and keep controllers readable.
-
-------------------------------------------------------------------------------------------------------
-Question 27: Can you explain what strong parameters are in Rails and why they are important for security?
-
-Answer -> Strong parameters are a security feature in Rails that prevent mass assignment vulnerabilities. Instead of allowing all parameters to be assigned automatically, Rails requires you to explicitly permit which attributes are allowed.
-
-This is important because without strong parameters, malicious users could modify sensitive fields like roles or permissions.
-
-By whitelisting parameters, Rails ensures that only intended data can be written to the database, which significantly improves application security.
 
 ------------------------------------------------------------------------------------------------------
 Question 28: Can you explain what a Rails migration is and how it helps manage database schema changes?
@@ -417,20 +365,6 @@ I usually test validations, associations, and scopes first. After that, I test a
 I avoid testing Rails internals and focus on what the model is responsible for. Clear, focused model tests make it easier to refactor confidently later.
 
 ------------------------------------------------------------------------------------------------------
-Question 36: Can you explain how you handle environment variables and secrets in a Rails production environment? What tools or practices do you use to keep those credentials secure?
-
-Answer -> In production, I never hardcode secrets into the codebase. Instead, I use environment variables or Rails encrypted credentials.
-
-For cloud platforms, secrets are usually managed through the platform’s configuration dashboard. Locally, tools like dotenv can be used, but those files are never committed to version control.
-
-The goal is to keep secrets secure, environment-specific, and easy to rotate when needed.
-
-------------------------------------------------------------------------------------------------------
-Question 37: Can you explain how you would diagnose and improve a slow-running Rails action? What tools or methods would you use to figure out where the bottleneck is?
-
-Answer -> When I need to diagnose a slow-running Rails action, I usually start by looking at the database queries. I use tools like the Bullet gem to identify N+1 query problems and make sure I am using eager loading properly. If the queries themselves are slow, I will use the EXPLAIN command or a tool like rack-mini-profiler to see which queries need indexing or optimization. Once the database is tuned, I also look at what else the action is doing—like if it is sending emails or generating large reports—and move those tasks into background jobs. Finally, I will add caching for any heavy computations to keep the response times quick.
-
-------------------------------------------------------------------------------------------------------
 Question 38: Can you explain how you handle error handling in a Rails application? For example, how do you manage and respond to exceptions in controllers or across the application?
 
 Answer -> When dealing with a slow Rails action, my first step is to measure and observe. I look at logs, request timings, and database query durations.
@@ -456,15 +390,6 @@ Answer -> A polymorphic association allows a model to belong to more than one ot
 For example, a Comment can belong to a Post or a Photo. Instead of having multiple foreign keys, the comment stores both an ID and a type.
 
 I use polymorphic associations when different models share the same relationship behavior. However, I use them carefully, because they can make queries and constraints more complex.
-
-------------------------------------------------------------------------------------------------------
-Question 41: In a Rails application, what are callbacks and when might you use them? Can you give an example of a before or after callback and how you would use it in a model?
-
-Answer -> Callbacks allow you to hook into different stages of a model’s lifecycle, such as before saving or after committing to the database.
-
-I use callbacks for things like normalizing data, generating derived values, or triggering side effects that must happen alongside persistence.
-
-That said, I use callbacks sparingly. Overusing them can make the code hard to follow and debug. For more complex workflows, I prefer service objects instead.
 
 ------------------------------------------------------------------------------------------------------
 Question 42: Can you describe how you would set up a Rails backend to serve as an API for a React frontend? In other words, explain the architecture and any best practices you’d follow to ensure smooth integration between a Rails API and a React single-page application.

@@ -402,7 +402,7 @@ Second, I implement authentication — typically OAuth2, JWT tokens, or API keys
 Third, I implement authorization to ensure users can only access permitted resources.
 Fourth, I validate all inputs strictly to prevent SQL injection, XSS, or mass assignment.
 Fifth, I implement rate limiting using tools like rack-attack.
-Also, I configure CORS to allow requests only from whitelisted origins.
+Also, I configure CORS(cross origin resource sharing) to allow requests only from whitelisted origins.
 I will also add Data-Level Security, to store sensitive data securely.
 Finally, I log suspicious activities and monitor traffic patterns.
 

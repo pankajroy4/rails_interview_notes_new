@@ -82,8 +82,7 @@ It checks:
   Class
   Included modules
   Superclass chain
-
-Ruby's method lookup is linear and predictable. When a method is called, Ruby first checks the object's singleton class. Then it checks modules prepended to that class, followed by the class itself, then included modules (in reverse order), and then moves up the inheritance chain. If no method is found, Ruby calls method_missing. Understanding this is crucial when debugging overrides and mixins.
+ If no method is found, Ruby calls method_missing. Understanding this is crucial when debugging overrides and mixins.
 
 ------------------------------------------------------------------------------------------------------
 Question 8: What are Modules used for?
@@ -256,18 +255,19 @@ Question 24: How does Routing work in Rails?
 
 Answer -> Routing maps an incoming HTTP request to a controller action.
 Routes are defined in config/routes.rb.
-
 Routes are matched top to bottom.
 
-When a request reaches Rails, ActionDispatch::Routing checks routes sequentially. It matches the HTTP verb and URL pattern. Once a match is found, Rails extracts parameters (like :id) and dispatches the request to the corresponding controller and action. If no route matches, Rails returns a 404 error. Route order matters because the first matching route wins.
+When a request reaches Rails, ActionDispatch::Routing checks routes sequentially. It matches the HTTP verb and URL pattern. Once a match is found, Rails extracts parameters (like :id) and dispatches the request to the corresponding controller and action. 
+If no route matches, Rails returns a 404 error. 
+Route order matters because the first matching route wins.
 
 ------------------------------------------------------------------------------------------------------
 Question 25: What are RESTful Routing Principles?
 
 Answer -> REST treats everything as a resource.
 HTTP verbs define actions, not the URL.
+URLs should be noun-based and stateless. (Har HTTP request mein server ko request process karne ke liye required information mil jaani chahiye. Server ko previous request ka context ya session state yaad rakhne par depend nahi karna chahiye.)
 
-URLs should be noun-based and stateless.
 In RESTful routing, the same URL behaves differently depending on the HTTP method. For example:
   GET /users → index
   POST /users → create
@@ -293,15 +293,6 @@ Answer ->Strong Parameters prevent mass assignment security threats.
 It make sure that only permitted attributes can be assigned.
 
 In Rails, parameters come from user input and cannot be trusted. Using params.require(:user).permit(:name, :email) ensures only allowed fields are mass assigned. This prevents users from injecting protected attributes like admin: true.
-
-------------------------------------------------------------------------------------------------------
-Question 28: What is Mass Assignment Protection?
-
-Answer -> Mass assignment allows assigning multiple attributes at once.
-Strong parameters ensure only safe attributes are allowed.
-
-When calling User.create(params[:user]), Rails could update all fields. Strong parameters enforce whitelisting to protect sensitive attributes. 
-Database constraints should still exist as a final safety layer.
 
 ------------------------------------------------------------------------------------------------------
 Question 29: Cookies vs Sessions
