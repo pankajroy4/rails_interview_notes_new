@@ -1,7 +1,25 @@
 Question 1: What is RSpec?
-Answer: RSpec is a behavior-driven development (BDD) testing framework for Ruby and Rails. It allows us to write human-readable tests that describe how the system should behave. Instead of focusing on implementation details, it focuses on expected behavior.
+Answer: RSpec is a behavior-driven development (BDD) testing framework for Ruby and Rails. It allows us to write human-readable tests that describe how the system should behave. Instead of focusing on implementation details(how the code internally works), it focuses on expected behavior(what the system should do).
 
-In Rails projects, we use RSpec to test models, controllers, APIs, background jobs, and integrations. It provides a DSL like describe, context, and it, along with powerful mocking, stubbing ans spy capabilities.
+In Rails projects, we use RSpec to test models, controllers, APIs, background jobs, and integrations. It provides DSL like describe, context, and it, along with powerful mocking, stubbing ans spy capabilities.
+
+Example: for a login feature:
+The expected behavior is:  "When a user provides valid credentials, they should be successfully logged in."
+  So we can test:
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["token"]).to be_present
+
+  We do not care whether internally we use:
+      User.find_by(email: params[:email])   # OR 
+      User.find_by_email(params[:email])
+      
+      These are implementation details.
+
+  A test like below would be tightly coupled to the implementation:
+      expect(User).to receive(:find_by).with(email: user.email) 
+
+    This test specifically checks that User.find_by was called. 
+    If we later change the implementation to use a service object or another query method, the actual behavior may remain the same, but this test would fail.
 
 --------------------------------------------------------------------------------------------------------
 Question 2: Difference Between Unit Test & Integration Test?
@@ -218,14 +236,6 @@ Examples: WebMock (For HTTP calls)
   stub_request(:get, "https://api.test.com").to_return(status: 200, body: "ok")
   stub_request(:get, "https://api.example.com/users/1").to_return(status: 500, body: "Internal Server Error")
   stub_request(:get, "https://api.example.com/users/1").to_timeout
-
--------------------------------------------------------------------------------------------------------
-Question 14: Mock vs Stub
-Answer: A stub replaces a method and returns a predefined value.
-A mock sets an expectation that a method must be called.
-
-Stubs test output.
-Mocks test interaction.
 
 -------------------------------------------------------------------------------------------------------
 Question 15: How do you test private methods?
@@ -445,8 +455,8 @@ Question 28: Stub and Mock.
       RSpec.describe OrderProcessor do
         it "charges the payment gateway" do
           order = double("Order", total: 100, update: true)
-
           gateway = double("PaymentGateway")
+          
           expect(gateway).to receive(:charge).with(100)
 
           processor = OrderProcessor.new(gateway)

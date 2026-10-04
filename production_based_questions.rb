@@ -3,8 +3,7 @@ Answer: A memory leak happens when objects are allocated in memory but not relea
 In Rails, this usually happens due to large object retention, global variables, class-level caching, or long-running background jobs.
 
 To identify memory leaks, I monitor memory usage using tools like top, htop, or NewRelic. If memory keeps growing without stabilizing, it is suspicious.
-
-I also use gems like memory_profiler, derailed_benchmarks, or stackprof to analyze object allocation.
+I also use gems like memory_profiler or stackprof to analyze object allocation.
 
 To fix it, I check for:
   Unnecessary caching of large objects
@@ -96,7 +95,7 @@ I would profile CPU using stackprof or rbspy to identify hot methods.
 --------------------------------------------------------------------------------------------------------------
 Question 8: What happens when you run rails assets:precompile in production?
 Answer: When you run RAILS_ENV=production rails assets:precompile, Rails first loads the production environment. 
-Then, depending on your setup, Sprockets in older Rails versions or Propshaft in Rails 7+, it compiles your assets like CSS, JavaScript, and images.
+Then it compiles your assets like CSS, JavaScript, and images.
 
 During this process, Rails generates fingerprinted, digested files for example, application-abc123.css or application-def456.js and stores them in the public/assets directory. 
 The reason for digesting is cache busting: if an asset changes, its hash changes, so the browser knows to download the new version rather than using a cached one.

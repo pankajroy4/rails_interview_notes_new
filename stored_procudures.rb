@@ -182,18 +182,6 @@ Stored procedures support variables, loops, conditional statements, and transact
 
 However, in frameworks like Rails, we typically keep business logic in the application layer unless there is a performance-critical requirement.
 
-
-Answer 2: A stored procedure is a precompiled set of SQL statements stored inside the database that can be executed by calling its name.
-
-Instead of sending multiple SQL queries from the application, we can write the logic once inside the database as a stored procedure and reuse it.
-
-It can contain:
-  SQL queries (SELECT, INSERT, UPDATE, DELETE)
-  Conditional logic (IF, CASE)
-  Loops
-  Transactions
-  Error handling
-
 -------------------------------------------------------------------------------------------------------------
 Question 2: What are the Benefits of Stored Procedures?
 Answer:

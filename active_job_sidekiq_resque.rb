@@ -24,8 +24,10 @@ Example:
   end
 
   You can then enqueue job from controller or service:
-    SendEmailJob.perform_later(user.id)
-  
+    SendEmailJob.perform_later(user.id)  # runs immediately in background as soon as we enqueue it
+    SendEmailJob.set(wait: 30.minutes).perform_later(user.id) # Runs after 30 minutes.
+    SendEmailJob.set(wait_until: 2.hours.from_now).perform_later(user.id)  # Runs after 2 hours from now.
+
   When using ActiveJob, we did not care about the backend as per code syntax. Code will remain same.
 
 -------------------------------------------------------------------------------------------
@@ -53,7 +55,8 @@ Example: Sidekiq worker(without ActiveJob). This code will completely skip Activ
   end
 
   You can then call the worker from controller or service:
-    EmailWorker.perform_async(1)
+    EmailWorker.perform_async(1)   # runs immediately in background as soon as we enqueue it
+    EmailWorker.perform_in(30.minutes, user.id) # Runs after 30 minutes after enueuing.
 
 --------------------------------------------------------------------------------------------------------
 Question 3: What is Resque?

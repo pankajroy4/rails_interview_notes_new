@@ -142,6 +142,8 @@ Answer ->  Blue-green and canary are usually safer because they allow quick roll
 Question 29: How do you handle DB migrations in CI/CD?
 
 Answer ->  Migrations are usually run during deployment as a separate step. We ensure they are backward-compatible so old and new app versions can run during rollout. 
+I run database migrations as a separate step in the deployment pipeline. Before deploying the new application version, I make sure the migration is backward-compatible because during rolling deployments, old and new application versions can temporarily run together.
+For example, instead of adding a NOT NULL column immediately, I first add it as nullable, deploy code that supports both schemas, backfill the data, and then make it NOT NULL in a later deployment. For larger schema changes, I follow the expand-and-contract approach. This allows me to deploy database changes without causing downtime or breaking the existing application.
  
 ------------------------------------------------------------------------------------------------------
 Question 30: What is a backward-compatible migration?

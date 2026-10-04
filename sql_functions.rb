@@ -959,7 +959,7 @@ Answer: A window function performs a calculation across a set of rows that are r
         OFFSET 1
         LIMIT 1;
 
-      ➤Find second highest order (without Window function). t will return all rows which has second highest order.
+      ➤Find second highest order (without Window function). It will return all rows which has second highest order.
 
           SELECT *
             FROM orders

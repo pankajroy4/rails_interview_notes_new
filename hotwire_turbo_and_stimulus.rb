@@ -213,3 +213,84 @@
       <% end %>
 
       In this Turbo example, when the form is submitted, it only replaces the contents of the "comments" Turbo Frame with the updated content. You do not need to manually handle AJAX or write any custom JavaScript for this.
+
+
+===============================
+- Ruby on Rails ✅
+- PostgreSQL ✅
+- REST APIs. ✅
+- OOP ✅
+- Git ❌
+- multi-tenant SaaS ❌
+- RSpec ✅
+- Redis ✅
+- Sidekiq ✅
+- AWS ❌
+- Rails security ✅
+- SQL/joins/relationships ✅
+- DB partitioning ✅
+- scaling Rails applications ✅
+
+========================================
+
+Priority 1 — Ruby/Rails 
+- Ruby OOP ✅
+- modules vs classes ✅
+- blocks/procs/lambdas ✅
+- metaprogramming ✅
+- method_missing ✅
+- Rails request lifecycle ✅
+- MVC ✅
+- ActiveRecord ✅
+- associations ✅
+- validations ✅
+- callbacks ✅
+- scopes ✅
+- concerns ✅
+- service objects ✅
+- serializers ❌
+- API-only Rails ❌ 
+- authentication ❌
+- authorization ✅
+- Rails security ✅
+- Hotwire ❌
+
+🔥 Priority 2 — PostgreSQL
+- joins ✅
+- indexes ✅
+- composite indexes ✅
+- transactions ✅
+- isolation levels ✅
+- N+1 ✅
+- query optimization ✅
+- EXPLAIN ✅
+- normalization ✅
+- partitioning ✅
+- locks ✅
+- database scaling ✅
+
+
+🔥 Priority 3 — Redis + Sidekiq
+Tumse almost certainly questions aa sakte hain:
+  Why Sidekiq? ✅
+  How does Sidekiq work? ✅
+  Redis ka role kya hai? ✅
+  Job retry kaise hota hai? ✅
+  Idempotency kya hoti hai? ✅
+  Duplicate jobs ko kaise handle karoge? ✅
+
+🔥 Priority 4 — System Design
+Ye Product Engineer role hai, so:
+  - scalable API design ✅
+  - multi-tenancy ❌
+  - caching ✅
+  - background processing ✅
+  - rate limiting ✅
+  - database scaling ✅
+  - horizontal scaling ✅
+  - load balancing ✅ 
+  - queues ✅
+  - failure handling ❌
+
+
+ProMobi Technologies is a SaaS product company that builds enterprise products around endpoint management, security and communication. Its flagship product is Scalefusion, a Unified Endpoint Management platform that helps organizations centrally manage and secure devices such as Android, iOS, Windows and macOS endpoints. The company also has products like OneIdP, Veltar and NuovoPay.

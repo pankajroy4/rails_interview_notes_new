@@ -106,6 +106,44 @@ Question 12: How is authentication handled?
 
 Answer: -> Authentication is usually centralized using JWT or OAuth. The client sends a token with each request, and individual services validate the token instead of maintaining sessions.
 
+For JWT, we can use asymmetric signing such as RS256, where the Auth Service keeps the private key to sign tokens, while other services use the public key to verify them. This means services do not need access to the users password, email or the private signing key.
+
+
+                                           Client
+                                              |
+                                              v
+                                        API Gateway
+                                              |
+                                +-------------+-------------+
+                                |             |             |
+                                v             v             v
+                            Auth Service   Order Service  Payment Service
+                                |             |             |
+                                v             v             v
+                              User DB       Order DB      Payment DB (Authenticate request using publick key.)
+                                ^                             
+                                |                              
+                            Validate Email/password, then perform JWT signing to generate token.
+                            After validation generate a token using private key.
+
+  NOTE: JWT Signing Types
+        There are two types of JWT signing types.
+        1. Symmetric Signing — HMAC / HS256
+          - Same secret key is used for both signing and verification.
+          - Auth Service → signs token using secret.
+          - Other services → verify token using the same secret.
+          - Secret must be shared with all verifying services.
+
+        2. Asymmetric Signing — RSA / RS256
+          - Uses a public/private key pair.
+          - Auth Service → signs token using private key.
+          - Other services → verify token using public key.
+          - Private key remains only with Auth Service.
+
+  Key difference:
+    HS256 = one shared secret
+    RS256 = private key for signing + public key for verification
+
 ------------------------------------------------------------------------------------------------------
 Question 13: How do microservices handle failures?
 

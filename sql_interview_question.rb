@@ -410,47 +410,6 @@ Answer -> Lock escalation means DB might upgrade from many row locks to a higher
 Postgres generally does not do classic lock escalation like SQL Server, but large operations can still acquire heavier locks.
 
 ------------------------------------------------------------------------------------------------------
-Question 64: Optimistic vs pessimistic locking?
-
-Answer -> Optimistic locking: Assumes conflicts are rare. Uses version column (Rails: lock_version) to detect conflicts during update.
-Pessimistic locking: Locks the row immediately using SELECT ... FOR UPDATE, preventing others from updating.
-
-------------------------------------------------------------------------------------------------------
-Question 65: How to avoid race conditions?
-
-Answer -> Common ways:
-use database constraints (UNIQUE)
-use transactions
-use row locking (FOR UPDATE)
-use upsert (ON CONFLICT)
-use idempotency keys
-
-Best solution: enforce correctness at DB layer.
-
-------------------------------------------------------------------------------------------------------
-Question 66: SERIALIZABLE isolation?
-
-Answer -> Serializable is the strictest isolation level. It makes concurrent transactions behave as if executed one by one. It prevents anomalies but increases:
-blocking
-transaction failures (serialization errors)
-
-------------------------------------------------------------------------------------------------------
-Question 67: Dirty read, phantom read?
-
-Answer -> Dirty read: reading uncommitted changes from another transaction (Postgres prevents this)
-Phantom read: re-running a query returns new rows because another transaction inserted rows matching condition.
-Serializable prevents these.
-
-------------------------------------------------------------------------------------------------------
-Question 68: How to troubleshoot deadlocks?
-Answer -> Steps:
-Identify deadlock error logs
-Find which queries/transactions involved
-Reduce lock time (short transactions)
-Lock rows in consistent order
-Add retry logic for deadlocks
-
-------------------------------------------------------------------------------------------------------
 Question 69: Use case of partial indexes?
 
 Answer -> Partial index indexes only subset of rows.
@@ -460,14 +419,6 @@ CREATE INDEX idx_users_active ON users(id)
 WHERE active = true;
 
 Great when most rows are inactive.
-
-------------------------------------------------------------------------------------------------------
-Question 70: What is a covering index?
-
-Answer -> A covering index includes all columns needed by query, so DB does not need table lookup.
-Example: CREATE INDEX idx_orders_user_created_at ON orders(user_id, created_at);
-
-Query filtering user_id and ordering by created_at can be served fully by index.
 
 ------------------------------------------------------------------------------------------------------
 Question 71: When to use JSONB?
@@ -488,28 +439,6 @@ Answer -> Two common indexes:
 Example:
   CREATE INDEX idx_meta_gin ON events USING GIN(meta);
   CREATE INDEX idx_meta_user ON events ((meta->>'user_id'));
-
-------------------------------------------------------------------------------------------------------
-Question 73: What is replication?
-
-Answer -> Replication copies data from primary DB to replica(s) for:
-  high availability
-  scaling reads
-  failover
-
-------------------------------------------------------------------------------------------------------
-Question 74: Read replicas?
-
-Answer -> Read replicas are secondary DB instances used for read-only queries.
-Writes still go to primary. Used to scale read-heavy workloads.
-
-------------------------------------------------------------------------------------------------------
-Question 75: How to prevent SQL injection?
-
-Answer -> use parameterized queries / prepared statements
-avoid string interpolation
-validate input when needed
-Rails: use ActiveRecord query bindings: User.where("email = ?", params[:email])
 
 ------------------------------------------------------------------------------------------------------
 Question 76: Prepared statements?
