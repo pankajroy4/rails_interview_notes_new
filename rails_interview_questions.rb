@@ -80,18 +80,18 @@ I would also configure secure cookies, HTTPS, appropriate security headers (CSP,
 Finally, I would regularly run dependency and security scans and follow the principle of least privilege for database users, APIs, and other services.
 
 ------------------------------------------------------------------------------------------------------
-Question 8: What are a couple of ways you can improve the performance of a Rails app if you notice it is getting a bit slow?
+Question 8(VVI): What are a couple of ways you can improve the performance of a Rails app if you notice it is getting a bit slow?
 
 Answer -> When a Rails app starts slowing down, the first thing I do is measure before optimizing. I use tools like Bullet, Skylight, New Relic, or Rails logs to identify bottlenecks — whether they are database-related, rendering-related, or network-related.
 
 Most performance issues come from the database layer, so I look for N+1 queries, missing indexes, and inefficient queries. Adding proper indexes, using includes, and avoiding unnecessary object loading often gives immediate gains.
 
-Next, I focus on caching. Fragment caching, low-level caching, and HTTP caching (ETags, conditional GETs) can dramatically reduce response times when used correctly.
+Next, I focus on caching. Fragment caching, low-level caching, and HTTP caching (ETags, LastModified) can dramatically reduce response times when used correctly.
 
 For heavy or slow tasks—like sending emails or processing files — I move the work to background jobs using Sidekiq or Active Job so user requests stay fast.
 
 ------------------------------------------------------------------------------------------------------
-Question 9: How do you typically handle exceptions in a Rails application, and what are some best practices for making sure errors are logged and users see friendly messages?
+Question 9(VVI): How do you typically handle exceptions in a Rails application, and what are some best practices for making sure errors are logged and users see friendly messages?
 
 Answer -> In a Rails application, I approach exception handling at multiple layers rather than relying on a single global solution.
 
@@ -106,7 +106,7 @@ For user experience, I never expose raw exception messages. Instead, I render fr
 Overall, the best practice is to treat errors as first-class citizens: catch what you expect, monitor what you do not, log everything responsibly, and always protect the user experience.
 
 ------------------------------------------------------------------------------------------------------
-9.REST Principles
+9(VVI).REST Principles
 Answer: REST stands for Representational State Transfer. It is an architectural style for designing scalable and maintainable APIs. It enforces stateless communication, resource-oriented URLs, proper HTTP verb usage, and client-server separation.
 
 First principle is statelessness — each request must contain all required information. The server should not store client session state.
@@ -169,14 +169,14 @@ Question 13: How do you typically set up and manage background jobs in Rails, an
 Answer -> In a Rails application, I use background jobs whenever I have tasks that are time-consuming and do not need to run during the main web request. I typically define these jobs using Active Job, which gives me a nice unified interface, and then I use Sidekiq and Redis as the backend to actually process those jobs. This is really useful for things like sending emails, generating big reports, or any other heavy lifting that I do not want to slow down the user experience. By using background jobs, I can keep the main app response fast and let the longer tasks run behind the scenes.
 
 ------------------------------------------------------------------------------------------------------
-Question 14: If you needed to scale a Rails app to handle a much larger number of users, what steps would you take?
+Question 14(VVI): If you needed to scale a Rails app to handle a much larger number of users, what steps would you take?
 
 Answer -> I would scale a Rails application at multiple levels.
 I would first identify the bottleneck using monitoring and profiling. I would look at things like request latency, CPU and memory usage, database query performance, throughput, Sidekiq queues, and error rates.
 
 For the application tier scaling, I would make the Rails application horizontally scalable by adding multiple statless application servers nodes behind the Nginx or a load balancer to distribute traffic between them.
 
-For database scaling, I would first optimize queries, fix any N+1 queries, add the right indexes, use cursor based pagination for large datasets and use connection pooling. 
+For database scaling, I would first optimize queries, fix any N+1 queries, add the right indexes, use cursor based pagination for large datasets and i will use connection pooling. 
 If read traffic becomes high, I would introduce read replicas and route read queries to replicas while keeping writes on the primary database. 
 If the dataset itself becomes too large, then I would consider partitioning or sharding.
 
@@ -211,7 +211,7 @@ Once I am confident I understand the flow, I design the new feature in a way tha
 After implementing the feature, I make sure it is well-tested, code-reviewed, and documented. The goal is to improve the system without increasing technical debt.
 
 ------------------------------------------------------------------------------------------------------
-Question 16: Can you explain how Rails MVC architecture works and how it helps structure a typical Rails application?
+Question 16(VVI): Can you explain how Rails MVC architecture works and how it helps structure a typical Rails application?
 
 Answer -> Rails follows the Model-View-Controller architecture, which helps clearly separate responsibilities in the application.
 
@@ -297,7 +297,7 @@ Best practices include keeping transactions short and focused, avoiding external
 Used correctly, transactions are a powerful tool for maintaining data integrity.
 
 ------------------------------------------------------------------------------------------------------
-Question 28: Can you explain what a Rails migration is and how it helps manage database schema changes?
+Question 28(VVI): Can you explain what a Rails migration is and how it helps manage database schema changes?
 
 Answer -> Rails migrations are a way to manage database schema changes in a structured and version-controlled manner.
 Each migration represents a change, such as creating a table or adding a column. Because migrations are committed to the codebase, they allow the entire team to stay in sync.
@@ -321,7 +321,7 @@ I usually use concerns when multiple models or controllers share common logic, l
 Concerns help keep classes smaller and more focused. However, I try not to overuse them, because too many concerns can make it harder to understand where behavior is coming from. Used thoughtfully, they are a clean way to organize shared logic.
 
 ------------------------------------------------------------------------------------------------------
-Question 32: How concerns are different from service objects?
+Question 32(VVI): How concerns are different from service objects?
  
 Answer -> Concerns are typically used to share reusable bits of logic that might be sprinkled across multiple models or controllers. They are all about mixing in behavior that is relevant to more than one class. So if you have a few models that all need the same set of methods, you put those methods in a concern and include it wherever needed. Concern supports lifecylce methods of model like callbacks(before_save, after_save etc).
 
@@ -363,15 +363,6 @@ Answer -> When testing a Rails model with RSpec, I focus on behavior rather than
 I usually test validations, associations, and scopes first. After that, I test any custom methods or business logic defined in the model, especially edge cases.
 
 I avoid testing Rails internals and focus on what the model is responsible for. Clear, focused model tests make it easier to refactor confidently later.
-
-------------------------------------------------------------------------------------------------------
-Question 38: Can you explain how you handle error handling in a Rails application? For example, how do you manage and respond to exceptions in controllers or across the application?
-
-Answer -> When dealing with a slow Rails action, my first step is to measure and observe. I look at logs, request timings, and database query durations.
-
-Very often, performance issues are caused by inefficient queries or N+1 problems. I fix those using eager loading, better query structure, or database indexes.
-
-If the action is still slow, I consider caching or moving heavy logic into background jobs. The key is to fix the actual bottleneck rather than applying random optimizations.
 
 ------------------------------------------------------------------------------------------------------
 Question 39: How do you manage database migrations in Rails, especially when working in a team environment? Can you explain how you handle merging or conflicts with migrations when multiple developers are working on the same project?

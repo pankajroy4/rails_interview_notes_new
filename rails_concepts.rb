@@ -21,7 +21,7 @@ Symbols are memory efficient and faster for identifiers.
 Strings are mutable and each "name" creates a new object in memory. They are used for dynamic content like user input and JSON data. Symbols, written as :name, are immutable and Ruby stores only one copy of each symbol in a global symbol table. That makes them efficient for hash keys, method names, and internal identifiers. For example, { name: "John" } is preferred over { "name" => "John" } for performance and readability. Symbols cannot be modified and historically had memory concerns if dynamically generated in large numbers.
 
 ------------------------------------------------------------------------------------------------------
-Question 3: How does Ruby Garbage Collection work?
+Question 3(VVI): How does Ruby Garbage Collection work?
 Answer -> Ruby mainly uses a Mark-and-Sweep garbage collection mechanism.
 
 In the mark phase, Ruby starts from root references like global variables, local variables, stack references, classes, and threads. It traverses all reachable objects and marks them as alive.
@@ -35,7 +35,7 @@ Young objects are checked frequently using Minor GC, which is faster. Objects th
 So the main benefit of Generational GC is that Ruby does not have to scan the entire heap every time. It focuses frequent GC work on young, short-lived objects, which makes garbage collection more efficient.
 
 ------------------------------------------------------------------------------------------------------
-Question 4: What is Duck Typing?
+Question 4(VVI): What is Duck Typing?
 
 Answer -> Duck typing means Ruby focuses on behavior, not type.
 If an object responds to the required methods, it can be used.
@@ -62,7 +62,7 @@ end
 This gives multiple-behavior capability while keeping method lookup predictable and simple.
 
 ------------------------------------------------------------------------------------------------------
-Question 6: What is a Singleton Class?
+Question 6(VVI): What is a Singleton Class?
 
 Answer -> A singleton class is a hidden class attached to every object.
 It stores methods defined only for that specific object.
@@ -72,7 +72,7 @@ Class methods are actually singleton methods of the class object.
 In Ruby, every object has its own singleton class (also called eigenclass). When you define a method like def obj.method_name, Ruby stores it inside the object’s singleton class. During method lookup, Ruby first checks the singleton class before the normal class. This mechanism is how class methods work, because classes are objects too.
 
 ------------------------------------------------------------------------------------------------------
-Question 7: Explain Ruby Method Lookup Path
+Question 7(VVI): Explain Ruby Method Lookup Path
 
 Answer -> Ruby follows a strict order to find methods when called.
 
@@ -189,7 +189,7 @@ Refinements are activated using the using keyword.
 Unlike monkey patching, refinements only apply within the file or module where they are enabled. This makes behavior modification controlled and predictable. Refinements are useful when extending core classes safely without affecting the entire application.
 
 ------------------------------------------------------------------------------------------------------
-Question 18: How does Ruby handle Threads?
+Question 18(VVI): How does Ruby handle Threads?
 
 Answer -> Ruby supports native threads.
 However, MRI Ruby has a Global Interpreter Lock (GIL).
@@ -234,7 +234,7 @@ Modules represent shared behavior or namespaces.
 Classes are blueprints for creating objects and support inheritance and state. Modules are used for namespacing and behavior sharing via include, extend, or prepend. Ruby supports single inheritance for classes but allows multiple modules to be mixed in.
 
 =================================== Rails Core Concepts ===================================
-Question 22: What is Rack?
+Question 22(VVI): What is Rack?
 
 Answer -> Rack is a minimal interface between Ruby web servers and frameworks.
 A Rack app responds to call(env) and returns [status, headers, body].
@@ -251,7 +251,7 @@ Each middleware can modify request and response.
 Middleware receives the env hash, can process or modify it, and either return a response or pass control to the next middleware using @app.call(env). On the way back, middleware can also modify the response. Order matters because execution is sequential.
 
 =================================== Rails Routing & Request Handling ===================================
-Question 24: How does Routing work in Rails?
+Question 24(VVI): How does Routing work in Rails?
 
 Answer -> Routing maps an incoming HTTP request to a controller action.
 Routes are defined in config/routes.rb.
@@ -262,7 +262,7 @@ If no route matches, Rails returns a 404 error.
 Route order matters because the first matching route wins.
 
 ------------------------------------------------------------------------------------------------------
-Question 25: What are RESTful Routing Principles?
+Question 25(VVI): What are RESTful Routing Principles?
 
 Answer -> REST treats everything as a resource.
 HTTP verbs define actions, not the URL.
@@ -278,7 +278,7 @@ In RESTful routing, the same URL behaves differently depending on the HTTP metho
 Rails supports REST using resources :users, which automatically generates standard CRUD routes. This keeps APIs predictable and consistent.
 
 ------------------------------------------------------------------------------------------------------
-Question 26: What is ActionDispatch?
+Question 26(VVI): What is ActionDispatch?
 
 Answer -> ActionDispatch is the layer between Rack and Rails MVC.
 
@@ -382,7 +382,7 @@ Use both for safety.
 Validations provide user-friendly errors but can be bypassed. Database constraints like NOT NULL, UNIQUE, and FOREIGN KEY ensure absolute data integrity, especially in concurrent systems.
 
 ------------------------------------------------------------------------------------------------------
-Question 39: Difference between rails 6, 7 and 8?
+Question 39(VVI): Difference between rails 6, 7 and 8?
 Short Asnwer -> Rails 6 introduced Zeitwerk autoloading, multiple database support, and Action Text/Mailbox.
 
 Rails 7 focused heavily on Hotwire, Turbo, Stimulus, and reducing JavaScript dependency using import maps.
