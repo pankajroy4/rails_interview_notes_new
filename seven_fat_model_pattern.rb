@@ -52,7 +52,7 @@ end
 class PhoneNumberType < ActiveRecord::Type::Value
   def cast(value)  # Will run when we read from db
     return if value.nil?
-    return value if value.is_a?(PhoneNumber) # avoid double-wrapping  if already PhoneNumber object.
+    return value if value.is_a?(PhoneNumber) # avoid double-wrapping if already PhoneNumber object.
 
     PhoneNumber.new(value)
   end
@@ -101,7 +101,7 @@ use service object in cases like:
 
 ------------------------------------------------------------------------------------------------------
 3.Form Objects
-One form submission may coordinate multiple domain models, so represent that form as its own object.
+One form submission may coordinate multiple models, so represent that form as its own object.
 Form Objects are useful when multiple ActiveRecord models are updated by a single form submission.
 
 Suppose we have a signup form, when submitting this create user and company.
@@ -144,7 +144,12 @@ Instead we should use a from object.
     end
 
 Then in the controller:
-    def create
+    class SignupsController < ApplicationController
+      def new
+        @signup_form = SignupForm.new
+      end
+
+      def create
         @form = SignupForm.new(form_params)
 
         if @form.save
@@ -156,7 +161,17 @@ Then in the controller:
             # OR for API
             render json: { errors: form.errors.to_hash }, status: :unprocessable_entity
         end
+      end
     end
+
+  In Views: 
+    <%= form_with model: @signup_form do |form| %>
+      <%= form.text_field :name %>
+      <%= form.email_field :email %>
+      <%= form.text_field :company_name %>
+
+      <%= form.submit "Sign Up" %>
+    <% end %>
 
 If the persistence logic of form object become complex then we can combine it with service object.
 
@@ -168,10 +183,6 @@ Suppose a model contains multiple scopes and class methods which consist some da
 The problem started when the query become extremely complex.
 
 In such cases we have to extarct the queries inside the Query object.
-
-
-A Query Object encapsulates a complex query and is responsible for returning a result set based on specific business/query rules.
-
 
 Example:
 class AbandonedTrialsQuery
