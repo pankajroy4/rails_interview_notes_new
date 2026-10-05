@@ -9,7 +9,7 @@
 ============
 
 1. Value Objects
-A Value Object represents a domain concept whose identity is based on its value rather than an ID. I use it when an attribute or small group of attributes has meaningful behavior of its own, such as Money, PhoneNumber or Address.
+A Value Object represents a concept whose identity is based on its value rather than an ID. I use it when an attribute or small group of attributes has meaningful behavior of its own, such as Money, PhoneNumber or Address.
 
 Suppose we have a user model:
 

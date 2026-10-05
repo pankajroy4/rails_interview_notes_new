@@ -266,7 +266,7 @@
     Common uses: audio or video players, a sidebar that stays open, a chat input.
 
   ------------------------------------------------------------------------------------------------------
-  Q18. Turbo morphing kya hai?
+  Q18. What is Turbo morphing?
     Morphing is a Turbo 8 feature. Instead of replacing the whole body or element, Turbo compares the old DOM with the new HTML and changes only the parts that are different.
     Benefits: the scroll position, focus, and typed text in unchanged parts stay as they are.
     Turn it on with a meta tag in the layout:
