@@ -65,6 +65,7 @@ Answer -> Rails provides strong security defaults, but securing an application s
 
 First, I rely on Rails built-in protections like CSRF tokens, strong parameters, and automatic SQL injection prevention.
 Authentication and authorization are clearly separated: authentication handled by Devise or similar, and authorization enforced via Pundit policies or similar mechanisms.
+In API-only rails app, I will use Devise-JWT with JTI or Devise Token Auth(for mobile clients) or OmniAuth(for social login - third-party authentication)
 
 For sensitive data, I would never hardcode secrets or credentials in the codebase. I would use environment variables or a proper secret manager, and sensitive data should be encrypted both in transit and at rest.
 
