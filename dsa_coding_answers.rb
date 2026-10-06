@@ -1183,3 +1183,187 @@ end
 s = "foo"
 t = "bar"
 puts isomorphic_string(s,t)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+38.Problem: Given a string containing only '(', ')', '{', '}', '[', ']', determine if
+brackets are balanced and correctly nested.
+Input:  s = "()[]{}"
+Output: true
+Constraints: 1 <= s.length <= 10^4
+
+def valid_parentheses(s)
+    stack = []
+    hash = {")" => "(" , "}" => "{", "]" => "["}
+
+    s.each_char do |c|
+        if hash.key?(c)
+            return false if stack.empty?
+            return false if hash[c] != stack.pop
+        else
+            satck << c
+        end 
+    end
+
+    stack.empty?
+end
+
+s = "()[]{}"
+puts valid_parentheses(s)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+72.Given a sorted array nums and a target, return its index, or -1 if not found.
+Input:  nums = [-1,0,3,5,9,12], target = 9
+Output: 4
+Explanation: nums[4] == 9
+
+# Recursion based implementation
+def binary_search(nums, target)
+    i = 0
+    j = nums.length-1
+    search(nums, i, j, target)
+end
+
+def search(nums, i, j, target)
+    return -1 if i>j
+
+    mid = (i+j)/2
+
+    if nums[mid] == target
+        return mid
+    elsif nums[mid]>target
+        return search(nums, i, mid-1, target) 
+    else    
+        return search(nums, mid+1, j, target) 
+    end
+end
+
+nums = [-1,0,3,5,9,12]
+target = 18
+puts binary_search(nums, target)
+
+# Non recursion based solution
+def binary_search(nums, target)
+    i = 0
+    j = nums.length-1
+    
+    while (i <=j)
+        mid = (i+j)/2
+
+        if nums[mid] == target
+            return mid
+        elsif nums[mid]>target
+            j = mid -1
+        else    
+            i = mid+1
+        end
+    end
+    return -1
+end
+
+
+nums = [-1,0,3,5,9,12]
+target = 9
+puts binary_search(nums, target)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+34.A number is "happy" if repeatedly replacing it with the sum of squares of its
+digits eventually reaches 1. Determine if n is happy.
+Input:  n = 19
+Output: true
+Explanation: 19 -> 82 -> 68 -> 100 -> 1
+Constraints: 1 <= n <= 2^31 - 1
+
+def is_happy(n)
+    hash = {}
+
+    while n > 1
+        return false if hash.key?(n)
+        hash[n] = true
+
+        sum = 0
+
+        # calculate digit square sum
+        while n > 0
+            digit = n % 10
+            sum += digit * digit
+            n /= 10
+        end
+
+        n = sum # again pass the current sum as n
+    end
+  true
+end
+
+n = 19
+puts happy_nums(n)
+
+Time complexity explanantion:
+    Inner loop: n is divided by 10 each time → O(log₁₀ n)
+    Outer loop: n predictably decrease nahi ho rha, n har baar change hoga due to sum, so directly O(log n) nahi bol sakte.
+
+    Given complexity:  n ≤ 2³¹ - 1, so n will have at max 10 digits. Maximum possible number of 10 digits: 9999999999
+    Maximum digit-square sum: 10 * 9² = 810
+
+    So first transformation ke baad n ≤ 810. Therefore outer loop has only constant number of possible states (1 - 810) → O(1).
+    Hash (seen) previously visited values ko store karta hai. Agar koi value repeat hoti hai, cycle detect karke loop terminate ho jata hai.
+
+    Therefore, outer loop can be considered O(1) for the given constraints.
+    so we can assume outer loop as constant.
+    Overall: O(1) * O(log n) = O(log n).
+
+-----------------------------------------------------------------------------------------------------------------------------------
+35.Contains Duplicate II — (Pattern: Hashing + Sliding Window)
+Problem: Given an array nums and integer k, return true if there are two distinct
+indices i, j such that nums[i] == nums[j] and |i - j| <= k.
+Input:  nums = [1,1,2,3,1], k = 3
+Output: true
+Explanation: nums[0] == nums[3] and |0-3| = 3 <= k.
+
+
+def duplicate(nums, k)
+    seen = {}
+
+    nums.each_with_index do |num, i| 
+        if seen.key?(num)
+            return true if (seen[num] - i).abs <= k
+        end
+
+        seen[num] = i
+
+    end
+
+    false
+end
+
+nums = [1,2,3,1]
+k = 3
+puts duplicate(nums, k)
+
+# Impelmentation 2
+
+
+def duplicate(nums, k)
+    seen = {}
+
+    j = 0
+    
+    nums.each_with_index do |num, i| 
+
+        if seen.key?(num)
+            return true if (seen[num] - i).abs <= k
+        end
+
+        seen[num] = i
+
+        if seen.length > k
+            hash.delete(nums[j])
+            j+=1
+        end
+    end
+
+    false
+end
+
+nums = [1,2,3,1]
+k = 3
+puts duplicate(nums, k)
