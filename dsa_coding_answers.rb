@@ -1312,14 +1312,13 @@ Time complexity explanantion:
     Overall: O(1) * O(log n) = O(log n).
 
 -----------------------------------------------------------------------------------------------------------------------------------
-35.Contains Duplicate II — (Pattern: Hashing + Sliding Window)
-Problem: Given an array nums and integer k, return true if there are two distinct
+35.Given an array nums and integer k, return true if there are two distinct
 indices i, j such that nums[i] == nums[j] and |i - j| <= k.
 Input:  nums = [1,1,2,3,1], k = 3
 Output: true
 Explanation: nums[0] == nums[3] and |0-3| = 3 <= k.
 
-
+# Implementation 1 - O(n) space
 def duplicate(nums, k)
     seen = {}
 
@@ -1339,26 +1338,15 @@ nums = [1,2,3,1]
 k = 3
 puts duplicate(nums, k)
 
-# Impelmentation 2
-
-
+# Impelmentation 2 - O(min(n, k)) space
 def duplicate(nums, k)
-    seen = {}
+    window = {}
 
-    j = 0
-    
     nums.each_with_index do |num, i| 
+        return true if window.key?(num)
+        window[num] = i
 
-        if seen.key?(num)
-            return true if (seen[num] - i).abs <= k
-        end
-
-        seen[num] = i
-
-        if seen.length > k
-            hash.delete(nums[j])
-            j+=1
-        end
+        window.delete(nums[i-k]) if window.length > k
     end
 
     false
