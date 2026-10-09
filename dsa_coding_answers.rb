@@ -1355,3 +1355,45 @@ end
 nums = [1,2,3,1]
 k = 3
 puts duplicate(nums, k)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+36.Top K Frequent Elements — (Pattern: Hashing + Heap/Bucket Sort)
+Problem: Given an array nums and integer k, return the k most frequent elements.
+Input:  nums = [1,1,1,2,2,3], k = 2
+Output: [1, 2]
+Explanation: 1 occurs 3 times, 2 occurs 2 times — the top 2 most frequent.
+Constraints: 1 <= nums.length <= 10^5, k <= number of distinct elements
+Approach:  bucket sort by frequency for O(n) — O(n log k) time (heap) or O(n) (bucket), O(n) space
+
+
+def top_k_frequent(nums,k)
+  hash = nums.tally
+  max = 0
+  second_max = 0
+
+  buckets_of_freq = []
+
+  hash.each do |key, val|
+    buckets_of_freq[val] = key
+  end
+
+  n = nums.length-1
+  puts "bucket: #{buckets_of_freq.inspect}"
+
+  ans  = []
+  i = nums.length-1
+
+  puts "Bucket is #{buckets_of_freq}"
+  while ans.length < k
+    if buckets_of_freq[-i] != nil
+      ans << buckets_of_freq[-i]
+    end
+    i-=1
+  end 
+  ans
+end
+
+nums = [1,2,1,2,1,2,3,1,3,2]
+k = 2
+puts top_k_frequent(nums,k).inspect
