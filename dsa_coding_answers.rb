@@ -1326,11 +1326,8 @@ def duplicate(nums, k)
         if seen.key?(num)
             return true if (seen[num] - i).abs <= k
         end
-
         seen[num] = i
-
     end
-
     false
 end
 
@@ -1345,10 +1342,8 @@ def duplicate(nums, k)
     nums.each_with_index do |num, i| 
         return true if window.key?(num)
         window[num] = i
-
         window.delete(nums[i-k]) if window.length > k
     end
-
     false
 end
 
@@ -1357,43 +1352,48 @@ k = 3
 puts duplicate(nums, k)
 
 -----------------------------------------------------------------------------------------------------------------------------------
+85.Problem: Given an array where every element appears twice except one, find that
+single element in linear time and O(1) space.
+Input:  nums = [4, 1, 2, 1, 2]
+Output: 4
 
-36.Top K Frequent Elements — (Pattern: Hashing + Heap/Bucket Sort)
-Problem: Given an array nums and integer k, return the k most frequent elements.
+def single_number(nums)
+    result = 0
+    nums.each do |num|
+        result = result ^ num
+    end
+    return result
+end
+
+nums = [4, 1, 2, 1, 2]
+puts single_number(nums)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+36.Given an array nums and integer k, return the k most frequent elements.
 Input:  nums = [1,1,1,2,2,3], k = 2
 Output: [1, 2]
-Explanation: 1 occurs 3 times, 2 occurs 2 times — the top 2 most frequent.
-Constraints: 1 <= nums.length <= 10^5, k <= number of distinct elements
-Approach:  bucket sort by frequency for O(n) — O(n log k) time (heap) or O(n) (bucket), O(n) space
 
+def top_k_frequent(nums, k)
+    freq = nums.tally
+    buckets = Array.new(nums.length + 1) { [] }
 
-def top_k_frequent(nums,k)
-  hash = nums.tally
-  max = 0
-  second_max = 0
-
-  buckets_of_freq = []
-
-  hash.each do |key, val|
-    buckets_of_freq[val] = key
-  end
-
-  n = nums.length-1
-  puts "bucket: #{buckets_of_freq.inspect}"
-
-  ans  = []
-  i = nums.length-1
-
-  puts "Bucket is #{buckets_of_freq}"
-  while ans.length < k
-    if buckets_of_freq[-i] != nil
-      ans << buckets_of_freq[-i]
+    freq.each do |num, freq|
+        buckets[freq] = buckets[freq] << num # or simply:  buckets[freq] << num  
     end
-    i-=1
-  end 
-  ans
+
+    # Instead of using (buckets.length - 1), we use (nums.length) because (buckets.length - 1) provides no additional benefit here. We can safely use nums.length because the maximum possible frequency cannot exceed (nums.length), and this avoids unnecessary iterations when the maximum actual frequency is lower than (nums.length).
+    result = []
+    (nums.length).downto(1) do |count|
+        buckets[count].each do |num|
+            result << num
+            return result if result.length == k
+        end
+    end
+    result
 end
 
 nums = [1,2,1,2,1,2,3,1,3,2]
 k = 2
 puts top_k_frequent(nums,k).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
