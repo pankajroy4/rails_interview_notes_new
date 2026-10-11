@@ -1397,3 +1397,166 @@ k = 2
 puts top_k_frequent(nums,k).inspect
 
 -----------------------------------------------------------------------------------------------------------------------------------
+37.Problem: Given an unsorted array nums, return the length of the longest run of
+consecutive integers, in O(n) time.
+Input:  nums = [100, 4, 200, 1, 3, 2]
+Output: 4
+Explanation: The consecutive sequence [1, 2, 3, 4] has length 4.
+
+def longest_consecutive_sequence(nums)
+    hash = nums.tally
+    ans = 0
+
+    hash.each do |num, count|
+        unless hash.key?(num-1)
+            current_ans = 0
+            while hash.key?(num)
+                current_ans +=1
+                num +=1
+            end
+            ans = current_ans if current_ans > ans
+        end
+    end
+    ans
+end
+
+nums = [100, 4, 200, 1, 3, 2]
+puts longest_consecutive_sequence(nums)
+
+#   --------------- We can also use set --------------------
+
+require 'set'
+def longest_consecutive_sequence(nums)
+    num_set = nums.to_set
+    ans = 0
+
+    num_set.each do |num|
+        unless num_set.include?(num-1)
+            current_ans = 0
+            while num_set.include?(num)
+                current_ans +=1
+                num +=1
+            end
+            ans = current_ans if current_ans > ans
+        end
+    end
+    ans
+end
+
+nums = [100, 4, 200, 1, 3, 2]
+puts longest_consecutive_sequence(nums)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+39.Design a stack supporting push, pop, top, and getMin(), all in O(1) time.
+Input:  push(-2), push(0), push(-3), getMin(), pop(), top(), getMin()
+Output: -3, 0, -2
+Explanation: getMin() reflects the current minimum after each operation.
+Constraints: up to 3*10^4 calls total
+
+class MinStack
+    def initialize()
+        @stack = []
+        @min_stack = []
+    end
+
+    def push(value)
+        if @min_stack.empty? || value <= @min_stack[-1]
+            @min_stack << value
+        end
+
+        @stack << value
+        nil
+    end
+
+    def pop()  
+        val = @stack.pop
+        @min_stack.pop  if val == @min_stack[-1]
+        val
+    end
+
+    def top()
+        @stack[-1]      
+    end
+
+    def get_min()
+        @min_stack[-1]
+    end
+end
+
+minStack = MinStack.new;
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+puts minStack.get_min(); # return -3
+minStack.pop();
+puts minStack.top();    # return 0
+puts minStack.get_min(); # return -2
+
+-----------------------------------------------------------------------------------------------------------------------------------
+40.Problem: Given an array nums, for each element find the next greater element to its right; use -1 if none exists.
+Input:  nums = [2, 1, 2, 4, 3]
+Output: [4, 2, 4, -1, -1]
+Explanation: For 2 (index 0), next greater is 4; for 1, next greater is 2; etc.
+Constraints: 1 <= nums.length <= 10^4
+
+def next_greater_element(nums)
+    ans = Array.new(nums.length, -1)
+    stack = []
+
+    nums.each_with_index do |num, i|
+        while stack.length > 0 && num > nums[stack[-1]]
+            ans[stack[-1]] = num
+            stack.pop
+        end
+        stack << i
+    end
+    #for remaining element in stack, ans array already holds -1 , so we are not working for remaining elements of stack
+    ans
+end
+ 
+nums = [2, 1, 2, 4, 3]
+puts next_greater_element(nums).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
+40.The next greater element of some element x in an array is the first greater element that is to the right of x in the same array.
+You are given two distinct 0-indexed integer arrays nums1 and nums2, where nums1 is a subset of nums2.
+For each 0 <= i < nums1.length, find the index j such that nums1[i] == nums2[j] and determine the next greater element of nums2[j] in nums2. If there is no next greater element, then the answer for this query is -1.
+
+Return an array ans of length nums1.length such that ans[i] is the next greater element as described above.
+Example:
+Input: nums1 = [4,1,2], nums2 = [1,3,4,2]
+Output: [-1,3,-1]
+Explanation:The next greater element for each value of nums1 is as follows:
+            4 is underlined in nums2 = [1,3,4,2]. There is no next greater element, so the answer is -1.
+            1 is underlined in nums2 = [1,3,4,2]. The next greater element is 3.
+            2 is underlined in nums2 = [1,3,4,2]. There is no next greater element, so the answer is -1.
+Constraints:
+1 <= nums1.length <= nums2.length <= 1000
+0 <= nums1[i], nums2[i] <= 104
+All integers in nums1 and nums2 are unique.
+All the integers of nums1 also appear in nums2.
+
+# as values in nums2 are uniuqe so we can create the stack of values too instead of index
+def next_greater_element(nums1, nums2)
+    hash = Hash.new(-1)
+    stack = []
+
+    nums2.each_with_index do |num|
+        while stack.length > 0 && num > stack[-1]
+            hash[stack[-1]] = num
+            stack.pop
+        end
+        stack << num
+    end
+
+    ans = []
+    # We are not working for remaining elements in stack. As hash initialized with -1, so for any other key it will return -1
+    nums1.each do |num|
+        ans << hash[num]
+    end
+    ans
+end
+
+nums1 = [4,1,2]
+nums2 = [1,3,4,2]
+puts next_greater_element(nums1, nums2).inspect

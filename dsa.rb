@@ -750,14 +750,34 @@ Explanation: getMin() reflects the current minimum after each operation.
 Constraints: up to 3*10^4 calls total
 Approach: auxiliary stack tracking running minimum alongside the main stack — O(1) time per op, O(n) space
 
-40.Next Greater Element — (Pattern: Monotonic Stack)
-Problem: Given an array nums, for each element find the next greater element to its
-right; use -1 if none exists.
+40.Next Greater Element — (Pattern: Monotonic Stack indices)
+Problem: Given an array nums, for each element find the next greater element to its right; use -1 if none exists.
 Input:  nums = [2, 1, 2, 4, 3]
 Output: [4, 2, 4, -1, -1]
 Explanation: For 2 (index 0), next greater is 4; for 1, next greater is 2; etc.
 Constraints: 1 <= nums.length <= 10^4
 Approach: monotonic decreasing stack of indices, pop when a bigger value is found — O(n) time, O(n) space
+
+40. Next Greater Element 2 — (Pattern: Monotonic Stack of values + hashmap)
+The next greater element of some element x in an array is the first greater element that is to the right of x in the same array.
+You are given two distinct 0-indexed integer arrays nums1 and nums2, where nums1 is a subset of nums2.
+For each 0 <= i < nums1.length, find the index j such that nums1[i] == nums2[j] and determine the next greater element of nums2[j] in nums2. If there is no next greater element, then the answer for this query is -1.
+
+Return an array ans of length nums1.length such that ans[i] is the next greater element as described above.
+Example:
+Input: nums1 = [4,1,2], nums2 = [1,3,4,2]
+Output: [-1,3,-1]
+Explanation:The next greater element for each value of nums1 is as follows:
+            4 is underlined in nums2 = [1,3,4,2]. There is no next greater element, so the answer is -1.
+            1 is underlined in nums2 = [1,3,4,2]. The next greater element is 3.
+            2 is underlined in nums2 = [1,3,4,2]. There is no next greater element, so the answer is -1.
+Constraints:
+1 <= nums1.length <= nums2.length <= 1000
+0 <= nums1[i], nums2[i] <= 104
+All integers in nums1 and nums2 are unique.
+All the integers of nums1 also appear in nums2.
+Approach: monotonic decreasing stack of values + hashmap, pop when a bigger value is found, store num & its next greater in hash map as key-value. 
+O(n) time, O(n) space
 
 41.Daily Temperatures — (Pattern: Monotonic Stack)
 Problem: Given daily temperatures, return an array where answer[i] is the number of
