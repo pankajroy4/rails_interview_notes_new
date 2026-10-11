@@ -1425,7 +1425,6 @@ puts longest_consecutive_sequence(nums)
 
 #   --------------- We can also use set --------------------
 
-require 'set'
 def longest_consecutive_sequence(nums)
     num_set = nums.to_set
     ans = 0
