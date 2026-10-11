@@ -1559,3 +1559,66 @@ end
 nums1 = [4,1,2]
 nums2 = [1,3,4,2]
 puts next_greater_element(nums1, nums2).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
+41.Given daily temperatures, return an array where answer[i] is the number of
+days to wait for a warmer temperature (0 if none).
+Input:  temperatures = [73,74,75,71,69,72,76,73]
+Output: [1,1,4,2,1,1,0,0]
+Explanation: Day 0 (73) waits 1 day for 74; day 3 (71) waits 2 days for 72; etc.
+
+def daily_temperatures(temperatures)
+    stack = []
+    ans = Array.new(temperatures.length, 0)
+
+    temperatures.each_with_index  do |temp, i|
+        while stack.length > 0 && temp > temperatures[stack[-1]]
+            ans[stack[-1]] = i - stack[-1]
+            stack.pop        
+        end
+        stack << i
+    end
+    # Do not work for remaining elements in stack, becz we alreay will have 0 for them in ans array.
+    ans
+end
+
+temperatures = [73,74,75,71,69,72,76,73]
+puts daily_temperatures(temperatures).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
+42.Evaluate Reverse Polish Notation — (Pattern: Stack)
+Problem: Evaluate an arithmetic expression given in postfix (Reverse Polish) notation.
+Input:  tokens = ["2","1","+","3","*"]
+Output: 9
+Explanation: (2 + 1) * 3 = 9
+Constraints: 1 <= tokens.length <= 10^4
+Approach: push operands, pop two and apply operator when an operator token appears — O(n) time, O(n) space
+
+def reverse_polish_notation(tokens)
+    operators = "+-*/"
+    stack = [] # Stack will store operands, not the operator
+    
+    tokens.each do |token|
+        if operators.include?(token)
+            op1 = stack.pop
+            op2 = stack.pop
+
+            case token
+            when "+"
+                stack << op1+op2
+            when "-"
+                stack << op2-op1
+            when "*"
+                stack << op1*op2
+            when "/"
+                stack << (op2.to_f/op1).truncate
+            end
+        else
+            stack << token.to_i
+        end
+    end
+    stack.pop
+end
+
+tokens = ["10","6","9","3","+","-11","*","/","*","17","+","5","+"]
+puts reverse_polish_notation(tokens)
