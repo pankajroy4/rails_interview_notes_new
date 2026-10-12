@@ -1383,7 +1383,7 @@ def top_k_frequent(nums, k)
 
     # Instead of using (buckets.length - 1), we use (nums.length) because (buckets.length - 1) provides no additional benefit here. We can safely use nums.length because the maximum possible frequency cannot exceed (nums.length), and this avoids unnecessary iterations when the maximum actual frequency is lower than (nums.length).
     result = []
-    (nums.length).downto(1) do |count|
+    (nums.length).downto(0) do |count|
         buckets[count].each do |num|
             result << num
             return result if result.length == k
