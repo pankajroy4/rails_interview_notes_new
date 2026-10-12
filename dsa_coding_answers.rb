@@ -1622,3 +1622,42 @@ end
 
 tokens = ["10","6","9","3","+","-11","*","/","*","17","+","5","+"]
 puts reverse_polish_notation(tokens)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+43.Decode String — (Pattern: Stack)
+Problem: Given an encoded string like "3[a2[c]]", return its decoded form.
+Input:  s = "3[a2[c]]"
+Output: "accaccacc"
+Explanation: "2[c]" decodes to "cc", so "a2[c]" is "acc", repeated 3 times.
+Constraints: 1 <= s.length <= 30
+Approach: stack of (previous string, repeat count), build on encountering ']' — O(n) time, O(n) space
+
+
+def decode_string(s)
+  stack = []
+  current_string = ""
+  current_num = 0
+
+  s.each_char do |char|
+    if char.match?(/[0-9]/)
+      current_num = current_num * 10 + char.to_i
+
+    elsif char == "["
+      stack.push([current_string, current_num])
+      current_string = ""
+      current_num = 0
+
+    elsif char == "]"
+      previous_string, repeat_count = stack.pop
+      current_string = previous_string + current_string * repeat_count
+
+    else
+      current_string += char
+    end
+  end
+
+  current_string
+end
+
+s = "3[a]2[bc]"
+puts decode_string(s)
