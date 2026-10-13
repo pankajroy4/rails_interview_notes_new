@@ -7,22 +7,6 @@ Every PR must pass formatting, linting, static analysis, security scans, tests, 
 As a senior developer, I try to reduce manual effort by setting up strong automated checks. In most teams I’ve worked with, every pull request goes through a CI pipeline. That pipeline runs our test suite, linting tools like RuboCop, and security scanners like Brakeman. So basic issues like style violations, failing tests, or obvious security problems are caught automatically before I even open the PR. I also make sure branch protection rules are enabled, so nothing gets merged unless checks pass. Because of that, when I review code, I can focus more on design decisions, performance concerns, and whether the solution fits the overall architecture, instead of pointing out formatting or small mistakes.
 
 ------------------------------------------------------------------------------------------------------
-Question 2: Let's say you're explaining the Rails request-response cycle to someone who is not super familiar with Rails. How would you break it down in simple terms?
-
-Answer -> I usually explain the Rails request-response cycle as a structured pipeline.
-
-When a user makes a request—like visiting a URL—the request first hits the Rails router, which decides which controller and action should handle it based on the route definitions.
-
-The request then moves to the controller, which acts as the coordinator. The controller may fetch or update data by interacting with models, which handle database logic and business rules.
-
-Once the controller has what it needs, it prepares a response—either rendering a view (for HTML) or returning JSON (for APIs). The view is combined with layout and templates to generate the final output.
-
-Finally, Rails sends the response back to the browser with an appropriate HTTP status code and headers.
-
-In short: Request → Router → Controller → Model → View → Response
-This clear separation of responsibilities is what makes Rails applications easy to reason about and maintain.
-
-------------------------------------------------------------------------------------------------------
 Question 3: Can you explain how Rails validations work and maybe give an example of when you would use them?
 
 Answer -> Validations are rules we define in models to make sure only valid data gets saved to the database. Rails runs them automatically before saving a record. Validations are model-level guards to ensure data integrity before hitting the database.
@@ -46,17 +30,6 @@ Answer -> Rails already gives a strong foundation for this with separate environ
 For environment-specific configuration, I typically use a combination of environment files and environment variables. For example, logging levels, caching behavior, and class loading are configured inside config/environments.
 
 For sensitive or deploy-specific data like API keys, database credentials, or third-party tokens, I always rely on environment variables. In modern Rails, credentials.yml.enc is also a good option, especially when combined with per-environment credentials.
-
-------------------------------------------------------------------------------------------------------
-Question 6: How would you handle a task that takes a long time to process, like sending out a bunch of emails or generating a big report?
-
-Answer -> I never handle long-running tasks inside a web request because it blocks the request and hurts user experience.
-
-Instead, I use background jobs. The controller triggers a job, immediately responds to the user, and the heavy work happens asynchronously.
-
-For example, sending bulk emails, generating reports, or syncing with third-party APIs are perfect use cases for background jobs. Tools like Sidekiq or Delayed Job help process these jobs efficiently.
-
-This approach keeps the application responsive and scalable.
 
 ------------------------------------------------------------------------------------------------------
 Question 7(VVI): What are some best practices to secure a Rails app against common vulnerabilities?

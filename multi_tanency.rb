@@ -26,6 +26,37 @@ The resolved tenant is stored in a request-scoped context, so the rest of the re
 Q6. How do you prevent data leakage between tenants?
 I use defense in depth. At the application level, every query goes through a tenant scope, and I avoid writing raw queries without it. At the database level, I can use Postgres Row-Level Security, so even if the application code forgets the filter, the database itself won't return another tenant's rows. I also write tests that explicitly check that one tenant cannot access another tenant records.
 
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation
+ON orders
+USING (
+  tenant_id = current_setting('app.tenant_id')::bigint
+);
+
+
+Inside controller:
+
+class ApplicationController < ActionController::Base
+  around_action :set_current_tenant
+
+  private
+
+  def set_current_tenant
+    tenant_id = current_user.tenant_id
+
+    ActiveRecord::Base.transaction do
+      ActiveRecord::Base.connection.execute(
+        ActiveRecord::Base.sanitize_sql_array([
+          "SET LOCAL app.tenant_id = ?",
+          tenant_id.to_s
+        ])
+      )
+
+      yield
+    end
+  end
+end
 ------------------------------------------------------------------------------------------------------
 Q7. What is the noisy neighbor problem, and how do you handle it?
 It is when one large tenant consumes a disproportionate share of shared resources, like CPU, DB connections, or queue workers, and slows everyone else down. To handle it, I would apply per-tenant rate limits, separate queues for heavy tenants, monitor usage per tenant, and if needed, move that tenant to a dedicated database. That is the pool-to-silo move.

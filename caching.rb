@@ -320,7 +320,7 @@ Important Reality:
 ---------------------------------------------------------------------------------------------
 Question: How Memcached Works (Internally)?
 Answer: Memcached is a distributed in-memory key-value store used purely for caching. It stores data in RAM and uses LRU(Least Recently Used) eviction. It is ideal for reducing database load by caching frequently accessed or expensive queries. Unlike Redis, it does not support persistence or complex data structures. 
-I would use Memcached when I only need fast ephemeral(इफ़ेमरल - अल्पकालिक) caching in high-traffic applications.
+I would use Memcached when I only need fast ephemeral(इफ़ेम रल - अल्पकालिक) caching in high-traffic applications.
 
 Memcached operates entirely in memory and does not touch disk, it is extremely fast — typically sub-millisecond latency.
 

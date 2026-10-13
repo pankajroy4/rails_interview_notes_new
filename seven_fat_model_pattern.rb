@@ -162,6 +162,11 @@ Then in the controller:
             render json: { errors: form.errors.to_hash }, status: :unprocessable_entity
         end
       end
+
+      private
+      def form_params
+        params.require(:signup_form).permit(:name, :email, :company_name)
+      end
     end
 
   In Views: 
@@ -361,7 +366,7 @@ class CommentsController < ApplicationController
       comment = FacebookCommentNotifier.new(comment) # here we get the object of FacebookCommentNotifier
     end
 
-    if comment.save  # this is not the Comment model object, this is FacebookCommentNotifier class object
+    if comment.save  # This comment object an be model object or FacebookCommentNotifier object. Depends on above
       redirect_to post_path(comment.post)
     else
       render :new, status: :unprocessable_entity
