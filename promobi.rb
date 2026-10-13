@@ -41,12 +41,7 @@ Good answer covers: unbounded LIMIT risk (memory/response-size blowup, accidenta
 10. Why active_model_serializers instead of Jbuilder or just calling .as_json with include:? What would you lose or gain switching to one of those?
 Good answer covers: AMS gives declarative, reusable serializer objects with consistent root-key behavior and easy association control; Jbuilder gives more rendering flexibility per-view at the cost of more boilerplate; as_json is fastest to write but leaks serialization concerns into controllers/models. Tests whether the gem choice was a reasoned pick or copied boilerplate.
 
-======================================================================================================================================================================
------------------------------------------------------------------------------------------------------------------------------------
-2. Your courses.name and tutors.email columns do not have null: false at the database level, but you did add unique DB indexes. Why the inconsistency, and what is actually enforcing presence right now?
-Good answer: acknowledges that only the Rails validation enforces presence, that it can be bypassed, and can reason about why they added the DB constraint for uniqueness (race conditions) but did not extend the same reasoning to presence — ideally recognizing it as an oversight rather than deflecting.
-
------------------------------------------------------------------------------------------------------------------------------------
+==========================================================================================================
 3. Walk me through what happens at the database level when you POST a course with two tutors. How many INSERT statements run, and in what transaction?
 Good answer: one INSERT for the course, then one INSERT per tutor, all wrapped in a single implicit transaction because of accepts_nested_attributes_for — Rails automatically wraps autosave-association saves in a transaction. Should be able to explain why the rollback spec passes.
 
@@ -71,27 +66,7 @@ Good answer: request specs exercise the full stack (routing, middleware, params 
 Good answer: explains wildcard CORS + credentialed requests (cookies/auth headers) is dangerous because any origin could make authenticated cross-origin requests on behalf of a user; for a token-based JSON API with no cookie-based session, the practical risk is lower but still worth restricting in production to limit which domains can call the API at all. Tests whether the CORS config was copy-pasted or actually reasoned about.
 
 
-=====================================================================================================================================================================
-
-Explain tutors.target.select(&:new_record?) in Course#tutors_have_unique_emails — what would change if you used tutors.select(&:new_record?) instead, and why did you avoid that?
-
-You left a comment saying that at scale you would move tutor creation to a background job with bulk inserts. Walk through what that implementation would actually look like — what happens to the APIs response/status code if creation becomes async?
-
-Your pagination clamps per_page to [1,100]. What is your reasoning for that upper bound, and what would break if a client requested per_page=100000 without the clamp?
-If two identical POST requests for the same course name land at the same instant, walk me through exactly what happens at each layer (validation, DB constraint, controller) and which one you are relying on to prevent a duplicate.
-
-=======================================================================================================================================================================
-
------------------------------------------------------------------------------------------------------------------------------------
-2. In Course#tutors_have_unique_emails you wrote tutors.target.select(&:new_record?) instead of tutors.select(&:new_record?). Why?
-Good answer covers: .target reads only what is already built/loaded in memory without triggering an extra DB query on the association — relevant because calling tutors on a persisted course would otherwise force-load existing children from the DB during validation.
-
------------------------------------------------------------------------------------------------------------------------------------
-10. Why active_model_serializers instead of Jbuilder or just calling .as_json with include:? What would you lose or gain switching to one of those?
-Good answer covers: AMS gives declarative, reusable serializer objects with consistent root-key behavior and easy association control; Jbuilder gives more rendering flexibility per-view at the cost of more boilerplate; as_json is fastest to write but leaks serialization concerns into controllers/models. Tests whether the gem choice was a reasoned pick or copied boilerplate.
-
-
-=================================================================================================================================================================
+==========================================================================================================
 Walk me through why rescue_from StandardError is registered first in base_controller.rb but more specific rescues still take priority. Do you know why that works, or did it just happen to work?
 
 You used tutors.target.select(&:new_record?) instead of tutors.select(&:new_record?) in the uniqueness validation — why? What would change if you called tutors directly here?
@@ -110,110 +85,41 @@ Talk me through the trade-off note you left about not extracting a Form Object �
 
 What would you test first if you had one more hour and RSpec was not off the table?
 
-===================================================================================================================================================================
-
-Walk me through tutors_have_unique_emails in course.rb — why tutors.target.select(&:new_record?) instead of just tutors.select(&:new_record?)? What would change if you used the latter?
-
-Why did you add rescue_from ActiveRecord::RecordNotUnique on top of the uniqueness validation? What's the failure mode you're protecting against, and why can not the validation alone catch it?
-
-rescue_from StandardError is registered before rescue_from ActionDispatch::Http::Parameters::ParseError in base_controller.rb. Which handler actually fires for a ParseError, and why? What would happen if you added a new narrow rescue_from after the StandardError line by mistake?
-
-Your 500 handler swallows everything via rescue_from StandardError. What does that do to your experience debugging in development? Was that a deliberate trade-off?
+==========================================================================================================
 
 render_record_not_unique parses exception.cause&.message to figure out which index was violated. What happens if the pg gem or Postgres changes that error string format? How would you make this more robust?
 
-The nested-attributes limit is 50. Is there any path, today or in a plausible near-future version of this API, where a course could end up with more than 50 tutors? Walk me through why or why not.
+The current implementation is fragile because it depends on the exact wording of a database error message. If PostgreSQL or the pg gem changes that format, our application might fail to identify the violated constraint and return a generic error.
 
-Why did not you introduce a service object for course creation? At what point (what additional requirement) would you reach for one?
+To make it more robust, I would extract the constraint name from PostgreSQL's structured diagnostic information instead of parsing the error message. The pg gem exposes the constraint name through the PostgreSQL result's diagnostic fields.
 
-If I asked you to add a PATCH /api/v1/courses/:id to update a course's tutors, what would break or need rethinking in your current uniqueness-validation approach?
-Your courses_spec.rb request spec references routes (/api/v1/courses/index, /api/v1/courses/create) that don't exist in your app. Walk me through what happened there.
+I would also keep the mapping between constraint names and user-friendly field names centralized, and handle cases where the diagnostic information is unavailable.
 
-The CORS initializer defaults allowed_origins to "*" outside production. Is that something you would want to revisit before this went to a staging environment shared with other engineers?
-=====================================================================================================================================================================
+This makes the error handling less dependent on implementation-specific error messages and easier to maintain.
+
+
+
+If I asked you to add a PATCH /api/v1/courses/:id to update a course's tutors, what would break or need rethinking in your current uniqueness-validation approach?'
+
+==========================================================================================================
 
 Walk me through why you moved email uniqueness off Tutor and onto Course. What happens if we add a TutorsController tomorrow?
 
-What would happen today if a client POSTs a malformed JSON body? Have you checked? How would you make every error response guaranteed-JSON in production?
-
-You wrote (in an earlier, now-removed comment) that you considered a Form Object pattern and rejected it for simplicity — what would make you reconsider that decision as the app grows? At what point does Course become "too fat"?
-
 tutors_have_unique_emails builds Tutor.where("LOWER(email) IN (?)", emails) — walk me through why this is safe from SQL injection, and whether you considered a citext column or a DB-level case-insensitive constraint instead of raw SQL LOWER() indexes.
 
-The original commit had a real password in database.yml. Talk me through what you'd do differently if this were a real production repo that had already been pushed with a secret in it.
-
-dependent: :destroy is on Course has_many :tutors but there's no destroy endpoint yet. If you added one, what would you watch out for with a course that has 50 tutors?
-
-Why rescue_from ActiveRecord::RecordNotUnique at all, given you already validate uniqueness in Ruby before saving? Walk me through the race condition this protects against.
 
 If this API needed to support 10,000 courses and 50 tutors each, what's the first thing you'd look at — indexes, query patterns, or something else?
 
-Why no authentication on the create endpoint — was that discussed as out of scope, or an oversight?
-
-====================================================================================================================================================================
+==========================================================================================================
 "Walk me through what happens when a client calls GET /api/v1/courses with ?per_page=5. What response do they actually get?" (Tests whether they have run it since submitting, and whether they can self-diagnose the Pagy bug live.)
-
-What's the difference between Pagy's :items and :limit variables? How did you choose limit?" (Did they read Pagy's docs, or guess based on other gems like Kaminari?)
-
-"Why did you move the tutor email uniqueness check off the Tutor model and onto Course as a custom validation, instead of just using uniqueness: true on Tutor#email?" (Verify this was deliberate, not accidental.)
-
-"Is there a race condition in tutors_have_unique_emails? If so, what actually prevents bad data from landing in the DB?" (Checks if they understand their own defense-in-depth setup or got lucky.)
-
-"Why did you add a catch-all route and a separate NotFoundController? What would happen without it?"
-
-"What testing did you do manually before submitting — walk me through your verification process for the index and create endpoints."
 
 "If this course catalog needed to support 10 million courses, what would break first, and what would you change?"
 
-"Why :unprocessable_content instead of :unprocessable_entity?" (Confirms genuine Rails knowledge vs. coincidence/IDE autocomplete.)
-
-"Was full CRUD (show/update/destroy) part of the original scope you were given, and if so, what did you cut and why, given the 3-day window?"
-
-"The CORS config only allows GET/POST/OPTIONS — was that intentional given your current routes, or just copied from a template?"
-
-====================================================================================================================================================================
-"Walk me through hitting your own GET /courses endpoint — what does the actual JSON response look like? Did you check it before submitting?" (direct probe on the pagination bug and self-verification habits)
-
-"Your index action builds a meta hash with page/pages/count. Where does that end up in the response, and why?" (tests whether they understand AMS adapters, or can diagnose it live if shown the empty response)
-
-"What happens if a client sends per_page=-1 or per_page=abc? Walk me through the code path." (tests awareness of untrusted input)
-
-"Why did you move email-uniqueness validation off Tutor and onto Course? What breaks if someone creates a Tutor directly without going through Course?" (tests whether the trade-off was deliberate and fully reasoned, or accidental)
-
-"You handle ActiveRecord::RecordNotUnique in the controller by string-matching the Postgres index name in the exception message. What happens if that message format changes across Postgres versions, and is there a more robust way to get the violated constraint name?"
-
-"You added a limit: 50 to accepts_nested_attributes_for and rescue TooManyRecords. What made you think to do that, and what would you pick that number based on?" (tests whether this was genuine production thinking or a lucky default)
-
-"Why structure CORS to hard-fail at boot in production if ALLOWED_ORIGINS is missing, rather than defaulting to something safe?" (tests whether the fail-fast design was intentional)
 
 "If you had to add an update or destroy endpoint for a single Tutor tomorrow, what would you need to revisit given how validation is currently structured?"
 
-"Did you run rubocop or brakeman before submitting? What did they report?"
 
-"Your final submission isn't committed to git — walk me through your workflow for this assignment."
-
-====================================================================================================================================================================
-Why a custom tutors_have_unique_emails validation instead of validates :email, uniqueness: true on Tutor — what specifically breaks with the simpler approach in a nested-attributes create?
-
-Your course-name uniqueness is backed by a case-insensitive DB index; the tutor-email index is case-sensitive while your validation treats email case-insensitively. Walk through what happens with two concurrent requests creating Foo@x.com and foo@x.com.
-render_record_not_unique always blames "Course's name" — what happens if the tutors-email index raises that same exception instead? How would you fix it?
-
-GET /courses returns every course and every nested tutor, unpaginated. How does this behave at 100k courses, and what would you add?
-
-You left the Form Object decision as an explicit comment — at what point would the complexity justify extracting it?
-
-You mentioned background jobs + bulk inserts for tutor creation at scale — sketch how you'd handle partial validation failures in that batch.
-
-database.yml has real-looking local credentials committed. What's your personal rule for what goes in that file vs. .env/credentials?
-
-Was authentication/authorization intentionally out of scope, or an oversight? What would you add first for a real product?
-
-rack-cors is in the Gemfile but the initializer is fully commented out — intentional, or missed?
-
-A leftover request spec hits a nonexistent route (GET /courses/create) and a factory has course: nil that would fail validation — what is your pre-submission checklist, even when tests themselves are out of scope?
-
-
-====================================================================================================================================================================
+==========================================================================================================
 1. Walk me through what happens, step by step, when a POST request includes 2 valid tutors and 1 tutor with a missing email. Why does the whole request fail instead of saving the 2 valid tutors?
 Good answer should cover: accepts_nested_attributes_for builds all tutor records in memory first; course.save triggers validation on the course and (by default) all its associated new records; if any fail, the whole save returns false and nothing is persisted — this is a single transaction under the hood even though they never wrote ActiveRecord::Base.transaction explicitly. Distinguishes genuine understanding from "I called accepts_nested_attributes_for because a tutorial told me to."
 
@@ -239,20 +145,17 @@ Good answer should cover: joins would INNER JOIN and silently drop courses with 
 
 -----------------------------------------------------------------------------------------------------------------------------------
 7. What is actually enforcing that a Tutor can only belong to one Course in your schema — is it the belongs_to :course line, or something else?
-Good answer should cover: belongs_to just declares the Ruby-level association; the real one-tutor-one-course constraint is structural — course_id is a single foreign key column on tutors, not a join table — so a tutor physically cannot reference more than one course. Distinguishes "I know the Rails DSL" from "I understand why the schema shape itself enforces the business rule."
+Good answer should cover: belongs_to just declares the Ruby-level association; the real one-tutor-one-course constraint is structural — course_id is a single foreign key column on tutors, not a join table — so a tutor physically cannot reference more than one course.
 
 -----------------------------------------------------------------------------------------------------------------------------------
 8. If I asked you to also support "update a course's tutors" (add/remove tutors from an existing course), what would you need to change about accepts_nested_attributes_for and your strong params, and what new failure mode would you need to test?
 Good answer should cover: needs allow_destroy: true (currently false, confirmed by their own course_spec.rb test asserting allow_destroy(false)), needs :id permitted in tutors_attributes for Rails to know which record to update vs. create, and the new failure mode is a tutor id belonging to a different course being spoofed in the request (mass-assignment-adjacent security concern).
 
 -----------------------------------------------------------------------------------------------------------------------------------
-9. Your per_page param clamps to a max of 100 and falls back to 20 on invalid input, but you do not validate page the same way in the controller — Pagy's own error handling catches that instead. Why the asymmetry?'
+9. Your per_page param clamps to a max of 100 and falls back to 20 on invalid input, but you do not validate page the same way in the controller — Pagy's own error handling catches that instead. Why the asymmetry?'  
 
 Good answer should cover: per_page is their own application-level parameter with their own business rule (a max cap), so they wrote custom clamping logic for it; page is Pagy's own parameter, and Pagy already raises a typed Pagy::VariableError for invalid values, which they chose to catch centrally in BaseController rather than reimplement. Tests whether they understand why they didn't write redundant validation for something a library already handles.
 
 -----------------------------------------------------------------------------------------------------------------------------------
 10. Walk me through why RuboCop and Brakeman are both in your CI pipeline, not just RSpec. What would each one have caught that the other would not?
 Good answer should cover: RuboCop catches style/consistency issues, not bugs; Brakeman performs static security analysis for things like SQL injection, mass assignment, or unsafe redirects — a clean test suite says nothing about security posture, and a security scanner says nothing about code style. Tests whether the CI setup was a copy-pasted Rails default they do not understand, or a deliberate choice.
-
-
-
