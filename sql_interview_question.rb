@@ -513,6 +513,12 @@ Question 83: Orders with payment status
   FROM orders o
   LEFT JOIN payments p ON p.order_id = o.id;
 
+  OR we can also write it as:
+
+  SELECT o.id, o.total_amount, COALESCE(p.status, 'No Payment') AS payment_status
+  FROM orders o
+  LEFT JOIN payments p ON p.order_id = o.id;
+
 ------------------------------------------------------------------------------------------------------
 Question 84: Orders where payment missing
 

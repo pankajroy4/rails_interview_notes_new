@@ -1,5 +1,6 @@
 Rails Database Optimizations (Basic and general optimization. Part -1 )
 =======================================================================
+➤ NOTE: rails store the migration files version in a special table called as "schema_migrations"
 ➤ Select Only What You Need:
     Rails by default loads all columns with SELECT *. Bad for performance when you only need 1-2 fields.
       User.select(:id, :email).where(active: true)
