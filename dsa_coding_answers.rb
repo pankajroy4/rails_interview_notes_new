@@ -1540,7 +1540,7 @@ def next_greater_element(nums1, nums2)
     hash = Hash.new(-1)
     stack = []
 
-    nums2.each_with_index do |num|
+    nums2.each do |num|
         while stack.length > 0 && num > stack[-1]
             hash[stack[-1]] = num
             stack.pop
