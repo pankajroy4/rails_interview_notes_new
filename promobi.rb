@@ -7,6 +7,8 @@ Good answer covers: the race condition between two concurrent requests both pass
 2. In Course#tutors_have_unique_emails you wrote tutors.target.select(&:new_record?) instead of tutors.select(&:new_record?). Why?
 Good answer covers: .target reads only what is already built/loaded in memory without triggering an extra DB query on the association — relevant because calling tutors on a persisted course would otherwise force-load existing children from the DB during validation.
 
+A good candidate should explain: calling tutors on an unloaded association triggers a DB query to load existing records; .target accesses the in-memory array of already-built/loaded objects without forcing a load. Since nested attributes already populate the in-memory association, using .target avoids an unnecessary query. Someone who copied this without understanding would struggle to explain the actual mechanism.
+
 -----------------------------------------------------------------------------------------------------------------------------------
 3. Walk me through exactly what happens when course.save is called with tutors_attributes containing one invalid tutor. Is this wrapped in a transaction, and where does that transaction actually come from?
 Good answer covers: accepts_nested_attributes_for builds in-memory child records; Rails' autosave-association callbacks save parent and children inside one implicit transaction during save; if any child fails validation, the parent's save returns false and nothing is persisted — they should be able to point to their own rollback test as proof.
@@ -40,9 +42,6 @@ Good answer covers: unbounded LIMIT risk (memory/response-size blowup, accidenta
 Good answer covers: AMS gives declarative, reusable serializer objects with consistent root-key behavior and easy association control; Jbuilder gives more rendering flexibility per-view at the cost of more boilerplate; as_json is fastest to write but leaks serialization concerns into controllers/models. Tests whether the gem choice was a reasoned pick or copied boilerplate.
 
 ======================================================================================================================================================================
-1. In course.rb, you wrote tutors.target.select(&:new_record?) instead of tutors.select(&:new_record?). What is the difference, and why did you choose target?
-A good candidate should explain: calling tutors on an unloaded association triggers a DB query to load existing records; .target accesses the in-memory array of already-built/loaded objects without forcing a load. Since nested attributes already populate the in-memory association, using .target avoids an unnecessary query. Someone who copied this without understanding would struggle to explain the actual mechanism.
-
 -----------------------------------------------------------------------------------------------------------------------------------
 2. Your courses.name and tutors.email columns do not have null: false at the database level, but you did add unique DB indexes. Why the inconsistency, and what is actually enforcing presence right now?
 Good answer: acknowledges that only the Rails validation enforces presence, that it can be bypassed, and can reason about why they added the DB constraint for uniqueness (race conditions) but did not extend the same reasoning to presence — ideally recognizing it as an oversight rather than deflecting.
@@ -60,14 +59,6 @@ Good answer: explains defense-in-depth — model-level uniqueness validation has
 Good answer: includes uses a separate query (or decides to LEFT JOIN depending on whether conditions reference the association) while eager_load always forces a LEFT OUTER JOIN in a single query; includes is generally preferred unless you need to filter/order on the associated tables columns, in which case the implicit join might not pick up the condition correctly and eager_load (or explicit references) is needed.
 
 -----------------------------------------------------------------------------------------------------------------------------------
-6. If two requests try to create a course with the same name at the exact same millisecond, walk me through what happens with your current implementation.
-Good answer: both requests pass the model-level validates :uniqueness check (both see no existing row), both attempt INSERT, the DB unique index on LOWER(name) causes one to raise ActiveRecord::RecordNotUnique, which your rescue_from catches and converts to a 409. Tests whether they understand why the DB constraint exists, not just that they added it.
-
------------------------------------------------------------------------------------------------------------------------------------
-7. Your nested attributes limit is 50. What happens today if someone submits 51? Walk me through the exact exception path.
-Good answer: accepts_nested_attributes_for(:tutors, limit: 50) raises ActiveRecord::NestedAttributes::TooManyRecords when attempting to assign the 51st, before any DB interaction; your rescue_from in base_controller.rb catches it and returns 400. Should be able to explain this happens at attribute-assignment time, not at save time.
-
------------------------------------------------------------------------------------------------------------------------------------
 8. You chose not to build a Form Object / service object for course creation, and left a comment about it. At what point — more fields, more cross-model logic, async side effects — would you change that decision?
 Good answer: a thoughtful answer naming concrete triggers (e.g., multiple models beyond two, needing to fire notifications/jobs post-creation, multi-step validation spanning unrelated records, wanting to reuse the same creation logic from multiple controllers/contexts) shows they are not just avoiding abstraction reflexively but have a mental model of when it earns its cost.
 
@@ -82,13 +73,6 @@ Good answer: explains wildcard CORS + credentialed requests (cookies/auth header
 
 =====================================================================================================================================================================
 
-Walk me through why you rescue ActiveRecord::RecordNotUnique in the controller in addition to the model-level validation — what exact race are you protecting against, and why did not you write a test for it?
-
-Why did you put tutor email-uniqueness validation on Course instead of Tutor? What would you need to change to support an endpoint that creates or updates a single Tutor directly?
-
-Your CI config (.github/workflows/ci.yml) never runs bundle exec rspec. Was that intentional, or an oversight? How would you have caught that before submitting?
-git status shows spec/requests/ as untracked. How did you package/submit this project? Did you verify the diff/zip you sent actually contained everything?
-
 Explain tutors.target.select(&:new_record?) in Course#tutors_have_unique_emails — what would change if you used tutors.select(&:new_record?) instead, and why did you avoid that?
 
 You left a comment saying that at scale you would move tutor creation to a background job with bulk inserts. Walk through what that implementation would actually look like — what happens to the APIs response/status code if creation becomes async?
@@ -98,40 +82,9 @@ If two identical POST requests for the same course name land at the same instant
 
 =======================================================================================================================================================================
 
-1. You added both a Rails-level uniqueness validation (case_sensitive: false) and a database unique index, with a rescue_from for RecordNotUnique. What problem does the DB index solve that the Rails validation alone does not?
-Good answer covers: the race condition between two concurrent requests both passing validation before either commits (TOCTOU); the DB constraint is the only actual guarantee under concurrency; the Rails validation exists purely for fast, friendly feedback in the common case.
-
 -----------------------------------------------------------------------------------------------------------------------------------
 2. In Course#tutors_have_unique_emails you wrote tutors.target.select(&:new_record?) instead of tutors.select(&:new_record?). Why?
 Good answer covers: .target reads only what is already built/loaded in memory without triggering an extra DB query on the association — relevant because calling tutors on a persisted course would otherwise force-load existing children from the DB during validation.
-
------------------------------------------------------------------------------------------------------------------------------------
-3. Walk me through exactly what happens when course.save is called with tutors_attributes containing one invalid tutor. Is this wrapped in a transaction, and where does that transaction actually come from?
-Good answer covers: accepts_nested_attributes_for builds in-memory child records; Rails' autosave-association callbacks save parent and children inside one implicit transaction during save; if any child fails validation, the parent's save returns false and nothing is persisted — they should be able to point to their own rollback test as proof.
-
------------------------------------------------------------------------------------------------------------------------------------
-4. Your GET /courses uses Course.includes(:tutors). If you removed includes, what would actually break, and how would you prove it in a test (not just by eyeballing the controller)?
-Good answer covers: without eager loading, each course would issue a separate query to fetch its tutors (N+1); proof requires either a query-count assertion, a tool like the bullet gem, or subscribing to ActiveSupport::Notifications for sql.active_record in a test.
-
------------------------------------------------------------------------------------------------------------------------------------
-5. Why does Tutor not have its own uniqueness validation for email, relying instead on logic inside Course? What breaks if someone later adds a direct "create tutor" endpoint?
-Good answer covers: acknowledges the coupling; recognizes a direct-tutor-creation path would skip the Course-level check and fall through to a raw DB uniqueness violation instead of a clean validation error — tests whether this was a deliberate, understood trade-off or an oversight.
-
------------------------------------------------------------------------------------------------------------------------------------
-6. You return 400 for too many nested tutors but 422 for a tutor with a bad email. What's the actual distinction you're drawing between those two status codes?
-Good answer covers: 400 = structurally malformed/invalid request (an exception, not a validation failure — the request itself violates a hard limit); 422 = well-formed request that fails business/semantic validation. Weak candidates will not have a crisp distinction and will say "I just picked one."
-
------------------------------------------------------------------------------------------------------------------------------------
-7. Your base_controller rescues StandardError first in the file, then more specific exceptions like RecordNotUnique afterward. When a RecordNotUnique is actually raised, which handler runs, and why doesn't the generic one win since it was declared first?
-Good answer covers: Rails' rescue_from (via ActiveSupport::Rescuable) matches by exception ancestry across all registered handlers and picks the most specific/most-recently-declared match, not simply "first declared" — this is the kind of internals question that separates "it worked" from "I know why it worked."
-
------------------------------------------------------------------------------------------------------------------------------------
-8. Two identical POST /courses requests for the same course name land at the database at nearly the same instant. Trace exactly what happens to each one, end to end.
-Good answer covers: both may pass the in-app Rails validation (neither sees the other's uncommitted row); both attempt INSERT; the DB's unique index on LOWER(name) lets exactly one succeed; the other raises ActiveRecord::RecordNotUnique, caught by rescue_from, resulting in a 409.
-
------------------------------------------------------------------------------------------------------------------------------------
-9. Why cap per_page at 100 instead of letting clients request any page size? What's the actual failure mode you're preventing?
-Good answer covers: unbounded LIMIT risk (memory/response-size blowup, accidental or deliberate resource exhaustion), not a theoretical concern — a client (or bot) requesting per_page=1000000 would force serialization of the entire table.
 
 -----------------------------------------------------------------------------------------------------------------------------------
 10. Why active_model_serializers instead of Jbuilder or just calling .as_json with include:? What would you lose or gain switching to one of those?
