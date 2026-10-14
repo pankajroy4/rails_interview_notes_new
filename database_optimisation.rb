@@ -92,7 +92,7 @@ Database Indexing in Rails (Part - 2)
         This creates a single index using more than once column.
         We use it when queries filter using multiple columns together.
 
-        add_index :orders, [:user_id, :status] => Add index in orders table on user_id  and statsu column together.
+        add_index :orders, [:user_id, :status] => Add index in orders table on user_id  and status column together.
         This will optimize => Order.where(user_id: 1, status: 'shipped')
 
         NOTE: In composite Index, order matters.

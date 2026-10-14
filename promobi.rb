@@ -159,3 +159,81 @@ Good answer should cover: per_page is their own application-level parameter with
 -----------------------------------------------------------------------------------------------------------------------------------
 10. Walk me through why RuboCop and Brakeman are both in your CI pipeline, not just RSpec. What would each one have caught that the other would not?
 Good answer should cover: RuboCop catches style/consistency issues, not bugs; Brakeman performs static security analysis for things like SQL injection, mass assignment, or unsafe redirects — a clean test suite says nothing about security posture, and a security scanner says nothing about code style. Tests whether the CI setup was a copy-pasted Rails default they do not understand, or a deliberate choice.
+
+
+  ======================================================
+
+  Since we support nested attributes for Tutors, an update request can contain both existing Tutors and new Tutors. I would normalize all submitted emails and check for duplicates within the submitted collection first. Then I would query the database for matching emails while excluding the IDs of existing Tutors being updated. This prevents a Tutor from conflicting with its own existing email while still detecting conflicts with other records. Finally, I would rely on a case-insensitive unique database index as the last line of defense against concurrent requests.
+
+  existing_tutor_ids = tutors.map(&:id).compact
+
+  existing_emails = Tutor
+    .where("LOWER(email) IN (?)", emails)
+    .where.not(id: existing_tutor_ids)
+
+    -----------
+  update_only ka use primarily has_one association ke saath hota hai. Ye control karta hai ki nested attributes existing associated record ko update karein ya nahi, jab uska ID provide nahi kiya gaya ho.
+
+-------------
+
+  I would first inspect Rails development logs to identify SQL queries executed by the GET endpoint. For automated measurement, I would subscribe to sql.active_record using ActiveSupport::Notifications and count relevant SQL events. I would then write request specs with multiple Courses and associated Tutors to verify that query count remains approximately constant as the number of Courses increases. I would also use Bullet to detect N+1 queries.
+
+---------------
+  duplicate(conflict) - 409
+  Missing record (Not found) - 404
+  validation failre(invalid) - 422
+  invalid request/bad request - 400 
+  created -  201
+  ok - 200
+
+-----------------
+  I would implement idempotency using an Idempotency-Key header. The client generates a unique key for each logical POST request and reuses it for retries. On the server, I would store the key, a request-payload digest, and the completed response. I would enforce uniqueness at the database level to handle concurrent requests and use a transaction to coordinate Course creation, nested Tutor creation, and idempotency-result persistence. If the same key and payload are received again, I would return the stored response instead of creating another Course. I would also reject reuse of the same key with a different payload.
+
+-----------------
+
+  1. Shallow copy
+Shallow copy mein naya outer object banta hai, lekin uske andar ke nested objects ke references share hote hain.
+
+original = [[1, 2], [3, 4]]
+copy = original.dup
+
+copy[0] << 99
+copy << [5, 9]
+
+puts original.inspect
+# [[1, 2, 99], [3, 4]]
+
+puts copy.inspect
+# [[1, 2, 99], [3, 4], [5, 9]]
+
+2. Deep copy
+Deep copy mein outer object ke saath nested mutable objects bhi independently copy kiye jaate hain.
+Ruby mein Array aur Hash ke liye koi universal built-in deep_dup method available nahi hai, lekin Rails mein deep_dup available hai.
+
+original = [[1, 2], [3, 4]]
+copy = original.deep_dup
+
+copy[0] << 99
+
+puts original.inspect
+# [[1, 2], [3, 4]]
+
+puts copy.inspect
+# [[1, 2, 99], [3, 4]]
+
+------------
+
+I prefer composition over inheritance when a class needs another object's behavior without having a genuine is-a relationship. Composition reduces tight coupling, allows dependencies to be replaced at runtime, and makes unit testing easier. I use inheritance when the subtype relationship is meaningful and the child can safely substitute for its parent.'
+-----------
+Overusing Rails concerns can create hidden dependencies, scatter business logic across multiple files, and make callbacks and method lookup harder to trace. Concerns are useful for cohesive, reusable behavior shared across models, but they should not become containers for unrelated business logic. For complex workflows, I prefer service objects with explicit dependencies. In my Course-Tutor API, I would keep validations and associations in the models and move complex multi-step creation logic into a service only when the complexity justifies it.
+-----------
+Devise is a Rails authentication solution built on top of Warden. It provides modules for password authentication, registration, password recovery and other authentication features. During login, Devise finds the user, verifies the submitted password against the stored password digest, and establishes an authenticated identity. In browser applications, this is commonly maintained through a session. For APIs, I would explicitly choose session-based authentication or a token-based approach, depending on the client and security requirements
+----------
+OAuth 2.0 is an authorization framework that defines how clients obtain access to protected resources, while JWT is a token format used to carry claims. OAuth access tokens can be JWTs or opaque tokens. If I am building a Rails API, I would choose OAuth 2.0 when delegated authorization and third-party access are required. I would consider JWT when a signed, self-contained bearer token fits the authentication architecture. For user sign-in through an identity provider, I would use OpenID Connect rather than OAuth 2.0 alone.
+-----------
+
+For a large PostgreSQL table, I would prefer CREATE INDEX CONCURRENTLY to minimize write blocking. In Rails, I would use algorithm: :concurrently with disable_ddl_transaction!, because concurrent index creation cannot run inside a transaction block. Before deployment, I would inspect the query plan, check for existing indexes and, for unique indexes, identify duplicate data. After deployment, I would verify index validity and monitor database load. If the migration fails, I would check for an invalid index before retrying.
+Production mein low-traffic window aur monitoring plan karna best practice hai.
+
+------------------
+For a large table, I would use the Expand-Migrate-Contract pattern. First, I would add the new nullable column without removing the old one. Then I would deploy backward-compatible application code that writes to both columns and backfill historical records in small, resumable batches. After verifying consistency, I would switch reads to the new column, monitor the application, and remove the old column in a later deployment. For data migrations, I would avoid long transactions, account for concurrent writes, and ensure that each batch can safely be retried.

@@ -1661,3 +1661,8 @@ end
 
 s = "3[a]2[bc]"
 puts decode_string(s)
+
+
+-----
+
+3723. Maximize Sum of Squares of Digits
