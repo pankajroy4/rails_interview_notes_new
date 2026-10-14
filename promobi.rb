@@ -225,7 +225,7 @@ puts copy.inspect
 
 I prefer composition over inheritance when a class needs another object's behavior without having a genuine is-a relationship. Composition reduces tight coupling, allows dependencies to be replaced at runtime, and makes unit testing easier. I use inheritance when the subtype relationship is meaningful and the child can safely substitute for its parent.'
 -----------
-Overusing Rails concerns can create hidden dependencies, scatter business logic across multiple files, and make callbacks and method lookup harder to trace. Concerns are useful for cohesive, reusable behavior shared across models, but they should not become containers for unrelated business logic. For complex workflows, I prefer service objects with explicit dependencies. In my Course-Tutor API, I would keep validations and associations in the models and move complex multi-step creation logic into a service only when the complexity justifies it.
+Over using Rails concerns can create hidden dependencies, scatter business logic across multiple files, and make callbacks and method lookup harder to trace. Concerns are useful for cohesive, reusable behavior shared across models, but they should not become containers for unrelated business logic. For complex workflows, I prefer service objects with explicit dependencies. In my Course-Tutor API, I would keep validations and associations in the models and move complex multi-step creation logic into a service only when the complexity justifies it.
 -----------
 Devise is a Rails authentication solution built on top of Warden. It provides modules for password authentication, registration, password recovery and other authentication features. During login, Devise finds the user, verifies the submitted password against the stored password digest, and establishes an authenticated identity. In browser applications, this is commonly maintained through a session. For APIs, I would explicitly choose session-based authentication or a token-based approach, depending on the client and security requirements
 ----------
@@ -237,3 +237,35 @@ Production mein low-traffic window aur monitoring plan karna best practice hai.
 
 ------------------
 For a large table, I would use the Expand-Migrate-Contract pattern. First, I would add the new nullable column without removing the old one. Then I would deploy backward-compatible application code that writes to both columns and backfill historical records in small, resumable batches. After verifying consistency, I would switch reads to the new column, monitor the application, and remove the old column in a later deployment. For data migrations, I would avoid long transactions, account for concurrent writes, and ensure that each batch can safely be retried.
+
+
+--------------
+1.API rate limiting aur brute-force protection kaise implement karoge?
+
+“I would implement distributed rate limiting using Redis-backed Rack::Attack or an API gateway. I would apply IP-based limits for anonymous traffic, user-based limits for authenticated requests, organization-level quotas for multi-tenant fairness, and stricter endpoint-specific limits for login and password reset.
+For brute-force protection, I would track failed login attempts, apply progressive delays or temporary restrictions, use MFA and risk-based challenges, and monitor suspicious patterns. I would return HTTP 429 with a Retry-After header when limits are exceeded. Finally, I would test the solution across multiple Rails instances and explicitly define how rate limiting behaves if Redis becomes unavailable.”
+
+Redis unavailable ho to kya karoge? :  Authentication aur sensitive endpoints ke liye fail-open vs fail-closed policy explicitly define karunga. Login security ke liye alternative throttling ya gateway protection honi chahiye; warna Redis failure attacker ko unlimited attempts de sakta hai.
+
+-----------
+“IDOR(Insecure Direct Object Reference) occurs when an application exposes a resource identifier but fails to verify whether the requesting user is authorized to access that resource. In a multi-tenant Rails application, I would prevent it by resolving records through the authenticated user's organization, enforcing resource-level authorization with policies, and optionally using PostgreSQL Row-Level Security as defense-in-depth. I would also test cross-tenant read, update, delete, nested-resource, and file-download scenarios. UUIDs alone do not prevent IDOR because authorization must be enforced on the server.”'
+
+-----
+5.Failed deployment ke baad rollback kaise karoge, particularly jab database migration bhi hui ho?
+“I separate application rollback from database rollback. First, I contain the incident and identify whether the failure is in the application, schema, or data migration. If the new schema is backward-compatible, I roll back the application to the last known-good release and verify critical flows. If the migration renamed or dropped columns, or transformed data, I do not blindly roll back the code or database; I estimate compatibility and data-loss risk and choose a safe forward fix or recovery strategy. To prevent these incidents, I use the expand–migrate–contract pattern, perform backfills in batches, maintain backward compatibility during rolling deployments, and run destructive migrations only after old code no longer depends on the old schema.”
+
+---
+Database commit ho gaya lekin background job enqueue nahi hui, toh kya karoge?
+“I would not rely solely on after_commit, because the database transaction can succeed while the Redis/Sidekiq enqueue fails. For critical background work, I would implement the transactional outbox pattern: persist the business record and an outbox event in the same database transaction. A dispatcher would publish pending events and retry failures. Since events may be delivered more than once, consumers must be idempotent. I would also monitor outbox lag, retries, and failed events. This gives reliable eventual processing without requiring an atomic transaction across PostgreSQL and Redis.”
+
+----
+External API slow ya unavailable ho, toh tumhara application resilient kaise rahega?
+“I would isolate external dependencies behind dedicated service objects and configure strict connection and read timeouts. I would retry only transient(क्षणिक) failures using exponential backoff with jitter and bounded attempts, and use idempotency keys for operations such as payments. A circuit breaker would stop repeated calls to an unhealthy dependency, while safe fallbacks or cached responses would provide graceful degradation. For non-blocking integrations, I would use Sidekiq with reliable enqueueing, retries, idempotent processing, and dead-letter or failure monitoring. Finally, I would monitor latency, error rates, retry volume, and queue backlog.”
+
+-----
+Agar Redis unavailable ho jaaye toh application ke kaun se features fail honge aur fallback strategy kya hogi?
+
+“I would first map every Redis dependency and classify it by criticality. Cache failures can often fall back to PostgreSQL, with safeguards against database overload. Sidekiq failures require durable job intent, so for critical workflows I would use a transactional outbox and replay pending events after recovery. For rate limiting and JWT revocation, I would define explicit fail-open or fail-closed policies based on security risk, with independent gateway protection where possible. I would also use highly available Redis, bounded timeouts and retries, monitoring, and recovery drills. The goal is to isolate the Redis outage rather than let it cascade across the entire application.”
+
+---------
+

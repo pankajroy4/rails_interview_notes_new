@@ -1,3 +1,15 @@
+What is redis and why it is fast?
+Answer: Redis is an in-memory data structure store commonly used for caching, session management, rate limiting, and background job queues.
+
+Redis is fast because it stores data primarily in RAM, uses efficient data structures, and most commands are simple in-memory operations that execute very quickly.
+
+Redis primarily uses a single-threaded event loop for command execution. This reduces lock contention and context-switching overhead compared to a multithreaded command-execution model. Using I/O multiplexing, a single thread can efficiently handle multiple client connections.
+
+However, Redis is not completely single-threaded. While command execution is primarily single-threaded, additional threads can be used for tasks such as background I/O and other supported operations, depending on the configuration.
+
+Redis also supports TTL, eviction policies, persistence through RDB and AOF, replication, and horizontal scaling through Redis Cluster. In Ruby on Rails, Redis is commonly used for caching and Sidekiq background job processing.
+
+-------------------------------------------------------------------------------------------
 Question 1: What is active job?
 Answer: ActiveJob is a framework inside Rails that provides a unified interface for background jobs.
 It is part of Rails core. It does not process jobs by itself.
