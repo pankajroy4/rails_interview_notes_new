@@ -1662,20 +1662,51 @@ end
 s = "3[a]2[bc]"
 puts decode_string(s)
 
+-----------------------------------------------------------------------------------------------------------------------------------
 
------
+3723.Maximize Sum of Squares of Digits (Greedy Approach)
+You are given two positive integers num and sum.
+A positive integer n is good if it satisfies both of the following:
+    The number of digits in n is exactly num.
+    The sum of digits in n is exactly sum.
+The score of a good integer n is the sum of the squares of digits in n.
+Return a string denoting the good integer n that achieves the maximum score. If there are multiple possible integers, return the 
+maximum one. If no such integer exists, return an empty string.
 
-3723. Maximize Sum of Squares of Digits
+Example:
+Input: num = 2, sum = 17
+Output: "98"
+Explanation:
+There are 2 good integers: 89 and 98.
+    The score of 89 is 82 + 92 = 145.
+    The score of 98 is 92 + 82 = 145.
+The maximum score is 145. The maximum good integer that achieves this score is 98. Therefore, the answer is "98".
+Constraints:
+    1 <= num <= 2 * 10^5
+    1 <= sum <= 2 * 10^6
+
 
 # For any n digits number, the maximum digit sum wiil be n*9 and minimum digit_sum will be 1
-  # Eg: For 2 digit number: maximum digit_sum = 99 => 9+9 => 18
-  #                     minimum_digit_sum = 10 => 1+0 => 1
+# Eg: For 2 digit number: maximum digit_sum = 99 => 9+9 => 18
+# minimum_digit_sum = 10 => 1+0 => 1
+# NOTE: (x+y)² > x² + y²
+
 
 def max_sum_of_squares(num, sum)
-  return "" if sum > num*9 
+  return "" if sum > num*9
+  return "" if sum == 0
 
-  (1..num).each do |digit_place|
+  remaining_sum = sum
+  ans = ""
 
-    
+  (num).downto(1) do |digit_place|
+      digit = [9, remaining_sum].min
+      ans << digit.to_s
+      remaining_sum -= digit
   end
+  ans
 end
+
+num = 3 
+sum = 20
+puts max_sum_of_squares(num, sum)
