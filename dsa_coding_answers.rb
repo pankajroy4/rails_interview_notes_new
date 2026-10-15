@@ -1617,7 +1617,7 @@ def reverse_polish_notation(tokens)
             stack << token.to_i
         end
     end
-    stack.pop
+    return stack.pop
 end
 
 tokens = ["10","6","9","3","+","-11","*","/","*","17","+","5","+"]
@@ -1666,3 +1666,16 @@ puts decode_string(s)
 -----
 
 3723. Maximize Sum of Squares of Digits
+
+# For any n digits number, the maximum digit sum wiil be n*9 and minimum digit_sum will be 1
+  # Eg: For 2 digit number: maximum digit_sum = 99 => 9+9 => 18
+  #                     minimum_digit_sum = 10 => 1+0 => 1
+
+def max_sum_of_squares(num, sum)
+  return "" if sum > num*9 
+
+  (1..num).each do |digit_place|
+
+    
+  end
+end
