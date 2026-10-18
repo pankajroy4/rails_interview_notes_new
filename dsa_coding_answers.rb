@@ -1710,3 +1710,56 @@ end
 num = 3 
 sum = 20
 puts max_sum_of_squares(num, sum)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+45.Implement a FIFO queue using only two stacks, supporting push, pop, peek, empty.
+Input:  push(1), push(2), peek(), pop(), empty()
+Output: 1, 1, false
+
+class MyQueue
+    def initialize()
+        @in_stack = []
+        @out_stack = []
+    end
+
+    def push(x)
+        @in_stack << x
+    end
+
+    def pop()
+        return @out_stack.pop if @out_stack.length > 0
+        while @in_stack.length > 0
+            @out_stack << @in_stack.pop
+        end
+        @out_stack.pop
+    end
+
+    def peek()
+        return @out_stack[-1] if @out_stack.length > 0
+        while @in_stack.length > 0
+            @out_stack << @in_stack.pop
+        end
+        @out_stack[-1]
+    end
+
+    def empty()
+        @out_stack.length == 0 && @in_stack.length == 0
+    end
+end
+
+obj = MyQueue.new()
+obj.push(10)
+param_2 = obj.pop()
+param_3 = obj.peek()
+param_4 = obj.empty()
+
+-----------------------------------------------------------------------------------------------------------------------------------
+46.Given an array and window size k, find the first negative number in every
+contiguous window of size k.
+Input:  arr = [12, -1, -7, 8, -15, 30, 16, 28], k = 3
+Output: [-1, -1, -7, -15, -15, 0]
+Explanation: Each windows first negative is reported; 0 if none exists in that window.
+Constraints: 1 <= arr.length <= 10^5
+
+-----------------------------------------------------------------------------------------------------------------------------------
+4079. Prime Subset Selection I
