@@ -1761,5 +1761,144 @@ Output: [-1, -1, -7, -15, -15, 0]
 Explanation: Each windows first negative is reported; 0 if none exists in that window.
 Constraints: 1 <= arr.length <= 10^5
 
+
+# using shit method, removes element from front of array. It may take n time.
+
+def first_negative(arr, k)
+  dequeue = []
+  ans  = []
+
+  arr.each_with_index do |num, i|
+    dequeue << i if num < 0
+    window_start = i - k + 1
+    
+    while dequeue.length > 0 && dequeue[0] < window_start
+      dequeue.shift
+    end
+
+    if i+1 >= k
+      if dequeue.length > 0
+        ans << arr[dequeue[0]]
+      else
+        ans << 0
+      end   
+    end
+  end
+  ans
+end
+
+arr = [12, -1, -7, 8, -15, 30, 16, 28]
+k = 3
+puts first_negative(arr, k).inspect
+
+
+# using head pointer.
+
+def first_negative(arr, k)
+  dequeue = []
+  head = 0
+  ans = []
+
+  arr.each_with_index do |num, i|
+    dequeue << i if num < 0
+    window_start = i - k + 1
+
+    while head < dequeue.length && dequeue[head] < window_start
+      head += 1
+    end
+
+    if i >= k - 1
+      if head < dequeue.length
+        ans << arr[dequeue[head]]
+      else
+        ans << 0
+      end
+    end
+  end
+
+  ans
+end
+
+arr = [12, -1, -7, 8, -15, 30, 16, 28]
+k = 3
+
+puts first_negative(arr, k).inspect
+
+-----------------------------------------------------------------------------------------------------------------------------------
+48.Sliding Window Maximum — (Pattern: Monotonic Deque)
+Problem: Given an array and window size k, return the max of every contiguous window.
+Input:  nums = [1,3,-1,-3,5,3,6,7], k = 3
+Output: [3,3,5,5,6,7]
+
+# Using shift
+def max_sliding_window(nums, k)
+  dequeue = []
+  ans = []
+
+  nums.each_with_index do |num, i|
+    window_start = i-k+1
+    
+    while dequeue.length > 0 && nums[dequeue.last] <= num
+      dequeue.pop
+    end
+
+    dequeue << i
+
+    while dequeue.length > 0 && dequeue[0] < window_start
+      dequeue.shift
+    end
+
+    if i+1 >= k
+      if dequeue.length > 0
+        ans << nums[dequeue[0]]
+      end   
+    end
+  end
+
+  ans
+end
+
+nums = [1,3,-1,-3,5,3,6,7]
+k = 3
+puts max_sliding_window(nums, k).inspect
+
+
+# using head pointer
+
+def max_sliding_window(nums, k)
+  dequeue = []
+  head = 0
+  tail = -1
+  ans = []
+
+  nums.each_with_index do |num, i|
+    window_start = i-k+1
+    
+    while head <= tail && nums[dequeue[tail]] <= num
+      tail-=1
+    end
+
+    tail+=1
+    dequeue[tail] =  i
+
+    while head <= tail && dequeue[head] < window_start
+      head+=1
+    end
+
+    if i+1 >= k
+      if tail >= head
+        ans << nums[dequeue[head]]
+      end   
+    end
+  end
+
+  ans
+end
+
+nums = [1,3,-1,-3,5,3,6,7]
+k = 3
+puts max_sliding_window(nums, k).inspect
+
+
 -----------------------------------------------------------------------------------------------------------------------------------
 4079. Prime Subset Selection I
