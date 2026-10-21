@@ -1899,6 +1899,27 @@ nums = [1,3,-1,-3,5,3,6,7]
 k = 3
 puts max_sliding_window(nums, k).inspect
 
+-----------------------------------------------------------------------------------------------------------------------------------
+49. Given the head of a singly linked list, reverse it and return the new head.
+Input:  head = 1 -> 2 -> 3 -> 4 -> 5
+Output: 5 -> 4 -> 3 -> 2 -> 1
+
+def reverse_list(head)
+  previous_node = nil
+  current_node = head
+
+  while current_node != nil
+    next_node = current_node.next
+
+    current_node.next = previous_node
+
+    previous_node = current_node
+    current_node = next_node
+  end
+
+  previous_node
+end
+
 
 -----------------------------------------------------------------------------------------------------------------------------------
 4079. Prime Subset Selection I
