@@ -1920,6 +1920,27 @@ def reverse_list(head)
   previous_node
 end
 
+-----------------------------------------------------------------------------------------------------------------------------------
+50.Middle of the Linked List — (Pattern: Fast/Slow Pointers)
+Problem: Given the head of a singly linked list, return the middle node (second middle
+if two exist).
+Input:  head = 1 -> 2 -> 3 -> 4 -> 5
+Output: 3
+Explanation: 3 is the middle of 5 nodes.
+Constraints: 1 <= number of nodes <= 100
+Approach: slow pointer moves 1 step, fast pointer moves 2 steps — O(n) time, O(1) space
+
+def middle_node(head)
+    slow = head
+    fast = head
+
+    while fast != nil && fast.next != nil 
+        slow = slow.next
+        fast = fast.next.next
+    end
+    slow
+end
+
 
 -----------------------------------------------------------------------------------------------------------------------------------
 4079. Prime Subset Selection I
