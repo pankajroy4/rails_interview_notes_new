@@ -890,8 +890,6 @@ Explanation: Nodes are spliced together in sorted order.
 Constraints: 0 <= nodes in each list <= 50
 Approach: dummy head, compare heads of both lists, attach the smaller each time — O(n+m) time, O(1) space
 
---- Medium ---
-
 52.Linked List Cycle — (Pattern: Floyd Algorithm)
 Problem: Given the head of a linked list, determine if it has a cycle.
 Input:  head = 3 -> 2 -> 0 -> -4 -> (back to node with value 2)
@@ -899,6 +897,8 @@ Output: true
 Explanation: The tail connects back into the list, forming a cycle.
 Constraints: 0 <= number of nodes <= 10^4
 Approach: fast/slow pointers (Floyd Tortoise and Hare) — if they meet, a cycle exists — O(n) time, O(1) space
+
+--- Medium ---
 
 53.Linked List Cycle II — (Pattern: Floyd Algorithm)
 Problem: Given a linked list, return the node where the cycle begins, or null if there

@@ -1927,8 +1927,6 @@ if two exist).
 Input:  head = 1 -> 2 -> 3 -> 4 -> 5
 Output: 3
 Explanation: 3 is the middle of 5 nodes.
-Constraints: 1 <= number of nodes <= 100
-Approach: slow pointer moves 1 step, fast pointer moves 2 steps — O(n) time, O(1) space
 
 def middle_node(head)
     slow = head
@@ -1941,6 +1939,55 @@ def middle_node(head)
     slow
 end
 
+-----------------------------------------------------------------------------------------------------------------------------------
+51.Merge Two Sorted Lists — (Pattern: Two Pointers)
+Problem: Merge two sorted linked lists and return it as one sorted list.
+Input:  l1 = 1->2->4, l2 = 1->3->4
+Output: 1->1->2->3->4->4
+
+def merge_two_lists(list1, list2)
+  temp = ListNode.new
+  tail = temp
+
+  while list1 != nil && list2 != nil
+      if list1.val <= list2.val
+          tail.next = list1
+          list1 = list1.next
+      else
+          tail.next = list2
+          list2 = list2.next
+      end
+
+      tail = tail.next
+  end
+
+  if list1 != nil
+      tail.next = list1
+  else
+      tail.next = list2
+  end
+
+  temp.next
+end
+
+-----------------------------------------------------------------------------------------------------------------------------------
+52.Linked List Cycle — (Pattern: Floyd Algorithm)
+Problem: Given the head of a linked list, determine if it has a cycle.
+Input:  head = 3 -> 2 -> 0 -> -4 -> (back to node with value 2)
+Output: true
+Explanation: The tail connects back into the list, forming a cycle.
+
+def hasCycle(head)
+  slow = head
+  fast = head
+
+  while fast != nil && fast.next !=nil
+      fast = fast.next.next
+      slow = slow.next
+      return true if fast == slow
+  end
+  return false
+end
 
 -----------------------------------------------------------------------------------------------------------------------------------
 4079. Prime Subset Selection I
