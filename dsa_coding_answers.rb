@@ -1990,4 +1990,40 @@ def hasCycle(head)
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------
+53.Linked List Cycle II — (Pattern: Floyd Algorithm)
+Problem: Given a linked list, return the node where the cycle begins, or null if there
+is no cycle.
+Input:  head = 3 -> 2 -> 0 -> -4 -> (back to node with value 2)
+Output: node with value 2
+Explanation: After detecting the cycle, resetting one pointer to head and advancing
+both one step at a time meets exactly at the cycle start.
+Constraints: 0 <= number of nodes <= 10^4
+
+def detectCycle(head)
+  pointer1 = head
+  pointer2 = head
+  cycle_found = false
+  
+  while pointer2 != nil && pointer2.next != nil
+    pointer1 = pointer1.next  # slow
+    pointer2 = pointer2.next.next # fast
+
+    if pointer1 == pointer2
+      cycle_found = true
+      break
+    end
+  end
+
+  return nil unless cycle_found
+  pointer2 = head
+
+  while pointer2 != pointer1 
+    pointer1 = pointer1.next
+    pointer2 = pointer2.next
+  end
+
+  return pointer2
+end
+
+-----------------------------------------------------------------------------------------------------------------------------------
 4079. Prime Subset Selection I
