@@ -2829,3 +2829,104 @@ DSA
 └── BIT MANIPULATION
     ├── Core: XOR / Bit Tricks       (Q85-Q89)
     └── Usage: Subsets via Bitmask   (bitmask as a subset representation — Q64, Q197)
+
+
+===========================================================================================
+                         1. RECURSION
+===========================================================================================
+
+-------------------------------------- Phase 1 — Basic Recursion --------------------------
+
+- LeetCode 509 → Fibonacci Number [Easy]
+- LeetCode 344 → Reverse String [Easy]
+- LeetCode 206 → Reverse Linked List [Easy]
+- LeetCode 21 → Merge Two Sorted Lists [Easy]
+- LeetCode 203 → Remove Linked List Elements [Easy]
+- LeetCode 24 → Swap Nodes in Pairs [Medium]
+- LeetCode 50 → Pow(x, n) [Medium]
+
+-------------------------------------- Phase 2 — Arrays & Strings -------------------------
+
+- LeetCode 704 → Binary Search [Easy]
+- LeetCode 35 → Search Insert Position [Easy]
+- LeetCode 74 → Search a 2D Matrix [Medium]
+- LeetCode 912 → Sort an Array [Medium]
+- LeetCode 125 → Valid Palindrome [Easy]
+- LeetCode 394 → Decode String [Medium]
+
+-------------------------------------- Phase 3 — Divide & Conquer -------------------------
+
+- LeetCode 53 → Maximum Subarray [Medium]
+- LeetCode 169 → Majority Element [Easy]
+- LeetCode 148 → Sort List [Medium]
+- LeetCode 215 → Kth Largest Element in an Array [Medium]
+- LeetCode 23 → Merge k Sorted Lists [Hard]
+- LeetCode 241 → Different Ways to Add Parentheses [Medium]
+- LeetCode 427 → Construct Quad Tree [Medium]
+
+-------------------------------------- Phase 4 — Tree Recursion --------------------------
+
+- LeetCode 104 → Maximum Depth of Binary Tree [Easy]
+- LeetCode 100 → Same Tree [Easy]
+- LeetCode 226 → Invert Binary Tree [Easy]
+- LeetCode 101 → Symmetric Tree [Easy]
+- LeetCode 112 → Path Sum [Easy]
+- LeetCode 110 → Balanced Binary Tree [Easy]
+- LeetCode 543 → Diameter of Binary Tree [Easy]
+- LeetCode 102 → Binary Tree Level Order Traversal [Medium]
+- LeetCode 236 → Lowest Common Ancestor of a Binary Tree [Medium]
+- LeetCode 105 → Construct Binary Tree from Preorder and Inorder Traversal [Medium]
+- LeetCode 199 → Binary Tree Right Side View [Medium]
+- LeetCode 124 → Binary Tree Maximum Path Sum [Hard]
+
+-------------------- Phase 5 — Recursion + Memoization (DP Foundation) -------------------
+
+- LeetCode 70 → Climbing Stairs [Easy]
+- LeetCode 746 → Min Cost Climbing Stairs [Easy]
+- LeetCode 198 → House Robber [Medium]
+- LeetCode 213 → House Robber II [Medium]
+- LeetCode 62 → Unique Paths [Medium]
+- LeetCode 63 → Unique Paths II [Medium]
+- LeetCode 322 → Coin Change [Medium]
+- LeetCode 300 → Longest Increasing Subsequence [Medium]
+- LeetCode 1143 → Longest Common Subsequence [Medium]
+
+
+===========================================================================================
+                         2. BACKTRACKING
+===========================================================================================
+
+-------------------------------------- Phase 1 — Subsets ----------------------------------
+
+- LeetCode 78 → Subsets [Medium]
+- LeetCode 90 → Subsets II [Medium]
+- LeetCode 1863 → Sum of All Subset XOR Totals [Easy]
+- LeetCode 784 → Letter Case Permutation [Medium]
+
+-------------------------------------- Phase 2 — Combinations -----------------------------
+
+- LeetCode 77 → Combinations [Medium]
+- LeetCode 39 → Combination Sum [Medium]
+- LeetCode 40 → Combination Sum II [Medium]
+- LeetCode 216 → Combination Sum III [Medium]
+- LeetCode 17 → Letter Combinations of a Phone Number [Medium]
+- LeetCode 22 → Generate Parentheses [Medium]
+
+-------------------------------------- Phase 3 — Permutations -----------------------------
+
+- LeetCode 46 → Permutations [Medium]
+- LeetCode 47 → Permutations II [Medium]
+
+-------------------------------------- Phase 4 — Grid Backtracking ------------------------
+
+- LeetCode 79 → Word Search [Medium]
+- LeetCode 1219 → Path with Maximum Gold [Medium]
+- LeetCode 980 → Unique Paths III [Hard]
+
+-------------------------------------- Phase 5 — Advanced ---------------------------------
+
+- LeetCode 93 → Restore IP Addresses [Medium]
+- LeetCode 131 → Palindrome Partitioning [Medium]
+- LeetCode 51 → N-Queens [Hard]
+- LeetCode 37 → Sudoku Solver [Hard]
+- LeetCode 698 → Partition to K Equal Sum Subsets [Medium]
